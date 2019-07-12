@@ -1,0 +1,35 @@
+{
+  "name": "mathnetclientv2",
+  "version": "0.0.1",
+  "description": "MathNet Client",
+  "main": "index.js",
+  "scripts": {
+    "dev": "webpack-dev-server --inline --progress --config build/webpack.local.js",
+    "build": "webpack --config build/webpack.local.js --mode development",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Makimo",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@vue/cli-service": "^3.9.2",
+    "@vue/eslint-config-airbnb": "^4.0.1",
+    "babel-eslint": "^10.0.2",
+    "clean-webpack-plugin": "^3.0.0",
+    "copy-webpack-plugin": "^5.0.3",
+    "eslint": "^6.0.1",
+    "eslint-loader": "^2.2.1",
+    "eslint-plugin-vue": "^5.2.3",
+    "mini-css-extract-plugin": "^0.7.0",
+    "vue-loader": "^15.7.0",
+    "vue-template-compiler": "^2.6.10",
+    "webpack": "^4.35.3",
+    "webpack-assets-manifest": "^3.1.1",
+    "webpack-bundle-tracker": "^0.4.2-beta",
+    "webpack-cli": "^3.3.5",
+    "webpack-dev-server": "^3.7.2",
+    "webpack-merge": "^4.2.1"
+  },
+  "dependencies": {
+    "vue": "^2.6.10"
+  }
+}
