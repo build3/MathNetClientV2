@@ -9,10 +9,18 @@
                         Home
                     </router-link>
                 </li>
-                <li>
+                <li v-if="!logIn">
+                    <router-link :to="{name: 'Login'}">
+                        Login
+                    </router-link>
+                </li>
+                <li v-if="!logIn">
                     <router-link :to="{name: 'Register'}">
                         Register
                     </router-link>
+                </li>
+                <li v-if="logIn">
+                    <a href="#" class="logout button button-primary" @click="logout()">Sign Out</a>
                 </li>
             </ul>
         </nav>
@@ -20,7 +28,25 @@
 </template>
 
 <script>
+import { mapState, mapActions } from 'vuex';
+
 export default {
     name: 'PageHeader',
+    computed: {
+        ...mapState('auth', [
+            'accessToken',
+        ]),
+    },
+    methods: {
+        logout() {
+            this.logout().then(() => {
+                this.user.authenticated = false;
+                this.$router.push('/home');
+            });
+        },
+    },
+    ...mapActions('auth', [
+        'logout',
+    ]),
 };
 </script>
