@@ -6,13 +6,14 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-12">
+        <div class="col-8 offset-2">
 
-            <div v-if="error"
-                class="alert alert-danger alert-dismissible fade show"
+            <div v-if="alert"
+                class="alert alert-dismissible fade show"
+                :class="'alert-' + alert.type"
                 role="alert">
-                {{ error }}
-                <button
+                {{ alert.message }}
+                <button v-if="alert.type === 'danger'"
                     type="button"
                     class="close"
                     data-dismiss="alert"
@@ -28,7 +29,7 @@
                         v-model="username"
                         type="text"
                         name="username"
-                        placeholder="User name"
+                        placeholder="Username"
                         required>
                 </div>
 
@@ -58,32 +59,40 @@ export default {
         return {
             username: undefined,
             password: undefined,
-            error: undefined,
+            alert: undefined,
         };
     },
 
     methods: {
         dismissError() {
-            this.error = undefined;
+            this.alert = undefined;
         },
 
-        onSubmit(username, password) {
+        async onSubmit(username, password) {
             this.dismissError();
-            this.createUser({
-                username,
-                password,
-                permissions: ['admin'],
-            })
-                // Automatically log the user in after successful signup.
-                .then(() => this.authenticate({
-                    strategy: 'local', username, password,
-                }))
-                .catch((error) => {
-                    console.log(error);
-                    this.error = (error.name === 'Conflict')
-                        ? 'That username is already taken.'
-                        : 'An error occured.';
+            this.alert = {
+                type: 'info',
+                message: 'Registering...',
+            };
+            try {
+                await this.createUser({
+                    username,
+                    password,
+                    permissions: ['admin'],
                 });
+                // Automatically log the user in after successful signup.
+                await this.authenticate({
+                    strategy: 'local', username, password,
+                });
+                this.$router.push('/admin');
+            } catch (error) {
+                this.alert = {
+                    type: 'danger',
+                    message: error.name === 'Conflict'
+                        ? 'That username is already taken.'
+                        : 'An error occured.',
+                };
+            }
         },
 
         ...mapActions('users', {

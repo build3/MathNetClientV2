@@ -6,13 +6,14 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-12">
+            <div class="col-8 offset-2">
 
-                <div v-if="error"
-                    class="alert alert-danger alert-dismissible fade show"
+                <div v-if="alert"
+                    class="alert alert-dismissible fade show"
+                    :class="'alert-' + alert.type"
                     role="alert">
-                    {{ error }}
-                    <button
+                    {{ alert.message }}
+                    <button v-if="alert.type === 'danger'"
                         type="button"
                         class="close"
                         data-dismiss="alert"
@@ -28,7 +29,7 @@
                             v-model="username"
                             type="text"
                             name="username"
-                            placeholder="User name"
+                            placeholder="Username"
                             required>
                     </div>
 
@@ -37,7 +38,7 @@
                             v-model="password"
                             type="password"
                             name="password"
-                            placeholder="User password"
+                            placeholder="Password"
                             required>
                     </div>
                     <button type="submit" class="btn btn-primary">
@@ -57,38 +58,36 @@ export default {
         return {
             username: undefined,
             password: undefined,
-            error: undefined,
+            alert: undefined,
         };
     },
     methods: {
-        dismissError() {
-            this.error = undefined;
+        dismissAlert() {
+            this.alert = undefined;
         },
 
-        onSubmit(username, password) {
-            console.log(username, password);
-            this.dismissError();
-            this.authenticate({
-                strategy: 'local',
-                username,
-                password,
-
-            })
-                .then((result) => {
-                    const token = result;
-                    localStorage.setItem('accessToken', token);
-                    this.retriveToken(token);
-                    this.$router.push('/admin');
-                })
-                .catch((error) => {
-                    this.error = (error.name === 'not-authenticated')
-                        ? 'Incorrect email or password.'
-                        : 'An error prevented login.';
+        async onSubmit(username, password) {
+            this.dismissAlert();
+            this.alert = {
+                type: 'info',
+                message: 'Logging in...',
+            };
+            try {
+                await this.authenticate({
+                    strategy: 'local',
+                    username,
+                    password,
                 });
+                this.$router.push('/admin');
+            } catch (error) {
+                this.alert = {
+                    type: 'danger',
+                    message: error.name === 'not-authenticated'
+                        ? 'Incorrect email or password.'
+                        : 'An error prevented login.',
+                };
+            }
         },
-        ...mapActions([
-            'retriveToken',
-        ]),
 
         ...mapActions('auth', [
             'authenticate',

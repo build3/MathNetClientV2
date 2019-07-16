@@ -1,4 +1,4 @@
-<template functional>
+<template>
     <div class="row border-bottom">
         <nav class="navbar navbar-static-top">
             <div class="navbar-header">
@@ -9,18 +9,22 @@
                         Home
                     </router-link>
                 </li>
-                <li v-if="!logIn">
+                <li v-if="!isLoggedIn">
                     <router-link :to="{name: 'Login'}">
                         Login
                     </router-link>
                 </li>
-                <li v-if="!logIn">
+                <li v-if="!isLoggedIn">
                     <router-link :to="{name: 'Register'}">
                         Register
                     </router-link>
                 </li>
-                <li v-if="logIn">
-                    <a href="#" class="logout button button-primary" @click="logout()">Sign Out</a>
+                <li v-if="isLoggedIn">
+                    <a href="#"
+                        class="logout"
+                        @click="logoutUser()">
+                        Logout
+                    </a>
                 </li>
             </ul>
         </nav>
@@ -28,25 +32,32 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 
 export default {
     name: 'PageHeader',
+
     computed: {
-        ...mapState('auth', [
-            'accessToken',
-        ]),
+        ...mapGetters('users', {
+            isLoggedIn: 'current',
+        }),
     },
+
     methods: {
-        logout() {
+        ...mapActions('auth', [
+            'logout',
+        ]),
+
+        ...mapActions('users', [
+            'clearCurrent',
+        ]),
+
+        logoutUser() {
             this.logout().then(() => {
-                this.user.authenticated = false;
                 this.$router.push('/home');
+                this.clearCurrent();
             });
         },
     },
-    ...mapActions('auth', [
-        'logout',
-    ]),
 };
 </script>

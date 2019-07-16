@@ -10,28 +10,16 @@ Vue.use(FeathersVuex);
 
 export default new Vuex.Store({
     plugins: [
-        service('users'),
+        service('users', {
+            actions: {
+                clearCurrent({ commit }) {
+                    commit('clearCurrent');
+                },
+            },
+        }),
+
+        service('classes'),
 
         auth({ userService: 'users' }),
     ],
-    state: {
-        token: localStorage.getItem('accessToken') || null,
-    },
-    mutations: {
-        retriveToken(state, token) {
-            state.token = token;
-        },
-        destroyToken(state) {
-            state.token = null;
-        },
-    },
-    actions: {
-        retriveToken(context, token) {
-            context.commit('retriveToken', token);
-        },
-
-        destroyToken(context) {
-            context.commit('destroyToken');
-        },
-    },
 });

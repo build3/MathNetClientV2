@@ -1,6 +1,6 @@
 <template functional>
     <div>
-        Hello World
+        Home Page
     </div>
 </template>
 
