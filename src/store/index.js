@@ -10,7 +10,8 @@ Vue.use(FeathersVuex);
 
 export default new Vuex.Store({
     plugins: [
-        service('todos'),
+        service('users'),
+
         auth({ userService: 'users' }),
     ],
 });

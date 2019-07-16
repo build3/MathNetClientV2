@@ -8,6 +8,10 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
+function resolve (dir) {
+  return path.join(__dirname, '..', dir)
+}
+
 module.exports = {
     target: 'web',
     externals: {},
@@ -63,6 +67,9 @@ module.exports = {
 
     resolve: {
         extensions: ['.js', '.vue', '.json'],
+        alias: {
+            '@': resolve('src')
+        }
     },
 
     plugins: [
