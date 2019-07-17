@@ -10,7 +10,16 @@ Vue.use(FeathersVuex);
 
 export default new Vuex.Store({
     plugins: [
-        service('todos'),
+        service('users', {
+            actions: {
+                clearCurrent({ commit }) {
+                    commit('clearCurrent');
+                },
+            },
+        }),
+
+        service('classes'),
+
         auth({ userService: 'users' }),
     ],
 });
