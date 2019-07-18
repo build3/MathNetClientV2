@@ -86,7 +86,7 @@ export default {
                 if (this.user.permissions.indexOf('admin') > -1) {
                     this.$router.push('/admin');
                 } else {
-                    this.$router.push('/student');
+                    this.$router.push('/student-class');
                 }
             } catch (error) {
                 this.alert = {

@@ -1,6 +1,6 @@
 <template>
     <div class="row border-bottom">
-        <nav class="navbar navbar-static-top">
+        <nav class="navbar navbar-static-top bg-white">
             <div class="navbar-header">
             </div>
             <ul class="nav navbar-top-links navbar-right">
