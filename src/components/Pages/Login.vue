@@ -51,7 +51,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 
 export default {
     data() {
@@ -60,6 +60,11 @@ export default {
             password: undefined,
             alert: undefined,
         };
+    },
+    computed: {
+        ...mapGetters('users', {
+            user: 'current',
+        }),
     },
     methods: {
         dismissAlert() {
@@ -78,7 +83,11 @@ export default {
                     username,
                     password,
                 });
-                this.$router.push('/admin');
+                if (this.user.permissions.indexOf('admin') > -1) {
+                    this.$router.push('/admin');
+                } else {
+                    this.$router.push('/student');
+                }
             } catch (error) {
                 this.alert = {
                     type: 'danger',

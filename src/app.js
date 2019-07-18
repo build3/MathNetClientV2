@@ -6,6 +6,8 @@ import SideMenu from './components/Layout/SideMenu.vue';
 import router from './router';
 import store from './store';
 
+require('./assets/app.scss');
+
 Vue.component('side-menu', SideMenu);
 Vue.component('page-header', PageHeader);
 

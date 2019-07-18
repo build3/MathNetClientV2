@@ -10,6 +10,20 @@
                     </a>
                 </div>
             </li>
+            <li v-if="user.permissions.indexOf('admin') > -1">
+                <router-link :to="{name: 'Admin'}">
+                    Admin
+                </router-link>
+                <router-link :to="{name: 'ClassesList'}">
+                    Classes
+                </router-link>
+                <router-link :to="{name: 'Designer'}">
+                    Designer
+                </router-link>
+                <router-link :to="{name: 'View'}">
+                    View
+                </router-link>
+            </li>
         </ul>
     </nav>
 </template>

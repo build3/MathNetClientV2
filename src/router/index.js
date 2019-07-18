@@ -8,10 +8,13 @@ Vue.use(Router);
 export default new Router({
     routes: [
         { path: '', name: 'Home', component: Pages.Home },
-
         { path: '/register', name: 'Register', component: Pages.Users.Register },
         { path: '/login', name: 'Login', component: Pages.Users.Login },
-        { path: '/admin', name: 'Admin', component: Pages.Users.Admin },
+
+        { path: '/admin', name: 'Admin', component: Pages.Admin },
+        { path: '/student', name: 'Student', component: Pages.Student },
+        { path: '/designer', name: 'Designer', component: Pages.Designer },
+        { path: '/view', name: 'View', component: Pages.View },
 
         {
             path: '/classes',
@@ -20,7 +23,7 @@ export default new Router({
             children: [
                 {
                     path: 'list',
-                    name: 'ClassesList',
+                    name: 'ClassList',
                     component: Pages.Classes.List,
                 },
                 {
