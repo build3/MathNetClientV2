@@ -1,9 +1,7 @@
-// import GGBApplet from '../../vendor/js/deployggb';
-
 export default class {
-    constructor(domElementId) {
+    constructor(params) {
         this.params = {
-            container: domElementId,
+            container: 'geogebra_designer',
             id: 'applet',
             width: 800,
             height: 600,
@@ -25,16 +23,19 @@ export default class {
             screenshotGenerator: false,
             preventFocus: false,
             scaleContainerClass: 'appletContainer',
+            ...params,
         };
 
-        window.ggbOnInit = this.ggbOnInit.bind(this);
-
-        // eslint-disable-next-line no-undef
         this.appletContainer = new GGBApplet(this.params);
         // this.appletContainer.setHTML5Codebase('/5.0/web3d/');
     }
 
-    inject() {
+    inject(callback) {
+        window.ggbOnInit = () => {
+            this.ggbOnInit();
+            callback();
+        };
+
         this.appletContainer.inject(this.params.container, 'auto');
     }
 
