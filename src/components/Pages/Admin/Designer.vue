@@ -20,9 +20,7 @@
                         <div class="col-10">
                             <h2>Constructions</h2>
                             <select multiple="multiple"
-                                id="bootstrap-duallistbox-nonselected-list_"
-                                class="form-control select-extender"
-                                name="_helper1">
+                                class="form-control select-extender">
                                 <option value="option1">option1</option>
                                 <option value="option2">option2</option>
                             </select>
@@ -40,9 +38,7 @@
                         <div class="col-10">
                             <h2>Groups</h2>
                             <select multiple="multiple"
-                                id="bootstrap-duallistbox-nonselected-list_"
-                                class="form-control select-style-extender"
-                                name="_helper2">
+                                class="form-control select-style-extender">
                                 <option value="option1">option1</option>
                                 <option value="option2">option2</option>
                             </select>
@@ -66,7 +62,7 @@
                 <div class="row mt-5">
                     <div class="col-12">
                         <button class="btn btn-warning p-2">Reset view</button>
-                            <div class="geogebra-applet">
+                            <div id="geogebra_designer" class="geogebra-applet">
                                 <!--Main geogebra applet-->
                             </div>
                         </div>
@@ -92,9 +88,7 @@
                         <div class="col-5">
                             <h4>Select Toolbar</h4>
                             <select multiple="multiple"
-                                id="bootstrap-duallistbox-nonselected-list_"
-                                class="form-control select-style-extender"
-                                name="_helper1">
+                                class="form-control select-style-extender">
                                 <option value="option1">option1</option>
                                 <option value="option2">option2</option>
                             </select>
@@ -133,8 +127,7 @@
                                 </div>
                                 <div class="m-2">
                                     <select
-                                        id="bootstrap-duallistbox-nonselected-list_"
-                                        class="form-control" name="_helper3">
+                                        class="form-control">
                                         <option value="option1">option1</option>
                                         <option value="option2">option2</option>
                                     </select>
@@ -178,9 +171,7 @@
                             <div class="col-5">
                                 <h4>Class users</h4>
                                 <select multiple="multiple"
-                                    id="bootstrap-duallistbox-nonselected-list_"
-                                    class="form-control select-extender"
-                                    name="_helper4">
+                                    class="form-control select-extender">
                                 </select>
                                 <button class="btn btn-primary mt-3">Send</button>
                             </div>
@@ -193,6 +184,24 @@
 </template>
 
 <script>
+import GeogebraInterface from '../../Geogebra/GeogebraInterface';
+
 export default {
+    mounted() {
+        const params = {
+            container: 'geogebra_designer',
+            id: 'applet',
+            width: 800,
+            height: 600,
+        };
+
+        // simple example code to show how to initialize GeoGebra
+        const GI = new GeogebraInterface(params); // constructor
+
+        GI.inject(() => { // passing callback
+            const xml = GI.getXML(); // getting Geogebra state
+            GI.setXML(xml); // setting Geogebra state from xml
+        });
+    },
 };
 </script>

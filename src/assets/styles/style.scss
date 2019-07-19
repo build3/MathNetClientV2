@@ -3,7 +3,7 @@
 }
 
 .ibox-style-extender {
-    display: none;
+    //display: none;
 }
 
 .select-extender {
@@ -51,4 +51,12 @@
 
 .center-btn-down {
     margin-left: 6.5em;
+}
+ol.breadcrumb {
+    background-color: transparent;
+}
+
+.row .no-gutters {
+    padding-left: 0;
+    padding-right: 0;
 }
