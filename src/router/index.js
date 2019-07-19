@@ -11,10 +11,13 @@ export default new Router({
         { path: '/register', name: 'Register', component: Pages.Users.Register },
         { path: '/login', name: 'Login', component: Pages.Users.Login },
 
-        { path: '/admin', name: 'Admin', component: Pages.Admin },
-        { path: '/student', name: 'Student', component: Pages.Student },
-        { path: '/designer', name: 'Designer', component: Pages.Designer },
-        { path: '/view', name: 'View', component: Pages.View },
+        { path: '/admin', name: 'Admin', component: Pages.Admin.Admin },
+        { path: '/designer', name: 'Designer', component: Pages.Admin.Designer },
+        { path: '/view', name: 'View', component: Pages.Admin.View },
+
+        { path: '/student-class', name: 'Student-Class', component: Pages.Student.StudentClass },
+        { path: '/student-group', name: 'Student-Group', component: Pages.Student.StudentGroup },
+        { path: '/student-geogebra', name: 'Student-Geogebra', component: Pages.Student.StudentGeogebra },
 
         {
             path: '/classes',

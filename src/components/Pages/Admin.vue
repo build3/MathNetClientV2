@@ -1,7 +1,0 @@
-<template>
-    <div class="admin">
-        <div class="row border-bottom white-bg dashboard-header">
-            <h1>Teacher page</h1>
-        </div>
-    </div>
-</template>
