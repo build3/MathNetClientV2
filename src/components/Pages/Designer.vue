@@ -201,11 +201,11 @@ import GeogebraInterface from '../Geogebra/GeogebraInterface';
 
 export default {
     mounted() {
-        let params = {
+        const params = {
             container: 'geogebra_designer',
             id: 'applet',
             width: 800,
-            height: 600
+            height: 600,
         };
 
         // simple example code to show how to initialize GeoGebra
