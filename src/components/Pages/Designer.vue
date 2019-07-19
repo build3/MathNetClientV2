@@ -67,7 +67,7 @@
                             <div class="row mt-5">
                                 <div class="col-12">
                                     <button class="btn btn-warning p-2">Reset view</button>
-                                    <div class="geogebra-applet">
+                                    <div id="geogebra_designer" class="geogebra-applet">
                                         <!--Main geogebra applet-->
                                     </div>
                                 </div>
@@ -197,6 +197,24 @@
 </template>
 
 <script>
+import GeogebraInterface from '../Geogebra/GeogebraInterface';
+
 export default {
+    mounted() {
+        let params = {
+            container: 'geogebra_designer',
+            id: 'applet',
+            width: 800,
+            height: 600
+        };
+
+        // simple example code to show how to initialize GeoGebra
+        const GI = new GeogebraInterface(params); // constructor
+
+        GI.inject(() => { // passing callback
+            const xml = GI.getXML(); // getting Geogebra state
+            GI.setXML(xml); // setting Geogebra state from xml
+        });
+    },
 };
 </script>
