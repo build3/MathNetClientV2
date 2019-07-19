@@ -54,22 +54,21 @@
 <script>
 import { mapActions } from 'vuex';
 
+import AlertMixin from '@/mixins/AlertMixin.vue';
+
 export default {
     data() {
         return {
             username: undefined,
             password: undefined,
-            alert: undefined,
         };
     },
 
-    methods: {
-        dismissError() {
-            this.alert = undefined;
-        },
+    mixins: [AlertMixin],
 
+    methods: {
         async onSubmit(username, password) {
-            this.dismissError();
+            this.dismissAlert();
             this.alert = {
                 type: 'info',
                 message: 'Registering...',

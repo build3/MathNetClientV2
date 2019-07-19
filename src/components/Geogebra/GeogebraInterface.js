@@ -25,7 +25,6 @@ export default class {
             scaleContainerClass: 'appletContainer',
             ...params,
         };
-
         // eslint-disable-next-line no-undef
         this.appletContainer = new GGBApplet(this.params);
         // this.appletContainer.setHTML5Codebase('/5.0/web3d/');

@@ -4,7 +4,7 @@
             <div class="navbar-header">
             </div>
             <ul class="nav navbar-top-links navbar-right">
-                <li v-if="checkUser()">
+                <li v-if="checkPermission()">
                     <router-link :to="{name: 'Home'}">
                         Home
                     </router-link>
@@ -58,11 +58,16 @@ export default {
                 this.clearCurrent();
             });
         },
-        checkUser() {
-            if (this.isLoggedIn === null || this.isLoggedIn.permissions.indexOf('student')) {
+        checkPermission() {
+            if (this.isLoggedIn) {
+                if (this.isLoggedIn.permissions.indexOf('student') > -1) {
+                    return false;
+                }
+
                 return true;
             }
-            return false;
+
+            return true;
         },
     },
 };
