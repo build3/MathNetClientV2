@@ -116,6 +116,7 @@ export default {
         },
 
         async deleteGroup(group) {
+            console.log(group);
             this.dismissAlert();
             try {
                 await this.remove(group);

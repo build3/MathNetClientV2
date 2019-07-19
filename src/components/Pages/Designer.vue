@@ -16,24 +16,33 @@
                             </div>
                         </div>
                         <div class="ibox-content table-responsive ibox-style-extender">
-                            <div class="row">
+                            <div class="row" v-if="!addMode">
                                 <div class="col-6">
                                     <div class="col-10">
                                         <h2>Constructions</h2>
-                                        <select multiple="multiple"
-                                            id="bootstrap-duallistbox-nonselected-list_"
+                                        <select
+                                            multiple="multiple"
                                             class="form-control select-extender"
-                                            name="_helper1">
-                                            <option value="option1">option1</option>
-                                            <option value="option2">option2</option>
+                                            v-model="selectedConstruction">
+                                            <option
+                                                v-for="constructions in this.teacher.constructions"
+                                                :key="constructions.id">
+                                                {{ constructions }}
+                                            </option>
                                         </select>
                                     </div>
                                     <div class="form-inline mt-3 col-12">
-                                        <button class="btn btn-primary p-2 m-1">
+                                        <button class="btn btn-primary p-2 m-1"
+                                            @click="useConstruction()">
                                             Use construction</button>
-                                        <button class="btn btn-warning p-2 m-1">
-                                            Edit construction</button>
-                                        <button class="btn btn-danger p-2 m-1">
+                                        <button
+                                            v-if="!addMode"
+                                            class="btn btn-primary p-2 m-1"
+                                            @click="addMode = true">
+                                            Add Construction
+                                        </button>
+                                        <button class="btn btn-danger p-2 m-1"
+                                            @click="deleteConstruction(selectedConstruction)">
                                             Delete construction</button>
                                     </div>
                                 </div>
@@ -41,11 +50,8 @@
                                     <div class="col-10">
                                         <h2>Groups</h2>
                                         <select multiple="multiple"
-                                            id="bootstrap-duallistbox-nonselected-list_"
-                                            class="form-control select-style-extender"
-                                            name="_helper2">
-                                            <option value="option1">option1</option>
-                                            <option value="option2">option2</option>
+                                            class="form-control select-style-extender">
+
                                         </select>
                                     </div>
                                     <div class="form-inline mt-3 col-12">
@@ -63,6 +69,24 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                            <form v-else
+                                @submit.prevent="addConstruction(constructionName)">
+                                <h3>Add Constructions</h3>
+                                <div class="form-group">
+                                    <input
+                                        v-model="constructionName"
+                                        class="form-control"
+                                        type="text"
+                                        placeholder="Construction Name"
+                                        required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save</button>
+                                <button class="btn btn-secondary"
+                                    @click.prevent="addMode = false">
+                                    Cancel
+                                </button>
+                            </form>
                             </div>
                             <div class="row mt-5">
                                 <div class="col-12">
@@ -193,13 +217,107 @@
                 </div>
             </div>
         </div>
-    </div>
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex';
 import GeogebraInterface from '../Geogebra/GeogebraInterface';
 
 export default {
+    name: 'Designer',
+
+    data() {
+        return {
+            alert: undefined,
+            constructions: undefined,
+            selectedConstruction: [],
+            addMode: false,
+            constructionName: undefined,
+            constructionXML: undefined,
+        };
+    },
+    computed: {
+        ...mapGetters('users', {
+            teacher: 'current',
+        }),
+
+        ...mapGetters('constructions', {
+            findConstruction: 'find',
+        }),
+
+        chosenConstruction() {
+            return this.findConstruction({ query: { name: this.selectedConstruction[0] } });
+        },
+    },
+
+    methods: {
+        ...mapActions('constructions', {
+            findConstructions: 'find',
+            creatConstruction: 'create',
+        }),
+
+        ...mapActions('users', {
+            patch: 'patch',
+        }),
+
+        useConstruction() {
+            const chosenConstructionName = this.chosenConstruction.data[0].name;
+            const chosenConstructionXML = this.chosenConstruction.data[0].xml;
+            console.log(chosenConstructionName);
+            console.log(chosenConstructionXML);
+            return chosenConstructionName;
+        },
+
+        dismissAlert() {
+            this.alert = undefined;
+        },
+
+        async deleteConstruction(construction) {
+            this.dismissAlert();
+            try {
+                await this.remove(construction);
+                this.alert = {
+                    type: 'sucess',
+                    message: 'Construction Deleted',
+                };
+            } catch (error) {
+                this.alert = {
+                    type: 'danger',
+                    message: error.message,
+                };
+            }
+        },
+
+        async addConstruction(constructionName) {
+            try {
+                await this.creatConstruction({
+                    name: constructionName,
+                    xml: 'test',
+                });
+            } catch (error) {
+                this.alert = {
+                    type: 'danger',
+                    message: error.message,
+                };
+            }
+
+            try {
+                await this.patch([
+                    this.teacher.username,
+                    {
+                        constructions: [...this.teacher.constructions, constructionName],
+                    },
+                ]);
+                this.addMode = false;
+            } catch (error) {
+                this.alert = {
+                    type: 'danger',
+                    message: error.message,
+                };
+            }
+        },
+    },
+
     mounted() {
         const params = {
             container: 'geogebra_designer',
@@ -215,6 +333,18 @@ export default {
             const xml = GI.getXML(); // getting Geogebra state
             GI.setXML(xml); // setting Geogebra state from xml
         });
+    },
+
+    created() {
+        this.findConstructions();
+    },
+    watch: {
+        editMode(newValue) {
+            if (!newValue) {
+                this.constructionName = undefined;
+                this.xml = undefined;
+            }
+        },
     },
 };
 </script>

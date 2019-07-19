@@ -10,7 +10,7 @@
                     </a>
                 </div>
             </li>
-            <li v-if="user.permissions.indexOf('admin') > -1">
+            <li>
                 <router-link :to="{name: 'Admin'}">
                     Admin
                 </router-link>
