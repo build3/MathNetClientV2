@@ -14,6 +14,9 @@
                 <router-link :to="{name: 'Admin'}">
                     Admin
                 </router-link>
+                <router-link :to="{name: 'ClassesList'}">
+                    Classes
+                </router-link>
                 <router-link :to="{name: 'Designer'}">
                     Designer
                 </router-link>

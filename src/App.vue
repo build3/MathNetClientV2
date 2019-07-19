@@ -5,7 +5,8 @@
         <main id="page-wrapper" class="gray-bg">
             <page-header/>
             <div class="wrapper wrapper-content">
-                <router-view></router-view>
+                <div v-if="!loaded">Loading</div>
+                <router-view v-else></router-view>
             </div>
         </main>
 
@@ -13,10 +14,23 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 
 export default {
     name: 'App',
+
+    data() {
+        return {
+            loaded: false,
+        };
+    },
+
+    computed: {
+        ...mapState('auth', [
+            'isAuthenticatePending',
+            'user',
+        ]),
+    },
 
     methods: {
         ...mapActions('auth', [
@@ -31,6 +45,17 @@ export default {
                     console.error(error);
                 }
             });
+    },
+
+    watch: {
+        isAuthenticatePending(newValue) {
+            if (!newValue) {
+                if (!this.user) {
+                    this.$router.replace({ name: 'Login' });
+                }
+                this.loaded = true;
+            }
+        },
     },
 };
 </script>

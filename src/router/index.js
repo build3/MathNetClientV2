@@ -1,23 +1,38 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import Admin from '@/components/Pages/Admin.vue';
-import Designer from '@/components/Pages/Designer.vue';
-import Home from '@/components/Pages/Home.vue';
-import Login from '@/components/Pages/Login.vue';
-import Register from '@/components/Pages/Register.vue';
-import View from '@/components/Pages/View.vue';
-import Student from '@/components/Pages/Student.vue';
+
+import Pages from '@/components/Pages';
 
 Vue.use(Router);
 
 export default new Router({
     routes: [
-        { path: '', name: 'Home', component: Home },
-        { path: '/register', name: 'Register', component: Register },
-        { path: '/login', name: 'Login', component: Login },
-        { path: '/admin', name: 'Admin', component: Admin },
-        { path: '/designer', name: 'Designer', component: Designer },
-        { path: '/view', name: 'View', component: View },
-        { path: '/student', name: 'Student', component: Student },
+        { path: '', name: 'Home', component: Pages.Home },
+        { path: '/register', name: 'Register', component: Pages.Users.Register },
+        { path: '/login', name: 'Login', component: Pages.Users.Login },
+
+        { path: '/admin', name: 'Admin', component: Pages.Admin },
+        { path: '/student', name: 'Student', component: Pages.Student },
+        { path: '/designer', name: 'Designer', component: Pages.Designer },
+        { path: '/view', name: 'View', component: Pages.View },
+
+        {
+            path: '/classes',
+            name: 'ClassesHome',
+            component: Pages.Classes.Home,
+            children: [
+                {
+                    path: 'list',
+                    name: 'ClassList',
+                    component: Pages.Classes.List,
+                },
+                {
+                    path: ':code',
+                    name: 'ClassDetails',
+                    component: Pages.Classes.Details,
+                    props: true,
+                },
+            ],
+        },
     ],
 });

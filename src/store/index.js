@@ -19,6 +19,7 @@ export default new Vuex.Store({
         }),
 
         service('classes'),
+        service('groups'),
 
         auth({ userService: 'users' }),
     ],
