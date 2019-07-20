@@ -33,7 +33,7 @@
                                     </div>
                                     <div class="form-inline mt-3 col-12">
                                         <button class="btn btn-primary p-2 m-1"
-                                            @click="useConstruction()">
+                                            @click="useConstruction(selectedConstruction)">
                                             Use construction</button>
                                         <button
                                             v-if="!addMode"
@@ -234,6 +234,7 @@ export default {
             addMode: false,
             constructionName: undefined,
             constructionXML: undefined,
+            GI: undefined,
         };
     },
     computed: {
@@ -254,18 +255,17 @@ export default {
         ...mapActions('constructions', {
             findConstructions: 'find',
             creatConstruction: 'create',
+            get: 'get',
         }),
 
         ...mapActions('users', {
             patch: 'patch',
         }),
 
-        useConstruction() {
-            const chosenConstructionName = this.chosenConstruction.data[0].name;
-            const chosenConstructionXML = this.chosenConstruction.data[0].xml;
-            console.log(chosenConstructionName);
-            console.log(chosenConstructionXML);
-            return chosenConstructionName;
+        async useConstruction(construction) {
+            await this.get(construction).then((res) => {
+                this.GI.setXML(res.xml);
+            });
         },
 
         dismissAlert() {
@@ -292,7 +292,7 @@ export default {
             try {
                 await this.creatConstruction({
                     name: constructionName,
-                    xml: 'test',
+                    xml: this.GI.getXML(),
                 });
             } catch (error) {
                 this.alert = {
@@ -327,11 +327,11 @@ export default {
         };
 
         // simple example code to show how to initialize GeoGebra
-        const GI = new GeogebraInterface(params); // constructor
+        this.GI = new GeogebraInterface(params); // constructor
 
-        GI.inject(() => { // passing callback
-            const xml = GI.getXML(); // getting Geogebra state
-            GI.setXML(xml); // setting Geogebra state from xml
+        this.GI.inject(() => { // passing callback
+            // const xml = this.GI.getXML(); // getting Geogebra state
+            // this.GI.setXML(xml); // setting Geogebra state from xml
         });
     },
 
