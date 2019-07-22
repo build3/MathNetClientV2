@@ -9,6 +9,7 @@
                     <div class="ibox border-bottom">
                         <div class="ibox-title">
                             <h5>Designer</h5>
+                            {{ this.constructions }}
                             <div class="ibox-tools">
                                 <a class="collapse-link">
                                     <i class="fa fa-chevron-down"></i>
@@ -16,6 +17,19 @@
                             </div>
                         </div>
                         <div class="ibox-content table-responsive ibox-style-extender">
+                            <div v-if="alert"
+                                class="alert alert-dismissible fade show"
+                                :class="'alert-' + alert.type"
+                                role="alert">
+                                {{ alert.message }}
+                                <button v-if="alert.type !== 'info'"
+                                    type="button"
+                                    class="close"
+                                    data-dismiss="alert"
+                                    aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
                             <div class="row" v-if="!addMode">
                                 <div class="col-6">
                                     <div class="col-10">
@@ -24,16 +38,17 @@
                                             multiple="multiple"
                                             class="form-control select-extender"
                                             v-model="selectedConstruction">
-                                            <option
-                                                v-for="constructions in this.teacher.constructions"
-                                                :key="constructions.id">
-                                                {{ constructions }}
-                                            </option>
+                                        <option
+                                            v-for="
+                                                construction in this.teacher.constructions"
+                                                :key="construction.id">
+                                                {{ construction }}
+                                        </option>
                                         </select>
                                     </div>
                                     <div class="form-inline mt-3 col-12">
                                         <button class="btn btn-primary p-2 m-1"
-                                            @click="useConstruction(selectedConstruction)">
+                                            @click="useConstruction()">
                                             Use construction</button>
                                         <button
                                             v-if="!addMode"
@@ -42,7 +57,8 @@
                                             Add Construction
                                         </button>
                                         <button class="btn btn-danger p-2 m-1"
-                                            @click="deleteConstruction(selectedConstruction)">
+                                            @click="
+                                                deleteConstruction(selectedConstruction)">
                                             Delete construction</button>
                                     </div>
                                 </div>
@@ -71,7 +87,7 @@
                                 </div>
                             </div>
                             <form v-else
-                                @submit.prevent="addConstruction(constructionName)">
+                                @submit.prevent="addConstruction()">
                                 <h3>Add Constructions</h3>
                                 <div class="form-group">
                                     <input
@@ -259,6 +275,7 @@ export default {
         ...mapActions('constructions', {
             findConstructions: 'find',
             createConstruction: 'create',
+            removeConstruction: 'remove',
             get: 'get',
         }),
 
@@ -266,8 +283,8 @@ export default {
             patch: 'patch',
         }),
 
-        async useConstruction(construction) {
-            await this.get(construction).then((res) => {
+        async useConstruction() {
+            await this.get(this.selectedConstruction).then((res) => {
                 this.GI.setXML(res.xml);
             });
         },
@@ -276,10 +293,15 @@ export default {
             this.alert = undefined;
         },
 
-        async deleteConstruction(construction) {
+        async deleteConstruction() {
             this.dismissAlert();
             try {
-                await this.remove(construction);
+                await this.removeConstruction(this.selectedConstruction);
+                this.selectedConstruction.forEach((construction) => {
+                    this.teacher.constructions = this.teacher.constructions.filter(
+                        con => con !== construction,
+                    );
+                });
                 this.alert = {
                     type: 'sucess',
                     message: 'Construction Deleted',
@@ -292,27 +314,14 @@ export default {
             }
         },
 
-        async addConstruction(constructionName) {
+        async addConstruction() {
             try {
                 await this.createConstruction({
-                    name: constructionName,
+                    name: this.constructionName,
                     xml: this.GI.getXML(),
                 });
-            } catch (error) {
-                this.alert = {
-                    type: 'danger',
-                    message: error.message,
-                };
-            }
-
-            try {
-                await this.patch([
-                    this.teacher.username,
-                    {
-                        constructions: [...this.teacher.constructions, constructionName],
-                    },
-                ]);
                 this.addMode = false;
+                this.teacher.constructions = [...this.teacher.constructions, this.constructionName];
             } catch (error) {
                 this.alert = {
                     type: 'danger',
@@ -320,6 +329,7 @@ export default {
                 };
             }
         },
+
         resetView() {
             this.GI.setXML(freshGeogebraState);
         },
@@ -345,9 +355,10 @@ export default {
     created() {
         this.findConstructions();
     },
+
     watch: {
-        editMode(newValue) {
-            if (!newValue) {
+        editMode(addValue) {
+            if (!addValue) {
                 this.constructionName = undefined;
                 this.xml = undefined;
             }
