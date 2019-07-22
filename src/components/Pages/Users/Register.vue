@@ -8,19 +8,7 @@
     <div class="row">
         <div class="col-8 offset-2">
 
-            <div v-if="alert"
-                class="alert alert-dismissible fade show"
-                :class="'alert-' + alert.type"
-                role="alert">
-                {{ alert.message }}
-                <button v-if="alert.type === 'danger'"
-                    type="button"
-                    class="close"
-                    data-dismiss="alert"
-                    aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
+            <alert :alert="alert" />
 
             <form class="form" method="post"
                 @submit.prevent="onSubmit(username, password)">
