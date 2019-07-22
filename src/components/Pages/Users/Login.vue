@@ -7,20 +7,7 @@
         </div>
         <div class="row">
             <div class="col-8 offset-2">
-
-                <div v-if="alert"
-                    class="alert alert-dismissible fade show"
-                    :class="'alert-' + alert.type"
-                    role="alert">
-                    {{ alert.message }}
-                    <button v-if="alert.type === 'danger'"
-                        type="button"
-                        class="close"
-                        data-dismiss="alert"
-                        aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
+                <alert :alert="alert" />
 
                 <form class="form" method="post"
                     @submit.prevent="onSubmit(username, password)">
@@ -53,24 +40,25 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 
+import AlertMixin from '@/mixins/AlertMixin.vue';
+
 export default {
     data() {
         return {
             username: undefined,
             password: undefined,
-            alert: undefined,
         };
     },
+
+    mixins: [AlertMixin],
+
     computed: {
         ...mapGetters('users', {
             user: 'current',
         }),
     },
-    methods: {
-        dismissAlert() {
-            this.alert = undefined;
-        },
 
+    methods: {
         async onSubmit(username, password) {
             this.dismissAlert();
             this.alert = {
@@ -86,7 +74,7 @@ export default {
                 if (this.user.permissions.indexOf('admin') > -1) {
                     this.$router.push('/admin');
                 } else {
-                    this.$router.push('/student');
+                    this.$router.push('/student-class');
                 }
             } catch (error) {
                 this.alert = {
@@ -102,7 +90,5 @@ export default {
             'authenticate',
         ]),
     },
-
-
 };
 </script>

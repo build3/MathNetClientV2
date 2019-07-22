@@ -1,6 +1,7 @@
 <template>
     <div id="wrapper">
-        <side-menu/>
+        <div v-if="checkPermission()">
+            <side-menu />
 
         <main id="page-wrapper" class="gray-bg">
             <page-header/>
@@ -9,12 +10,20 @@
                 <router-view v-else></router-view>
             </div>
         </main>
-
+        </div>
+        <div v-else>
+            <main class="gray-bg student-main">
+                <page-header/>
+                <div class="wrapper wrapper-content">
+                    <router-view></router-view>
+                </div>
+            </main>
+        </div>
     </div>
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 
 export default {
     name: 'App',
@@ -30,12 +39,26 @@ export default {
             'isAuthenticatePending',
             'user',
         ]),
+        ...mapGetters('users', {
+            user: 'current',
+        }),
     },
 
     methods: {
         ...mapActions('auth', [
             'authenticate',
         ]),
+        checkPermission() {
+            if (this.user) {
+                if (this.user.permissions.indexOf('student') > -1) {
+                    return false;
+                }
+
+                return true;
+            }
+
+            return true;
+        },
     },
 
     mounted() {

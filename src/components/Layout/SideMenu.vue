@@ -10,11 +10,11 @@
                     </a>
                 </div>
             </li>
-            <li>
+            <li v-if="checkPermissionToSideMenu()">
                 <router-link :to="{name: 'Admin'}">
                     Admin
                 </router-link>
-                <router-link :to="{name: 'ClassesList'}">
+                <router-link :to="{name: 'ClassList'}">
                     Classes
                 </router-link>
                 <router-link :to="{name: 'Designer'}">
@@ -38,6 +38,15 @@ export default {
         ...mapGetters('users', {
             user: 'current',
         }),
+    },
+    methods: {
+        checkPermissionToSideMenu() {
+            if (this.user) {
+                return true;
+            }
+
+            return false;
+        },
     },
 };
 </script>
