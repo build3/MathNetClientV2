@@ -1,6 +1,9 @@
 import Home from './Home.vue';
-import Login from './Login.vue';
-import Register from './Register.vue';
+
+import UsersHome from './Users/Index.vue';
+import Login from './Users/Login.vue';
+import Register from './Users/Register.vue';
+import Profile from './Users/Profile.vue';
 
 import Admin from './Admin/Admin.vue';
 import Designer from './Admin/Designer.vue';
@@ -24,8 +27,10 @@ export default {
     },
 
     Users: {
+        Home: UsersHome,
         Login,
         Register,
+        Profile,
     },
 
     Student: {

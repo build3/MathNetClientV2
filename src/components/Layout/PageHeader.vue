@@ -20,6 +20,11 @@
                     </router-link>
                 </li>
                 <li v-if="isLoggedIn">
+                    <router-link :to="{name: 'Profile'}">
+                        Profile
+                    </router-link>
+                </li>
+                <li v-if="isLoggedIn">
                     <a href="#"
                         class="logout"
                         @click="logoutUser()">
