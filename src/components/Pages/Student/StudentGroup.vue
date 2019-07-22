@@ -28,7 +28,7 @@
                                 v-for="(g, index) in groups.data" :key="index" >
                                 <td class="footable-visible footable-first-column">
                                     <span class="footable-toggle"></span>
-                                    Group {{ index + 1 }}
+                                    {{ g.name }}
                                 </td>
                                 <td class="footable-visible">
                                     <router-link :to="{
