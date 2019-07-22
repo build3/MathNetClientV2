@@ -13,6 +13,7 @@ import ClassesHome from './Classes/Index.vue';
 import ClassesList from './Classes/List.vue';
 import ClassDetails from './Classes/Details.vue';
 
+import StudentHome from './Student/Index.vue';
 import StudentClass from './Student/StudentClass.vue';
 import StudentGroup from './Student/StudentGroup.vue';
 import StudentGeogebra from './Student/StudentGeogebra.vue';
@@ -34,9 +35,10 @@ export default {
     },
 
     Student: {
-        StudentClass,
-        StudentGroup,
-        StudentGeogebra,
+        Home: StudentHome,
+        Class: StudentClass,
+        Group: StudentGroup,
+        Geogebra: StudentGeogebra,
     },
 
     Classes: {

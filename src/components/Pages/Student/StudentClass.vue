@@ -13,32 +13,33 @@
                                     Class
                                     <span class="footable-sort-indicator"></span>
                                 </th>
-                            <th>
-                                Groups in class
-                                <span class="footable-sort-indicator"></span>
-                            </th>
-                            <th>
-                                Action
-                                <span class="footable-sort-indicator"></span>
-                            </th>
-                        </tr>
+                                <th>
+                                    Code
+                                    <span class="footable-sort-indicator"></span>
+                                </th>
+                                <th>
+                                    Action
+                                    <span class="footable-sort-indicator"></span>
+                                </th>
+                            </tr>
                         </thead>
                         <tbody>
-                            <tr>
+                            <tr v-for="cl in classes.data" :key="cl.code">
                                 <td>
                                     <span class="footable-toggle"></span>
-                                    Class one
+                                    {{ cl.name }}
                                 </td>
                                 <td class="footable-visible">
                                     <span class="footable-toggle"></span>
-                                    2
+                                    {{ cl.code }}
                                 </td>
                                 <td class="footable-visible">
-                                    <!--Static link only for template mock-up-->
-                                    <router-link :to="{name: 'Student-Group'}">
-                                        <button class="btn btn-primary btn-sieze-xs">
-                                            Join to class
-                                        </button>
+                                    <router-link :to="{
+                                            name: 'StudentGroup',
+                                            params: { code: cl.code }
+                                        }"
+                                        class="btn btn-primary btn-xs">
+                                        Join Class
                                     </router-link>
                                 </td>
                             </tr>
@@ -51,7 +52,29 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex';
+
 export default {
     name: 'StudentClass',
+
+    computed: {
+        ...mapGetters('classes', {
+            findClassesInStore: 'find',
+        }),
+
+        classes() {
+            return this.findClassesInStore();
+        },
+    },
+
+    methods: {
+        ...mapActions('classes', {
+            findClasses: 'find',
+        }),
+    },
+
+    created() {
+        this.findClasses();
+    },
 };
 </script>
