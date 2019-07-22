@@ -121,7 +121,7 @@ export default {
 
             try {
                 await this.remove(group);
-                
+
                 this.alert = {
                     type: 'success',
                     message: 'Group Deleted',

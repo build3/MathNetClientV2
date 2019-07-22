@@ -1,5 +1,3 @@
-import Home from './Home.vue';
-
 import UsersHome from './Users/Index.vue';
 import Login from './Users/Login.vue';
 import Register from './Users/Register.vue';
@@ -19,7 +17,6 @@ import StudentGroup from './Student/StudentGroup.vue';
 import StudentGeogebra from './Student/StudentGeogebra.vue';
 
 export default {
-    Home,
 
     Admin: {
         Admin,
