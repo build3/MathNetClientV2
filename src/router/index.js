@@ -13,10 +13,6 @@ export default new Router({
         { path: '/designer', name: 'Designer', component: Pages.Admin.Designer },
         { path: '/view', name: 'View', component: Pages.Admin.View },
 
-        { path: '/student-class', name: 'Student-Class', component: Pages.Student.StudentClass },
-        { path: '/student-group', name: 'Student-Group', component: Pages.Student.StudentGroup },
-        { path: '/student-geogebra', name: 'Student-Geogebra', component: Pages.Student.StudentGeogebra },
-
         {
             path: '/users',
             name: 'UsersHome',
@@ -56,6 +52,31 @@ export default new Router({
                     path: ':code',
                     name: 'ClassDetails',
                     component: Pages.Classes.Details,
+                    props: true,
+                },
+            ],
+        },
+
+        {
+            path: '/student',
+            name: 'StudentHome',
+            component: Pages.Student.Home,
+            children: [
+                {
+                    path: 'class',
+                    name: 'StudentClass',
+                    component: Pages.Student.Class,
+                },
+                {
+                    path: ':code',
+                    name: 'StudentGroup',
+                    component: Pages.Student.Group,
+                    props: true,
+                },
+                {
+                    path: ':code/:id',
+                    name: 'StudentGeogebra',
+                    component: Pages.Student.Geogebra,
                     props: true,
                 },
             ],

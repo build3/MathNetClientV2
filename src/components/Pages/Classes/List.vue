@@ -17,7 +17,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="cl in classes.data" :key="cl.id">
+                        <tr v-for="cl in classes.data" :key="cl.code">
                             <td>{{ cl.name }}</td>
                             <td>{{ cl.code }}</td>
                             <td class="text-center">

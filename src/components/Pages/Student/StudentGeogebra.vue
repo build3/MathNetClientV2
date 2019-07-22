@@ -6,10 +6,15 @@
         </div>
             <div class="ibox border-bottom offset-2 col-8">
                 <div class="ibox-title form-inline">
-                    <h3>Group one, {{ student.username }}</h3>
                     <div class="leave-option">
-                        <router-link :to="{name: 'Student-Group'}">
-                            <button class="btn btn-danger">Leave Group</button>
+                        <router-link :to="{
+                                name: 'StudentGroup',
+                                params: {
+                                    code: code,
+                                },
+                            }"
+                            class="btn btn-danger">
+                            Leave Group
                         </router-link>
                     </div>
                 </div>
@@ -43,10 +48,23 @@ import { mapGetters } from 'vuex';
 
 export default {
     name: 'StudentGeogebra',
+
     computed: {
         ...mapGetters('users', {
             student: 'current',
         }),
+    },
+
+    props: {
+        code: {
+            default: '',
+            type: String,
+        },
+
+        id: {
+            default: '',
+            type: String,
+        },
     },
 };
 </script>

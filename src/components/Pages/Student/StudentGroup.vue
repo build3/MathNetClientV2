@@ -18,38 +18,34 @@
                                 </th>
                                 <th data-hide="action"
                                     class="footable-visible footable-sortable">
-                                    Students in Group
-                                    <span class="footable-sort-indicator"></span>
-                                </th>
-                                <th data-hide="action"
-                                    class="footable-visible footable-sortable">
                                     Action
                                     <span class="footable-sort-indicator"></span>
                                 </th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="footable-even">
+                            <tr class="footable-even"
+                                v-for="(g, index) in groups.data" :key="index" >
                                 <td class="footable-visible footable-first-column">
                                     <span class="footable-toggle"></span>
-                                    Group one
+                                    Group {{ index + 1 }}
                                 </td>
                                 <td class="footable-visible">
-                                    <span class="footable-toggle"></span>
-                                    2
-                                </td>
-                                <td class="footable-visible">
-                                    <!--Static link only for template mock-up-->
-                                    <router-link :to="{name: 'Student-Geogebra'}">
-                                        <button class="btn btn-primary btn-sieze-xs">
-                                            Join to group
-                                        </button>
+                                    <router-link :to="{
+                                            name: 'StudentGeogebra',
+                                            params: {
+                                                code: code,
+                                                id: g._id,
+                                            }
+                                        }"
+                                        class="btn btn-primary btn-xs">
+                                        Join Group
                                     </router-link>
                                 </td>
                             </tr>
                         </tbody>
-                        <router-link :to="{name: 'Student-Class'}">
-                            <button class="btn btn-danger">Leave Group</button>
+                        <router-link :to="{name: 'StudentClass'}">
+                            <button class="btn btn-danger">Leave Class</button>
                         </router-link>
                     </table>
                 </div>
@@ -59,6 +55,39 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex';
+
 export default {
+    name: 'StudentGroup',
+
+    computed: {
+
+        ...mapGetters('groups', {
+            findGroupsInStore: 'find',
+        }),
+
+        groups() {
+            return this.findGroupsInStore({
+                query: { class: this.code },
+            });
+        },
+    },
+
+    methods: {
+        ...mapActions('groups', {
+            findGroups: 'find',
+        }),
+    },
+
+    created() {
+        this.findGroups();
+    },
+
+    props: {
+        code: {
+            default: '',
+            type: String,
+        },
+    },
 };
 </script>
