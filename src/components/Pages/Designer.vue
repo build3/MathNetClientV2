@@ -90,7 +90,10 @@
                             </div>
                             <div class="row mt-5">
                                 <div class="col-12">
-                                    <button class="btn btn-warning p-2">Reset view</button>
+                                    <button class="btn btn-warning p-2"
+                                        @click="resetView">
+                                        Reset view
+                                    </button>
                                     <div id="geogebra_designer" class="geogebra-applet">
                                         <!--Main geogebra applet-->
                                     </div>
@@ -222,6 +225,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import GeogebraInterface from '../Geogebra/GeogebraInterface';
+import freshGeogebraState from '../../helpers/fresh_geogebra_state';
 
 export default {
     name: 'Designer',
@@ -254,7 +258,7 @@ export default {
     methods: {
         ...mapActions('constructions', {
             findConstructions: 'find',
-            creatConstruction: 'create',
+            createConstruction: 'create',
             get: 'get',
         }),
 
@@ -290,7 +294,7 @@ export default {
 
         async addConstruction(constructionName) {
             try {
-                await this.creatConstruction({
+                await this.createConstruction({
                     name: constructionName,
                     xml: this.GI.getXML(),
                 });
@@ -315,6 +319,9 @@ export default {
                     message: error.message,
                 };
             }
+        },
+        resetView() {
+            this.GI.setXML(freshGeogebraState);
         },
     },
 
