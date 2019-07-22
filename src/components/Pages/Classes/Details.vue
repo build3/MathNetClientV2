@@ -103,6 +103,7 @@ export default {
 
         async addGroup() {
             this.dismissAlert();
+
             try {
                 await this.create({
                     class: this.code,
@@ -117,8 +118,10 @@ export default {
 
         async deleteGroup(group) {
             this.dismissAlert();
+
             try {
                 await this.remove(group);
+                
                 this.alert = {
                     type: 'success',
                     message: 'Group Deleted',

@@ -61,16 +61,19 @@ export default {
     methods: {
         async onSubmit(username, password) {
             this.dismissAlert();
+            
             this.alert = {
                 type: 'info',
                 message: 'Logging in...',
             };
+
             try {
                 await this.authenticate({
                     strategy: 'local',
                     username,
                     password,
                 });
+
                 if (this.user.permissions.indexOf('admin') > -1) {
                     this.$router.push('/admin');
                 } else {

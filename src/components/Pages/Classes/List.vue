@@ -114,11 +114,13 @@ export default {
 
         async onSubmit(classname, code) {
             this.dismissAlert();
+
             try {
                 await this.create({
                     name: classname,
                     code,
                 });
+                
                 this.editMode = false;
             } catch (error) {
                 this.alert = {
@@ -130,8 +132,10 @@ export default {
 
         async deleteClass(code) {
             this.dismissAlert();
+
             try {
                 await this.remove(code);
+
                 this.alert = {
                     type: 'success',
                     message: 'Class Deleted',
