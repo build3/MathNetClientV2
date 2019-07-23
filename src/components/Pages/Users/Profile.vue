@@ -59,7 +59,7 @@ export default {
         return {
             newPassword: undefined,
             confirmNewPassword: undefined,
-            editMode: false,
+            editMode: true,
         };
     },
 
@@ -85,17 +85,25 @@ export default {
                         type: 'info',
                         message: 'Changing...',
                     };
+
                     await this.patch([
                         this.user.username,
                         {
                             password: newPassword,
                         },
                     ]);
+
                     this.alert = {
                         type: 'success',
                         message: 'Password successfully changed',
                     };
-                    this.editMode = false;
+
+                    // this.editMode = false;
+                    // The next two lines should be deleted, and the above line
+                    // uncommented, once profile consists of anyting more than
+                    // password change form.
+                    this.newPassword = undefined;
+                    this.confirmNewPassword = undefined;
                 } catch (error) {
                     this.alert = {
                         type: 'danger',

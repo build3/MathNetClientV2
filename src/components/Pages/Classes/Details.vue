@@ -16,31 +16,23 @@
         </div>
         <div class="ibox border-bottom offset-2 col-8">
             <div class="ibox-content">
-                <div v-if="alert"
-                    class="alert alert-dismissible fade show"
-                    :class="'alert-' + alert.type"
-                    role="alert">
-                    {{ alert.message }}
-                    <button v-if="alert.type !== 'info'"
-                        type="button"
-                        class="close"
-                        data-dismiss="alert"
-                        aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
+                <alert :alert="alert" />
 
                 <table class="table" v-if="!editMode">
                     <thead>
                         <tr>
-                            <th></th>
-                            <th></th>
+                            <th>Name</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="(g, index) in groups.data" :key="index">
                             <td>{{ g.name }}</td>
-                            <td class="text-center">
+                            <td>
+                                <button class="btn btn-sm btn-primary mr-2"
+                                    @click="editGroup(g)">
+                                    Edit Group
+                                </button>
                                 <button class="btn btn-sm btn-danger"
                                     @click="deleteGroup(g)">
                                     Delete Group
@@ -83,14 +75,19 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 
+import AlertMixin from '@/mixins/AlertMixin.vue';
+
 export default {
     name: 'ClassDetails',
+
+    mixins: [AlertMixin],
 
     data() {
         return {
             alert: undefined,
             groupName: undefined,
             editMode: false,
+            currentlyEdited: undefined,
         };
     },
 
@@ -116,20 +113,33 @@ export default {
             findGroups: 'find',
             create: 'create',
             remove: 'remove',
+            patch: 'patch',
         }),
 
-        dismissAlert() {
-            this.alert = undefined;
+        editGroup(group) {
+            this.groupName = group.name;
+            this.currentlyEdited = group._id;
+            this.editMode = true;
         },
 
         async onSubmit(groupName) {
             this.dismissAlert();
 
             try {
-                await this.create({
-                    name: groupName,
-                    class: this.code,
-                });
+                if (!this.currentlyEdited) {
+                    await this.create({
+                        name: groupName,
+                        class: this.code,
+                    });
+                } else {
+                    await this.patch([
+                        this.currentlyEdited,
+                        {
+                            name: groupName,
+                        },
+                    ]);
+                }
+
                 this.editMode = false;
             } catch (error) {
                 this.alert = {
@@ -140,7 +150,6 @@ export default {
         },
 
         async deleteGroup(group) {
-            console.log(group);
             this.dismissAlert();
 
             try {

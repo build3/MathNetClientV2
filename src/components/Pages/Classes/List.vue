@@ -13,7 +13,7 @@
                         <tr>
                             <th>Name</th>
                             <th>Code</th>
-                            <th></th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -29,6 +29,10 @@
                                     class="btn btn-sm btn-primary mr-2">
                                     Details
                                 </router-link>
+                                <button class="btn btn-sm btn-primary mr-2"
+                                    @click="editClass(cl)">
+                                    Edit Class
+                                </button>
                                 <button class="btn btn-sm btn-danger"
                                     @click="deleteClass(cl.code)">
                                     Delete Class
@@ -90,6 +94,7 @@ export default {
             classname: undefined,
             code: undefined,
             editMode: false,
+            currentlyEdited: undefined,
         };
     },
 
@@ -110,16 +115,34 @@ export default {
             findClasses: 'find',
             create: 'create',
             remove: 'remove',
+            patch: 'patch',
         }),
+
+        editClass(cl) {
+            this.classname = cl.name;
+            this.code = cl.code;
+            this.currentlyEdited = cl.code;
+            this.editMode = true;
+        },
 
         async onSubmit(classname, code) {
             this.dismissAlert();
 
             try {
-                await this.create({
-                    name: classname,
-                    code,
-                });
+                if (!this.currentlyEdited) {
+                    await this.create({
+                        name: classname,
+                        code,
+                    });
+                } else {
+                    await this.patch([
+                        this.currentlyEdited,
+                        {
+                            name: classname,
+                            code,
+                        },
+                    ]);
+                }
 
                 this.editMode = false;
             } catch (error) {
@@ -158,6 +181,7 @@ export default {
             if (!newValue) {
                 this.classname = undefined;
                 this.code = undefined;
+                this.currentlyEdited = undefined;
             }
         },
     },
