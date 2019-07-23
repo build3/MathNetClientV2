@@ -38,6 +38,11 @@
                         </tr>
                     </thead>
                     <tbody>
+                        <tr v-if="!groups.total > 0">
+                            <td class="text-center">
+                                No groups.
+                            </td>
+                        </tr>
                         <tr v-for="(g, index) in groups.data" :key="index">
                             <td>Group {{ index + 1 }}</td>
                             <td class="text-center">
@@ -117,12 +122,11 @@ export default {
         },
 
         async deleteGroup(group) {
-            console.log(group);
             this.dismissAlert();
 
             try {
                 await this.remove(group);
-                
+
                 this.alert = {
                     type: 'success',
                     message: 'Group Deleted',
