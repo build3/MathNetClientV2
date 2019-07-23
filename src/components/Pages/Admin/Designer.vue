@@ -92,7 +92,7 @@
                                 <select multiple="multiple"
                                     class="form-control select-style-extender">
                                     <option v-for="(g, index) in groupsInClass" :key="index">
-                                        Group {{ index + 1 }}
+                                        {{ g.name }}
                                     </option>
                                 </select>
                             </div>
