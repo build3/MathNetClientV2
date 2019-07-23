@@ -71,7 +71,7 @@ export default {
                 await this.authenticate({
                     strategy: 'local', username, password,
                 });
-                this.$router.push('/admin');
+                this.$router.push({ name: 'ClassList' });
             } catch (error) {
                 this.alert = {
                     type: 'danger',

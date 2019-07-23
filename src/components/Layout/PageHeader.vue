@@ -4,11 +4,6 @@
             <div class="navbar-header">
             </div>
             <ul class="nav navbar-top-links navbar-right">
-                <li v-if="checkPermission()">
-                    <router-link :to="{name: 'Home'}">
-                        Home
-                    </router-link>
-                </li>
                 <li v-if="!isLoggedIn">
                     <router-link :to="{name: 'Login'}">
                         Login
@@ -59,20 +54,9 @@ export default {
 
         logoutUser() {
             this.logout().then(() => {
-                this.$router.push('/home');
+                this.$router.push({ name: 'Login' });
                 this.clearCurrent();
             });
-        },
-        checkPermission() {
-            if (this.isLoggedIn) {
-                if (this.isLoggedIn.permissions.indexOf('student') > -1) {
-                    return false;
-                }
-
-                return true;
-            }
-
-            return true;
         },
     },
 };

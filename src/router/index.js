@@ -7,8 +7,6 @@ Vue.use(Router);
 
 export default new Router({
     routes: [
-        { path: '', name: 'Home', component: Pages.Home },
-
         { path: '/admin', name: 'Admin', component: Pages.Admin.Admin },
         { path: '/designer', name: 'Designer', component: Pages.Admin.Designer },
         { path: '/view', name: 'View', component: Pages.Admin.View },
