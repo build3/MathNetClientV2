@@ -11,13 +11,19 @@
             </div>
             <div class="ibox-content">
                 <div class="row">
-                    <div class="checkbox m-r-xs form-inline">
-                        <input class="ml-2" type="checkbox" id="checkbox1">
-                            <label class="ml-1" for="checkbox1">Show menu bar
-                                </label>
-                            <input class="ml-2" type="checkbox" id="checkbox2">
-                            <label class="ml-1" for="checkbox2">Send toolbar
-                                </label>
+                    <div class="col-6">
+                        <div class="checkbox form-inline">
+                            <label class="checkbox-container">
+                                Show menu bar
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                            <label class="checkbox-container">
+                                Send toolbar
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <div class="row mt-3">
