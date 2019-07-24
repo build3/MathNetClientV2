@@ -49,7 +49,7 @@ export default new Router({
                     component: Pages.Classes.List,
                 },
                 {
-                    path: ':code',
+                    path: ':id',
                     name: 'ClassDetails',
                     component: Pages.Classes.Details,
                     props: true,
@@ -74,7 +74,7 @@ export default new Router({
                     props: true,
                 },
                 {
-                    path: ':code',
+                    path: ':id',
                     name: 'StudentGroup',
                     component: Pages.Student.Group,
                     props: true,

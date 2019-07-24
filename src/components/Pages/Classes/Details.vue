@@ -44,7 +44,8 @@
 
                 <form v-else
                     @submit.prevent="onSubmit(groupName)">
-                    <h3>Add Group</h3>
+                    <h3 v-if="!currentlyEdited">Add Group</h3>
+                    <h3 v-else>Edit Group</h3>
 
                     <div class="form-group">
                         <input class="form-control"
@@ -98,13 +99,18 @@ export default {
         }),
 
         ...mapGetters('classes', {
-            getClass: 'get',
+            getClassInStore: 'get',
         }),
 
         groups() {
             return this.findGroupsInStore({
-                query: { class: this.code },
+                query: { class: this.id },
             });
+        },
+
+        code() {
+            const res = this.getClassInStore(this.id);
+            return res ? res.code : undefined;
         },
     },
 
@@ -114,6 +120,10 @@ export default {
             create: 'create',
             remove: 'remove',
             patch: 'patch',
+        }),
+
+        ...mapActions('classes', {
+            getClass: 'get',
         }),
 
         editGroup(group) {
@@ -129,7 +139,7 @@ export default {
                 if (!this.currentlyEdited) {
                     await this.create({
                         name: groupName,
-                        class: this.code,
+                        class: this.id,
                     });
                 } else {
                     await this.patch([
@@ -170,10 +180,11 @@ export default {
 
     created() {
         this.findGroups();
+        this.getClass(this.id);
     },
 
     props: {
-        code: {
+        id: {
             default: '',
             type: String,
         },

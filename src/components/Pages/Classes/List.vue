@@ -24,7 +24,7 @@
                                 <router-link
                                     :to="{
                                         name: 'ClassDetails',
-                                        params: { code: cl.code }
+                                        params: { id: cl._id }
                                     }"
                                     class="btn btn-sm btn-primary mr-2">
                                     Details
@@ -44,7 +44,8 @@
 
                 <form v-else
                     @submit.prevent="onSubmit(classname, code)">
-                    <h3>Add Class</h3>
+                    <h3 v-if="!currentlyEdited">Add Class</h3>
+                    <h3 v-else>Edit Class</h3>
 
                     <div class="form-group">
                         <input class="form-control"
@@ -121,7 +122,7 @@ export default {
         editClass(cl) {
             this.classname = cl.name;
             this.code = cl.code;
-            this.currentlyEdited = cl.code;
+            this.currentlyEdited = cl._id;
             this.editMode = true;
         },
 
