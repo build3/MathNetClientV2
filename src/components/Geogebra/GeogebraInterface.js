@@ -41,6 +41,8 @@ export default class {
 
     ggbOnInit() {
         this.applet = this.appletContainer.getAppletObject();
+
+        this.registerGlobalListeners();
     }
 
     getXML() {
@@ -49,5 +51,30 @@ export default class {
 
     setXML(xml) {
         this.applet.setXML(xml);
+    }
+
+    registerGlobalListeners() {
+        window[`addListener${this.appletId}`] = label => this.onAddElement(label);
+
+        this.applet.unregisterAddListener(`addListener${this.appletId}`);
+
+        this.applet.registerAddListener(`addListener${this.appletId}`);
+    }
+
+    onAddElement(label) {
+        if (this.ignoreUpdates) return;
+
+        console.log('Admin add listener called');
+        this.setCaption(label, 'unassigned');
+    }
+
+    setCaption(objectLabel, caption) {
+        this.ignoreUpdates = true;
+        const type = this.applet.getObjectType(objectLabel);
+        if (type === 'point') {
+            this.applet.setLabelStyle(objectLabel, 3);
+        }
+        this.applet.setCaption(objectLabel, caption);
+        this.ignoreUpdates = false;
     }
 }
