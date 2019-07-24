@@ -7,11 +7,6 @@
                 </div>
             </div>
             <ul class="nav navbar-top-links navbar-right">
-                <li v-if="checkPermission()">
-                    <router-link :to="{name: 'Home'}">
-                        Home
-                    </router-link>
-                </li>
                 <li v-if="!isLoggedIn">
                     <router-link :to="{name: 'Login'}">
                         Login
@@ -40,8 +35,9 @@
 </template>
 
 <script>
-import io from 'socket.io-client';
 import { mapGetters, mapActions } from 'vuex';
+
+import feathersClient from '../../feathers-client';
 
 export default {
     name: 'PageHeader',
@@ -49,7 +45,6 @@ export default {
     data() {
         return {
             ping: '',
-            socket: io('http://localhost:3030'),
             pingTime: '',
         };
     },
@@ -71,28 +66,17 @@ export default {
 
         logoutUser() {
             this.logout().then(() => {
-                this.$router.push('/home');
+                this.$router.push({ name: 'Login' });
                 this.clearCurrent();
             });
-        },
-        checkPermission() {
-            if (this.isLoggedIn) {
-                if (this.isLoggedIn.permissions.indexOf('student') > -1) {
-                    return false;
-                }
-
-                return true;
-            }
-
-            return true;
         },
         checkPing() {
             setInterval(() => {
                 this.pingTime = Date.now();
-                this.socket.emit('ping-rate');
+                feathersClient.io.emit('ping-rate');
             }, 2000);
 
-            this.socket.on('pong-rate', () => {
+            feathersClient.io.on('pong-rate', () => {
                 this.ping = Date.now() - this.pingTime;
             });
         },

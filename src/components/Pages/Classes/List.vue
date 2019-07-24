@@ -17,6 +17,11 @@
                         </tr>
                     </thead>
                     <tbody>
+                        <tr v-if="!classes.total > 0">
+                            <td></td>
+                            <td>No class.</td>
+                            <td></td>
+                        </tr>
                         <tr v-for="cl in classes.data" :key="cl.code">
                             <td>{{ cl.name }}</td>
                             <td>{{ cl.code }}</td>

@@ -30,7 +30,7 @@
                     </button>
                 </div>
 
-                <table class="table">
+                <table class="table" v-if="!editMode">
                     <thead>
                         <tr>
                             <th></th>
@@ -38,8 +38,13 @@
                         </tr>
                     </thead>
                     <tbody>
+                        <tr v-if="!groups.total > 0">
+                            <td class="text-center">
+                                No groups.
+                            </td>
+                        </tr>
                         <tr v-for="(g, index) in groups.data" :key="index">
-                            <td>Group {{ index + 1 }}</td>
+                            <td>{{ g.name }}</td>
                             <td class="text-center">
                                 <button class="btn btn-sm btn-danger"
                                     @click="deleteGroup(g)">
@@ -50,9 +55,28 @@
                     </tbody>
                 </table>
 
+                <form v-else
+                    @submit.prevent="onSubmit(groupName)">
+                    <h3>Add Group</h3>
+
+                    <div class="form-group">
+                        <input class="form-control"
+                            type="text"
+                            v-model="groupName"
+                            placeholder="Group Name"
+                            required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button class="btn btn-secondary"
+                        @click.prevent="editMode = false">
+                        Cancel
+                    </button>
+                </form>
+
                 <button
+                    v-if="!editMode"
                     class="btn btn-primary"
-                    @click="addGroup">
+                    @click="editMode = true">
                     Add Group
                 </button>
             </div>
@@ -70,6 +94,8 @@ export default {
     data() {
         return {
             alert: undefined,
+            groupName: undefined,
+            editMode: false,
         };
     },
 
@@ -101,13 +127,15 @@ export default {
             this.alert = undefined;
         },
 
-        async addGroup() {
+        async onSubmit(groupName) {
             this.dismissAlert();
 
             try {
                 await this.create({
+                    name: groupName,
                     class: this.code,
                 });
+                this.editMode = false;
             } catch (error) {
                 this.alert = {
                     type: 'danger',
@@ -117,7 +145,6 @@ export default {
         },
 
         async deleteGroup(group) {
-            console.log(group);
             this.dismissAlert();
 
             try {
@@ -144,6 +171,14 @@ export default {
         code: {
             default: '',
             type: String,
+        },
+    },
+
+    watch: {
+        editMode(newValue) {
+            if (!newValue) {
+                this.groupName = undefined;
+            }
         },
     },
 };

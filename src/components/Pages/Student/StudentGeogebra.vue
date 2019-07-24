@@ -6,11 +6,15 @@
         </div>
             <div class="ibox border-bottom offset-2 col-8">
                 <div class="ibox-title form-inline">
+                    <h3 v-if="group">
+                        {{ group.name }}, {{ student.username }}
+                    </h3>
                     <div class="leave-option">
-                        <router-link :to="{
+                        <router-link v-if="group"
+                            :to="{
                                 name: 'StudentGroup',
                                 params: {
-                                    code: code,
+                                    code: group.class,
                                 },
                             }"
                             class="btn btn-danger">
@@ -44,7 +48,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 
 export default {
     name: 'StudentGeogebra',
@@ -53,14 +57,28 @@ export default {
         ...mapGetters('users', {
             student: 'current',
         }),
+
+        ...mapGetters('groups', [
+            'get',
+        ]),
+
+        group() {
+            return this.get(this.id);
+        },
+    },
+
+    methods: {
+        ...mapActions('groups', {
+            getGroup: 'get',
+        }),
+    },
+
+    created() {
+        this.getGroup(this.id);
     },
 
     props: {
-        code: {
-            default: '',
-            type: String,
-        },
-
+        /** The id of the group we're currently in. */
         id: {
             default: '',
             type: String,

@@ -7,8 +7,6 @@ Vue.use(Router);
 
 export default new Router({
     routes: [
-        { path: '', name: 'Home', component: Pages.Home },
-
         { path: '/admin', name: 'Admin', component: Pages.Admin.Admin },
         { path: '/designer', name: 'Designer', component: Pages.Admin.Designer },
         { path: '/view', name: 'View', component: Pages.Admin.View },
@@ -68,15 +66,15 @@ export default new Router({
                     component: Pages.Student.Class,
                 },
                 {
-                    path: ':code',
-                    name: 'StudentGroup',
-                    component: Pages.Student.Group,
+                    path: 'geogebra/:id',
+                    name: 'StudentGeogebra',
+                    component: Pages.Student.Geogebra,
                     props: true,
                 },
                 {
-                    path: ':code/:id',
-                    name: 'StudentGeogebra',
-                    component: Pages.Student.Geogebra,
+                    path: ':code',
+                    name: 'StudentGroup',
+                    component: Pages.Student.Group,
                     props: true,
                 },
             ],

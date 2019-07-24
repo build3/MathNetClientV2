@@ -75,7 +75,7 @@ export default {
                 });
 
                 if (this.user.permissions.indexOf('admin') > -1) {
-                    this.$router.push('/admin');
+                    this.$router.push({ name: 'ClassList' });
                 } else {
                     this.$router.push({ name: 'StudentClass' });
                 }
