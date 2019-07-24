@@ -2,6 +2,9 @@
     <div class="row border-bottom">
         <nav class="navbar navbar-static-top bg-white">
             <div class="navbar-header">
+                <div class="ping-section">
+                    <p>Ping:</p><p v-if="!ping">waiting</p><p>{{ ping }}</p>
+                </div>
             </div>
             <ul class="nav navbar-top-links navbar-right">
                 <li v-if="checkPermission()">
@@ -37,10 +40,19 @@
 </template>
 
 <script>
+import io from 'socket.io-client';
 import { mapGetters, mapActions } from 'vuex';
 
 export default {
     name: 'PageHeader',
+
+    data() {
+        return {
+            ping: '',
+            socket: io('http://localhost:3030'),
+            pingTime: '',
+        };
+    },
 
     computed: {
         ...mapGetters('users', {
@@ -74,6 +86,19 @@ export default {
 
             return true;
         },
+        checkPing() {
+            setInterval(() => {
+                this.pingTime = Date.now();
+                this.socket.emit('ping-rate');
+            }, 2000);
+
+            this.socket.on('pong-rate', () => {
+                this.ping = Date.now() - this.pingTime;
+            });
+        },
+    },
+    created() {
+        this.checkPing();
     },
 };
 </script>

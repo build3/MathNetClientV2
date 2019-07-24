@@ -60,3 +60,19 @@ ol.breadcrumb {
     padding-left: 0;
     padding-right: 0;
 }
+
+.ping-section {
+    display: inline-flex;
+
+    p:first-child {
+        padding: 14px 4px 14px 25px;
+    }
+
+    p {
+        font-weight: 600;
+        margin-top: 1em;
+        margin-bottom: .5em;
+        padding: 14px 4px 14px 4px;
+        color: #999c9e;
+    }
+}

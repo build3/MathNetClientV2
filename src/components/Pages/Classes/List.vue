@@ -120,7 +120,7 @@ export default {
                     name: classname,
                     code,
                 });
-                
+
                 this.editMode = false;
             } catch (error) {
                 this.alert = {

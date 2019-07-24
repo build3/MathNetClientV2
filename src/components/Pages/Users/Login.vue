@@ -61,7 +61,7 @@ export default {
     methods: {
         async onSubmit(username, password) {
             this.dismissAlert();
-            
+
             this.alert = {
                 type: 'info',
                 message: 'Logging in...',
