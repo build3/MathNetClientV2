@@ -11,10 +11,18 @@
 
                 <form v-if="editMode"
                     @submit.prevent="onSubmit(
+                        oldPassword,
                         newPassword,
                         confirmNewPassword
                     )">
                     <h3>Change Password</h3>
+                    <div class="form-group">
+                        <input class="form-control"
+                            type="password"
+                            v-model="oldPassword"
+                            placeholder="Old Password"
+                            required>
+                    </div>
                     <div class="form-group">
                         <input class="form-control"
                             type="password"
@@ -57,6 +65,7 @@ import AlertMixin from '@/mixins/AlertMixin.vue';
 export default {
     data() {
         return {
+            oldPassword: undefined,
             newPassword: undefined,
             confirmNewPassword: undefined,
             editMode: true,
@@ -72,8 +81,9 @@ export default {
     },
 
     methods: {
-        async onSubmit(newPassword, confirmNewPassword) {
+        async onSubmit(oldPassword, newPassword, confirmNewPassword) {
             this.dismissAlert();
+
             if (newPassword !== confirmNewPassword) {
                 this.alert = {
                     type: 'danger',
@@ -89,6 +99,7 @@ export default {
                     await this.patch([
                         this.user.username,
                         {
+                            oldPassword,
                             password: newPassword,
                         },
                     ]);
@@ -99,9 +110,10 @@ export default {
                     };
 
                     // this.editMode = false;
-                    // The next two lines should be deleted, and the above line
-                    // uncommented, once profile consists of anyting more than
-                    // password change form.
+                    // The next three lines should be deleted, and the above
+                    // line uncommented, once profile consists of anyting more
+                    // than a password change form.
+                    this.oldPassword = undefined;
                     this.newPassword = undefined;
                     this.confirmNewPassword = undefined;
                 } catch (error) {
@@ -121,6 +133,7 @@ export default {
     watch: {
         editMode(newValue) {
             if (!newValue) {
+                this.oldPassword = undefined;
                 this.newPassword = undefined;
                 this.confirmNewPassword = undefined;
             }
