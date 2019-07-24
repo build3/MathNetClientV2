@@ -14,6 +14,11 @@
                         Register
                     </router-link>
                 </li>
+                <li v-if="isStudent">
+                    <router-link :to="{name: 'StudentClass'}">
+                        Class List
+                    </router-link>
+                </li>
                 <li v-if="isLoggedIn">
                     <router-link :to="{name: 'Profile'}">
                         Profile
@@ -39,8 +44,16 @@ export default {
 
     computed: {
         ...mapGetters('users', {
-            isLoggedIn: 'current',
+            user: 'current',
         }),
+
+        isLoggedIn() {
+            return this.user !== undefined;
+        },
+
+        isStudent() {
+            return this.user && this.user.permissions.includes('student');
+        },
     },
 
     methods: {
