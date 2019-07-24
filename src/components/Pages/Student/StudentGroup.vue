@@ -34,7 +34,6 @@
                                     <router-link :to="{
                                             name: 'StudentGeogebra',
                                             params: {
-                                                code: code,
                                                 id: g._id,
                                             }
                                         }"
@@ -68,7 +67,7 @@ export default {
 
         groups() {
             return this.findGroupsInStore({
-                query: { class: this.code },
+                query: { class: this.id },
             });
         },
     },
@@ -84,7 +83,8 @@ export default {
     },
 
     props: {
-        code: {
+        /** The id of the class we're currently in. */
+        id: {
             default: '',
             type: String,
         },
