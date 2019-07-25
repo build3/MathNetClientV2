@@ -24,6 +24,11 @@
                             </tr>
                         </thead>
                         <tbody>
+                            <tr v-if="!groups.total > 0">
+                                <td class="text-center">
+                                    No groups
+                                </td>
+                            </tr>
                             <tr class="footable-even"
                                 v-for="(g, index) in groups.data" :key="index" >
                                 <td class="footable-visible footable-first-column">
@@ -34,7 +39,6 @@
                                     <router-link :to="{
                                             name: 'StudentGeogebra',
                                             params: {
-                                                code: code,
                                                 id: g._id,
                                             }
                                         }"
@@ -45,7 +49,7 @@
                             </tr>
                         </tbody>
                         <router-link :to="{name: 'StudentClass'}">
-                            <button class="btn btn-danger">Leave Class</button>
+                            <button class="btn btn-danger mt-3">Leave Class</button>
                         </router-link>
                     </table>
                 </div>
@@ -68,7 +72,7 @@ export default {
 
         groups() {
             return this.findGroupsInStore({
-                query: { class: this.code },
+                query: { class: this.id },
             });
         },
     },
@@ -84,7 +88,8 @@ export default {
     },
 
     props: {
-        code: {
+        /** The id of the class we're currently in. */
+        id: {
             default: '',
             type: String,
         },

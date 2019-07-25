@@ -7,7 +7,6 @@ Vue.use(Router);
 
 export default new Router({
     routes: [
-        { path: '/admin', name: 'Admin', component: Pages.Admin.Admin },
         { path: '/designer', name: 'Designer', component: Pages.Admin.Designer },
         { path: '/view', name: 'View', component: Pages.Admin.View },
 
@@ -47,7 +46,7 @@ export default new Router({
                     component: Pages.Classes.List,
                 },
                 {
-                    path: ':code',
+                    path: ':id',
                     name: 'ClassDetails',
                     component: Pages.Classes.Details,
                     props: true,
@@ -72,7 +71,7 @@ export default new Router({
                     props: true,
                 },
                 {
-                    path: ':code',
+                    path: ':id',
                     name: 'StudentGroup',
                     component: Pages.Student.Group,
                     props: true,

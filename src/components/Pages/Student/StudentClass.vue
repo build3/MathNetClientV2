@@ -24,6 +24,11 @@
                             </tr>
                         </thead>
                         <tbody>
+                            <tr v-if="!classes.total > 0">
+                                <td></td>
+                                <td>No class</td>
+                                <td></td>
+                            </tr>
                             <tr v-for="cl in classes.data" :key="cl.code">
                                 <td>
                                     <span class="footable-toggle"></span>
@@ -36,7 +41,7 @@
                                 <td class="footable-visible">
                                     <router-link :to="{
                                             name: 'StudentGroup',
-                                            params: { code: cl.code }
+                                            params: { id: cl._id }
                                         }"
                                         class="btn btn-primary btn-xs">
                                         Join Class

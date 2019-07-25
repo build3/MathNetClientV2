@@ -85,7 +85,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-6">
+                        <div class="offset-1 col-5">
                             <div class="col-10 class-table">
                                 <h2>Select class</h2>
                                 <table class="table">
@@ -100,7 +100,7 @@
                                     <tr v-if="!classes.total > 0">
                                         <td></td>
                                         <td>
-                                            No class.
+                                            No class
                                         </td>
                                         <td></td>
                                     </tr>
