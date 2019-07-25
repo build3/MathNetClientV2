@@ -1,5 +1,8 @@
 import ggbBase64 from '../../helpers/ggbbase64';
 
+const POINT = 'point';
+const CAPTION_STYLE = 3;
+
 export default class {
     constructor(params) {
         this.params = {
@@ -72,8 +75,8 @@ export default class {
     setCaption(objectLabel, caption) {
         this.ignoreUpdates = true;
         const objType = this.applet.getObjectType(objectLabel);
-        if (objType === 'point') {
-            this.applet.setLabelStyle(objectLabel, 3);
+        if (objType === POINT) {
+            this.applet.setLabelStyle(objectLabel, CAPTION_STYLE);
         }
         this.applet.setCaption(objectLabel, caption);
         this.ignoreUpdates = false;
