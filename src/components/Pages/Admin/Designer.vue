@@ -387,6 +387,7 @@ export default {
 
         resetView() {
             this.GI.setXML(freshGeogebraState);
+            this.GI.registerGlobalListeners();
         },
     },
 

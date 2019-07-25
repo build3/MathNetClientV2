@@ -1,10 +1,13 @@
 import ggbBase64 from '../../helpers/ggbbase64';
 
+const POINT = 'point';
+const CAPTION_STYLE = 3;
+
 export default class {
     constructor(params) {
         this.params = {
             container: 'geogebra_designer',
-            id: 'applet',
+            id: 'geogebra_designer',
             width: 800,
             height: 600,
             perspective: 'AG',
@@ -45,6 +48,8 @@ export default class {
 
     ggbOnInit() {
         this.applet = this.appletContainer.getAppletObject();
+
+        this.registerGlobalListeners();
     }
 
     getXML() {
@@ -53,5 +58,27 @@ export default class {
 
     setXML(xml) {
         this.applet.setXML(xml);
+    }
+
+    registerGlobalListeners() {
+        window[`addListener${this.appletId}`] = label => this.onAddElement(label);
+        this.applet.unregisterAddListener(`addListener${this.appletId}`);
+        this.applet.registerAddListener(`addListener${this.appletId}`);
+    }
+
+    onAddElement(label) {
+        if (!this.ignoreUpdates) {
+            this.setCaption(label, `${label}_{unassigned}`);
+        }
+    }
+
+    setCaption(objectLabel, caption) {
+        this.ignoreUpdates = true;
+        const objType = this.applet.getObjectType(objectLabel);
+        if (objType === POINT) {
+            this.applet.setLabelStyle(objectLabel, CAPTION_STYLE);
+        }
+        this.applet.setCaption(objectLabel, caption);
+        this.ignoreUpdates = false;
     }
 }
