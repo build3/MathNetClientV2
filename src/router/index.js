@@ -2,14 +2,60 @@ import Vue from 'vue';
 import Router from 'vue-router';
 
 import Pages from '@/components/Pages';
+import store from '../store';
+
 
 Vue.use(Router);
 
+
+function requireAuthAdmin(to, from, next) {
+    if (store.state.auth.user !== null) {
+        const { permissions } = store.state.auth.user;
+        if (permissions.includes('admin')) {
+            next();
+        } else {
+            next('/404');
+        }
+    } else {
+        next();
+    }
+}
+
+function requireAuthStudent(to, from, next) {
+    if (store.state.auth.user !== null) {
+        const { permissions } = store.state.auth.user;
+        if (permissions.includes('student')) {
+            next();
+        } else {
+            next('/404');
+        }
+    } else {
+        next();
+    }
+}
+
 export default new Router({
     routes: [
-        { path: '/admin', name: 'Admin', component: Pages.Admin.Admin },
-        { path: '/designer', name: 'Designer', component: Pages.Admin.Designer },
-        { path: '/view', name: 'View', component: Pages.Admin.View },
+        {
+            path: '/designer',
+            name: 'Designer',
+            component: Pages.Admin.Designer,
+            beforeEnter: requireAuthAdmin,
+            meta: {
+                permissions: 'admin',
+            },
+        },
+        {
+            path: '/view',
+            name: 'View',
+            component: Pages.Admin.View,
+            beforeEnter: requireAuthAdmin,
+            meta: {
+                permissions: 'admin',
+            },
+        },
+        { path: '/404', name: 'NotFound', component: Pages.Admin.NotFound },
+        { path: '*', redirect: '/404' },
 
         {
             path: '/users',
@@ -40,6 +86,10 @@ export default new Router({
             path: '/classes',
             name: 'ClassesHome',
             component: Pages.Classes.Home,
+            beforeEnter: requireAuthAdmin,
+            meta: {
+                permissions: 'admin',
+            },
             children: [
                 {
                     path: 'list',
@@ -52,6 +102,8 @@ export default new Router({
                     component: Pages.Classes.Details,
                     props: true,
                 },
+                { path: '/404', name: 'NotFound', component: Pages.NotFound },
+                { path: '*', redirect: '/404' },
             ],
         },
 
@@ -59,6 +111,10 @@ export default new Router({
             path: '/student',
             name: 'StudentHome',
             component: Pages.Student.Home,
+            beforeEnter: requireAuthStudent,
+            meta: {
+                permissions: 'student',
+            },
             children: [
                 {
                     path: 'class',
@@ -77,6 +133,8 @@ export default new Router({
                     component: Pages.Student.Group,
                     props: true,
                 },
+                { path: '/404', name: 'NotFound', component: Pages.NotFound },
+                { path: '*', redirect: '/404' },
             ],
         },
     ],

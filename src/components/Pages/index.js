@@ -3,7 +3,6 @@ import Login from './Users/Login.vue';
 import Register from './Users/Register.vue';
 import Profile from './Users/Profile.vue';
 
-import Admin from './Admin/Admin.vue';
 import Designer from './Admin/Designer.vue';
 import View from './Admin/View.vue';
 
@@ -15,13 +14,14 @@ import StudentHome from './Student/Index.vue';
 import StudentClass from './Student/StudentClass.vue';
 import StudentGroup from './Student/StudentGroup.vue';
 import StudentGeogebra from './Student/StudentGeogebra.vue';
+import NotFound from './Admin/NotFound.vue';
 
 export default {
 
     Admin: {
-        Admin,
         Designer,
         View,
+        NotFound,
     },
 
     Users: {
