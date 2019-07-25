@@ -65,7 +65,7 @@ export default class {
         if (this.ignoreUpdates) return;
 
         console.log('Admin add listener called');
-        this.setCaption(label, 'unassigned');
+        this.setCaption(label, `${label}_{unassigned}`);
     }
 
     setCaption(objectLabel, caption) {
