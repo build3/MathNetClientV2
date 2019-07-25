@@ -13,13 +13,13 @@
                         <tr>
                             <th>Name</th>
                             <th>Code</th>
-                            <th></th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-if="!classes.total > 0">
                             <td></td>
-                            <td>No class.</td>
+                            <td>No class</td>
                             <td></td>
                         </tr>
                         <tr v-for="cl in classes.data" :key="cl.code">
@@ -29,11 +29,15 @@
                                 <router-link
                                     :to="{
                                         name: 'ClassDetails',
-                                        params: { code: cl.code }
+                                        params: { id: cl._id }
                                     }"
                                     class="btn btn-sm btn-primary mr-2">
                                     Details
                                 </router-link>
+                                <button class="btn btn-sm btn-primary mr-2"
+                                    @click="editClass(cl)">
+                                    Edit Class
+                                </button>
                                 <button class="btn btn-sm btn-danger"
                                     @click="deleteClass(cl.code)">
                                     Delete Class
@@ -45,7 +49,8 @@
 
                 <form v-else
                     @submit.prevent="onSubmit(classname, code)">
-                    <h3>Add Class</h3>
+                    <h3 v-if="!currentlyEdited">Add Class</h3>
+                    <h3 v-else>Edit Class</h3>
 
                     <div class="form-group">
                         <input class="form-control"
@@ -95,6 +100,7 @@ export default {
             classname: undefined,
             code: undefined,
             editMode: false,
+            currentlyEdited: undefined,
         };
     },
 
@@ -115,16 +121,34 @@ export default {
             findClasses: 'find',
             create: 'create',
             remove: 'remove',
+            patch: 'patch',
         }),
+
+        editClass(cl) {
+            this.classname = cl.name;
+            this.code = cl.code;
+            this.currentlyEdited = cl._id;
+            this.editMode = true;
+        },
 
         async onSubmit(classname, code) {
             this.dismissAlert();
 
             try {
-                await this.create({
-                    name: classname,
-                    code,
-                });
+                if (!this.currentlyEdited) {
+                    await this.create({
+                        name: classname,
+                        code,
+                    });
+                } else {
+                    await this.patch([
+                        this.currentlyEdited,
+                        {
+                            name: classname,
+                            code,
+                        },
+                    ]);
+                }
 
                 this.editMode = false;
             } catch (error) {
@@ -163,6 +187,7 @@ export default {
             if (!newValue) {
                 this.classname = undefined;
                 this.code = undefined;
+                this.currentlyEdited = undefined;
             }
         },
     },
