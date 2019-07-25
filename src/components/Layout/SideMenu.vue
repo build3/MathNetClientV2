@@ -11,9 +11,6 @@
                 </div>
             </li>
             <li v-if="checkPermissionToSideMenu()">
-                <router-link :to="{name: 'Admin'}">
-                    Admin
-                </router-link>
                 <router-link :to="{name: 'ClassList'}">
                     Classes
                 </router-link>

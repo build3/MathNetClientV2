@@ -1,8 +1,10 @@
+import ggbBase64 from '../../helpers/ggbbase64';
+
 export default class {
     constructor(params) {
         this.params = {
             container: 'geogebra_designer',
-            id: 'applet',
+            id: 'geogebra_designer',
             width: 800,
             height: 600,
             perspective: 'AG',
@@ -23,8 +25,10 @@ export default class {
             screenshotGenerator: false,
             preventFocus: false,
             scaleContainerClass: 'appletContainer',
+            ggbBase64,
             ...params,
         };
+
         // eslint-disable-next-line no-undef
         this.appletContainer = new GGBApplet(this.params);
         // this.appletContainer.setHTML5Codebase('/5.0/web3d/');
@@ -55,23 +59,20 @@ export default class {
 
     registerGlobalListeners() {
         window[`addListener${this.appletId}`] = label => this.onAddElement(label);
-
         this.applet.unregisterAddListener(`addListener${this.appletId}`);
-
         this.applet.registerAddListener(`addListener${this.appletId}`);
     }
 
     onAddElement(label) {
-        if (this.ignoreUpdates) return;
-
-        console.log('Admin add listener called');
-        this.setCaption(label, `${label}_{unassigned}`);
+        if (!this.ignoreUpdates) {
+            this.setCaption(label, `${label}_{unassigned}`);
+        }
     }
 
     setCaption(objectLabel, caption) {
         this.ignoreUpdates = true;
-        const type = this.applet.getObjectType(objectLabel);
-        if (type === 'point') {
+        const objType = this.applet.getObjectType(objectLabel);
+        if (objType === 'point') {
             this.applet.setLabelStyle(objectLabel, 3);
         }
         this.applet.setCaption(objectLabel, caption);
