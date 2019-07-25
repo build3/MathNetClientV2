@@ -1,3 +1,5 @@
+import ggbBase64 from '../../helpers/ggbbase64';
+
 export default class {
     constructor(params) {
         this.params = {
@@ -23,8 +25,10 @@ export default class {
             screenshotGenerator: false,
             preventFocus: false,
             scaleContainerClass: 'appletContainer',
+            ggbBase64,
             ...params,
         };
+
         // eslint-disable-next-line no-undef
         this.appletContainer = new GGBApplet(this.params);
         // this.appletContainer.setHTML5Codebase('/5.0/web3d/');
