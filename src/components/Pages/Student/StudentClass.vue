@@ -36,7 +36,7 @@
                                 <td class="footable-visible">
                                     <router-link :to="{
                                             name: 'StudentGroup',
-                                            params: { id: cl._id }
+                                            params: { code: cl.code }
                                         }"
                                         class="btn btn-primary btn-xs">
                                         Join Class

@@ -29,7 +29,7 @@
                                 <router-link
                                     :to="{
                                         name: 'ClassDetails',
-                                        params: { id: cl._id }
+                                        params: { code: cl.code }
                                     }"
                                     class="btn btn-sm btn-primary mr-2">
                                     Details
@@ -59,7 +59,8 @@
                             placeholder="Class Name"
                             required>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group"
+                        v-if="!currentlyEdited">
                         <input class="form-control"
                             type="text"
                             v-model="code"
@@ -127,7 +128,7 @@ export default {
         editClass(cl) {
             this.classname = cl.name;
             this.code = cl.code;
-            this.currentlyEdited = cl._id;
+            this.currentlyEdited = cl.code;
             this.editMode = true;
         },
 
@@ -145,7 +146,6 @@ export default {
                         this.currentlyEdited,
                         {
                             name: classname,
-                            code,
                         },
                     ]);
                 }

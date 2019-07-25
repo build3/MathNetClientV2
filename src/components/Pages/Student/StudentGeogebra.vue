@@ -14,7 +14,7 @@
                             :to="{
                                 name: 'StudentGroup',
                                 params: {
-                                    id: group.class,
+                                    code: group.class,
                                 },
                             }"
                             class="btn btn-danger">
