@@ -27,11 +27,11 @@
                         <!--Geogebra applet-->
                     </div>
                     <div class="control-options">
-                        <div class="col-5">
+                        <div class="col-8">
                             <button class="btn btn-info center-btn-up">Up(I)</button>
                             <div class="form-inline">
                                 <button class="btn btn-info m-2">Left(J)</button>
-                                <p class="mt-3">Selected object:</p>
+                                <p class="mt-3 p-2">Selected object:</p>
                                 <button class="btn btn-info m-2">Right(L)</button>
                             </div>
                             <button class="btn btn-info center-btn-down">Down(K)</button>

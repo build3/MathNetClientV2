@@ -14,7 +14,7 @@
                 </li>
             </ol>
         </div>
-        <div class="ibox border-bottom offset-2 col-8">
+        <div class="ibox border-bottom offset-2 col-5">
             <div class="ibox-content">
                 <alert :alert="alert" />
 
@@ -28,7 +28,7 @@
                     <tbody>
                         <tr v-if="!groups.total > 0">
                             <td class="text-center">
-                                No groups.
+                                No groups
                             </td>
                         </tr>
                         <tr v-for="(g, index) in groups.data" :key="index">

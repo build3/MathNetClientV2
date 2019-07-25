@@ -33,7 +33,7 @@
                         Change
                     </button>
                     <button class="btn btn-secondary"
-                        @click.prevent="editMode = false">
+                        @click.prevent="backSubmit">
                         Cancel
                     </button>
                 </form>
@@ -110,6 +110,15 @@ export default {
                         message: error.message,
                     };
                 }
+            }
+        },
+
+        async backSubmit() {
+            this.editMode = false;
+            if (this.user.permissions.indexOf('admin') > -1) {
+                this.$router.push({ name: 'ClassList' });
+            } else {
+                this.$router.push({ name: 'StudentClass' });
             }
         },
 
