@@ -13,8 +13,21 @@
                     </router-link>
                 </li>
                 <li v-if="!isLoggedIn">
-                    <router-link :to="{name: 'Register'}">
-                        Register
+                    <router-link
+                        :to="{
+                            name: 'Register',
+                            params: { permissions: 'student' }
+                        }">
+                        Register Student
+                    </router-link>
+                </li>
+                <li v-if="!isLoggedIn">
+                    <router-link
+                        :to="{
+                            name: 'Register',
+                            params: { permissions: 'admin' }
+                        }">
+                        Register Teacher
                     </router-link>
                 </li>
                 <li v-if="isStudent">
