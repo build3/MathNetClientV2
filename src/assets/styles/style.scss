@@ -96,6 +96,12 @@ table {
     }
 }
 
+table.designer-class-table tr {
+    td:first-child, td:nth-child(2) {
+        line-height: 29px;
+    }
+}
+
 .class-table {
     overflow: auto;
     height: 36em;

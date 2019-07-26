@@ -88,7 +88,7 @@
                         <div class="offset-1 col-5">
                             <div class="col-10 class-table">
                                 <h2>Select class</h2>
-                                <table class="table">
+                                <table class="table designer-class-table">
                                     <thead>
                                         <tr>
                                             <th>Name</th>
@@ -108,7 +108,9 @@
                                             <td>{{ cl.name }}</td>
                                             <td>{{ cl.code }}</td>
                                             <td class="text-center">
-                                                <button @click="selectGroupsInClass(cl.code)"
+                                                <button
+                                                    v-if="code !== cl.code"
+                                                    @click="selectGroupsInClass(cl.code)"
                                                     class="btn btn-sm btn-primary mr-2">
                                                     Select
                                                 </button>
@@ -295,6 +297,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
+
+import ToastrMixin from '@/mixins/ToastrMixin.vue';
 import GeogebraInterface from '../../Geogebra/GeogebraInterface';
 import freshGeogebraState from '../../../helpers/fresh_geogebra_state';
 
@@ -315,6 +319,9 @@ export default {
             groupsInClass: undefined,
         };
     },
+
+    mixins: [ToastrMixin],
+
     computed: {
         ...mapGetters('users', {
             teacher: 'current',
@@ -360,12 +367,15 @@ export default {
             findClasses: 'find',
         }),
 
-        ...mapActions('users', {
-            patch: 'patch',
-        }),
-
         async selectGroupsInClass(code) {
+            this.clearToast();
+
+            this.code = code;
             this.groupsInClass = await this.findGroups({ query: { class: code } });
+
+            if (!this.groupsInClass.length) {
+                this.showToast('Selected class nas no groups', 'warning');
+            }
         },
 
         async useConstruction() {
