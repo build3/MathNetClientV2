@@ -58,17 +58,20 @@
                             <div class="col-10 mt-4">
                                 <h2>Groups</h2>
                                 <select multiple="multiple"
-                                    class="form-control select-style-extender">
+                                    class="form-control select-style-extender"
+                                    v-model="selectedGroup">
                                     <option v-for="(g, index) in groupsInClass" :key="index">
                                         {{ g.name }}
                                     </option>
                                 </select>
                                 <div class="mt-2">
                                     <div class="form-inline">
-                                        <button class="btn btn-primary p-2 mr-1 mt-2">
-                                            Send view to one</button>
-                                        <button class="btn btn-primary p-2 mr-1 mt-2">
-                                            Send view to all</button>
+                                        <button class="btn btn-primary p-2 mr-1 mt-2"
+                                            @click="send(selectedGroup)">
+                                                Send view to one</button>
+                                        <button class="btn btn-primary p-2 mr-1 mt-2"
+                                            @click="sendToAll()">
+                                                Send view to all</button>
                                     </div>
                                     <div class="checkbox mt-3">
                                         <label class="checkbox-container">
@@ -305,12 +308,14 @@ export default {
             alert: undefined,
             constructions: undefined,
             selectedConstruction: [],
+            selectedGroup: [],
             addMode: false,
             constructionName: undefined,
             constructionXML: undefined,
             GI: undefined,
             classname: undefined,
             code: undefined,
+            selectedClassCode: undefined,
             groupsInClass: undefined,
         };
     },
@@ -334,6 +339,10 @@ export default {
         ...mapGetters('classes', {
             findClassesInStore: 'find',
             getClass: 'get',
+        }),
+
+        ...mapGetters('workshops', {
+            getWorkshop: 'get',
         }),
 
         classes() {
@@ -363,7 +372,14 @@ export default {
             patch: 'patch',
         }),
 
+        ...mapActions('workshops', {
+            getWorkshopToStore: 'get',
+            createWorkshop: 'create',
+            updateWorkshop: 'update',
+        }),
+
         async selectGroupsInClass(code) {
+            this.selectedClassCode = code;
             this.groupsInClass = await this.findGroups({ query: { class: code } });
         },
 
@@ -417,6 +433,61 @@ export default {
         resetView() {
             this.GI.setXML(freshGeogebraState);
             this.GI.registerGlobalListeners();
+        },
+
+        async send(groups) {
+            const xml = this.GI.getXML();
+            await this.findGroupsInStore({
+                query: {
+                    name: groups,
+                    class: this.selectedClassCode,
+                },
+            });
+            const groupsObjects = await this.findGroups({
+                query: {
+                    name: groups,
+                    class: this.selectedClassCode,
+                },
+            });
+            groupsObjects.forEach((g) => { this.createOrUpdateWorkshopWithXML(g._id, xml); });
+        },
+
+        async sendToAll() {
+            const xml = this.GI.getXML();
+            await this.findGroupsInStore({ query: { class: this.selectedClassCode } });
+            const groupsObjects = await this.findGroups({
+                query: {
+                    class: this.selectedClassCode,
+                },
+            });
+            groupsObjects.forEach((g) => { this.createOrUpdateWorkshopWithXML(g._id, xml); });
+        },
+
+        async createOrUpdateWorkshopWithXML(groupId, xml) {
+            let w;
+            try {
+                await this.getWorkshopToStore(groupId);
+                w = await this.getWorkshop(groupId);
+            } catch (error) {
+                if (error.code !== 404) {
+                    this.alert = {
+                        type: 'danger',
+                        message: `Error @ get workshop: ${error.message}`,
+                    };
+                }
+            }
+            try {
+                if (w) {
+                    await this.updateWorkshop([groupId, { xml }]);
+                } else {
+                    await this.createWorkshop({ id: groupId, xml });
+                }
+            } catch (error) {
+                this.alert = {
+                    type: 'danger',
+                    message: `Error @ update/create workshop: ${error.message}`,
+                };
+            }
         },
     },
 

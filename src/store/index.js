@@ -21,6 +21,9 @@ export default new Vuex.Store({
         service('classes'),
         service('groups'),
         service('constructions'),
+        service('workshops', {
+            idField: 'id',
+        }),
 
         auth({ userService: 'users' }),
     ],
