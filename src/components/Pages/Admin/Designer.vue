@@ -12,20 +12,10 @@
                     <h5>Designer</h5>
                 </div>
                 <div class="ibox-content table-responsive ibox-style-extender">
-                    <div v-if="alert"
-                        class="alert alert-dismissible fade show"
-                        :class="'alert-' + alert.type"
-                        role="alert">
-                        {{ alert.message }}
-                        <button v-if="alert.type !== 'info'"
-                            type="button"
-                            class="close"
-                            data-dismiss="alert"
-                            aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
                     <div class="row" v-if="!addMode">
+                        <div class="col-12">
+                            <alert :alert="alert" />
+                        </div>
                         <div class="col-6">
                             <div class="col-10">
                                 <h2>Constructions</h2>
@@ -125,6 +115,7 @@
                         </div>
                     </div>
                     <form v-else @submit.prevent="addConstruction()">
+                        <alert :alert="alert_add" />
                         <h3>Add Constructions</h3>
                         <div class="form-group">
                             <input
@@ -299,6 +290,7 @@
 import { mapGetters, mapActions } from 'vuex';
 
 import ToastrMixin from '@/mixins/ToastrMixin.vue';
+import AlertMixin from '@/mixins/AlertMixin.vue';
 import GeogebraInterface from '../../Geogebra/GeogebraInterface';
 import freshGeogebraState from '../../../helpers/fresh_geogebra_state';
 
@@ -308,6 +300,7 @@ export default {
     data() {
         return {
             alert: undefined,
+            alert_add: undefined,
             constructions: undefined,
             selectedConstruction: [],
             addMode: false,
@@ -320,7 +313,7 @@ export default {
         };
     },
 
-    mixins: [ToastrMixin],
+    mixins: [AlertMixin, ToastrMixin],
 
     computed: {
         ...mapGetters('users', {
@@ -379,17 +372,26 @@ export default {
         },
 
         async useConstruction() {
-            await this.get(this.selectedConstruction).then((res) => {
-                this.GI.setXML(res.xml);
-            });
+            try {
+                await this.get(this.selectedConstruction).then((res) => {
+                    this.GI.setXML(res.xml);
+                });
+            } catch (error) {
+                this.alert = {
+                    type: 'danger',
+                    message: 'Please select construction',
+                };
+            }
         },
 
         dismissAlert() {
             this.alert = undefined;
+            this.alert_add = undefined;
         },
 
         async deleteConstruction() {
             this.dismissAlert();
+
             try {
                 await this.removeConstruction(this.selectedConstruction);
                 this.selectedConstruction.forEach((construction) => {
@@ -398,7 +400,7 @@ export default {
                     );
                 });
                 this.alert = {
-                    type: 'sucess',
+                    type: 'success',
                     message: 'Construction Deleted',
                 };
             } catch (error) {
@@ -410,6 +412,8 @@ export default {
         },
 
         async addConstruction() {
+            this.dismissAlert();
+
             try {
                 await this.createConstruction({
                     name: this.constructionName,
@@ -417,8 +421,12 @@ export default {
                 });
                 this.addMode = false;
                 this.teacher.constructions = [...this.teacher.constructions, this.constructionName];
-            } catch (error) {
                 this.alert = {
+                    type: 'success',
+                    message: 'Construction saved',
+                };
+            } catch (error) {
+                this.alert_add = {
                     type: 'danger',
                     message: error.message,
                 };
