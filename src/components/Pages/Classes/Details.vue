@@ -103,19 +103,10 @@ export default {
             findGroupsInStore: 'find',
         }),
 
-        ...mapGetters('classes', {
-            getClassInStore: 'get',
-        }),
-
         groups() {
             return this.findGroupsInStore({
-                query: { class: this.id },
+                query: { class: this.code },
             });
-        },
-
-        code() {
-            const res = this.getClassInStore(this.id);
-            return res ? res.code : undefined;
         },
     },
 
@@ -125,10 +116,6 @@ export default {
             create: 'create',
             remove: 'remove',
             patch: 'patch',
-        }),
-
-        ...mapActions('classes', {
-            getClass: 'get',
         }),
 
         editGroup(group) {
@@ -144,7 +131,7 @@ export default {
                 if (!this.currentlyEdited) {
                     await this.create({
                         name: groupName,
-                        class: this.id,
+                        class: this.code,
                     });
                 } else {
                     await this.patch([
@@ -185,11 +172,10 @@ export default {
 
     created() {
         this.findGroups();
-        this.getClass(this.id);
     },
 
     props: {
-        id: {
+        code: {
             default: '',
             type: String,
         },

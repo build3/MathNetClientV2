@@ -72,7 +72,7 @@ export default {
 
         groups() {
             return this.findGroupsInStore({
-                query: { class: this.id },
+                query: { class: this.code },
             });
         },
     },
@@ -88,8 +88,8 @@ export default {
     },
 
     props: {
-        /** The id of the class we're currently in. */
-        id: {
+        /** The code of the class we're currently in. */
+        code: {
             default: '',
             type: String,
         },
