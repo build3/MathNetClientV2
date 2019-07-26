@@ -16,9 +16,10 @@ export default new Router({
             component: Pages.Users.Home,
             children: [
                 {
-                    path: 'register',
+                    path: 'register/:permissions',
                     name: 'Register',
                     component: Pages.Users.Register,
+                    props: true,
                 },
                 {
                     path: 'login',
