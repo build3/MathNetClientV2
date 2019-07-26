@@ -39,6 +39,9 @@ export default new Router({
             path: '/classes',
             name: 'ClassesHome',
             component: Pages.Classes.Home,
+            redirect: {
+                name: 'ClassList',
+            },
             children: [
                 {
                     path: 'list',
