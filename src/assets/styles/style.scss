@@ -1,3 +1,7 @@
+.nav.navbar-right > li > a:hover {
+    color: #6b6d6e;
+}
+
 .student-main {
     height: 100vh;
 }
@@ -13,12 +17,13 @@
 .leave-option {
     position: absolute;
     right: 1em;
+    bottom: 1em;
 }
 
 .slidecontainer {
     width: 100%;
   }
-  
+
 .slider {
     -webkit-appearance: none;
     width: 80%;
@@ -61,7 +66,23 @@ ol.breadcrumb {
     padding-right: 0;
 }
 
-.geogebra-applet { 
+.ping-section {
+    display: inline-flex;
+
+    p:first-child {
+        padding: 14px 4px 14px 25px;
+    }
+
+    p {
+        font-weight: 600;
+        margin-top: 1em;
+        margin-bottom: .5em;
+        padding: 14px 4px 14px 4px;
+        color: #999c9e;
+    }
+}
+
+.geogebra-applet {
     margin-left: .9em;
 }
 
@@ -71,7 +92,7 @@ ol.breadcrumb {
 
 table {
     td {
-        vertical-align: middle;
+        vertical-align: middle !important;
     }
 }
 
@@ -140,4 +161,12 @@ table {
 .axis-label {
     margin-right: 12em;
     margin-bottom: .5em !important;
+}
+
+.student-table {
+    margin-bottom: 0rem !important;
+}
+
+.btn-leave {
+    margin-left: -.3em;
 }

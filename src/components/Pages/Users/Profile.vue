@@ -11,10 +11,18 @@
 
                 <form v-if="editMode"
                     @submit.prevent="onSubmit(
+                        oldPassword,
                         newPassword,
                         confirmNewPassword
                     )">
                     <h3>Change Password</h3>
+                    <div class="form-group">
+                        <input class="form-control"
+                            type="password"
+                            v-model="oldPassword"
+                            placeholder="Old Password"
+                            required>
+                    </div>
                     <div class="form-group">
                         <input class="form-control"
                             type="password"
@@ -33,7 +41,7 @@
                         Change
                     </button>
                     <button class="btn btn-secondary"
-                        @click.prevent="editMode = false">
+                        @click.prevent="backSubmit">
                         Cancel
                     </button>
                 </form>
@@ -57,9 +65,10 @@ import AlertMixin from '@/mixins/AlertMixin.vue';
 export default {
     data() {
         return {
+            oldPassword: undefined,
             newPassword: undefined,
             confirmNewPassword: undefined,
-            editMode: false,
+            editMode: true,
         };
     },
 
@@ -72,8 +81,9 @@ export default {
     },
 
     methods: {
-        async onSubmit(newPassword, confirmNewPassword) {
+        async onSubmit(oldPassword, newPassword, confirmNewPassword) {
             this.dismissAlert();
+
             if (newPassword !== confirmNewPassword) {
                 this.alert = {
                     type: 'danger',
@@ -85,23 +95,42 @@ export default {
                         type: 'info',
                         message: 'Changing...',
                     };
+
                     await this.patch([
                         this.user.username,
                         {
+                            oldPassword,
                             password: newPassword,
                         },
                     ]);
+
                     this.alert = {
                         type: 'success',
                         message: 'Password successfully changed',
                     };
-                    this.editMode = false;
+
+                    // this.editMode = false;
+                    // The next three lines should be deleted, and the above
+                    // line uncommented, once profile consists of anyting more
+                    // than a password change form.
+                    this.oldPassword = undefined;
+                    this.newPassword = undefined;
+                    this.confirmNewPassword = undefined;
                 } catch (error) {
                     this.alert = {
                         type: 'danger',
                         message: error.message,
                     };
                 }
+            }
+        },
+
+        async backSubmit() {
+            this.editMode = false;
+            if (this.user.permissions.indexOf('admin') > -1) {
+                this.$router.push({ name: 'ClassList' });
+            } else {
+                this.$router.push({ name: 'StudentClass' });
             }
         },
 
@@ -113,6 +142,7 @@ export default {
     watch: {
         editMode(newValue) {
             if (!newValue) {
+                this.oldPassword = undefined;
                 this.newPassword = undefined;
                 this.confirmNewPassword = undefined;
             }

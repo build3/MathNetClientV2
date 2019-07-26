@@ -2,6 +2,9 @@
     <div class="row border-bottom">
         <nav class="navbar navbar-static-top bg-white">
             <div class="navbar-header">
+                <div class="ping-section">
+                    <p>Ping:</p><p v-if="!ping">waiting</p><p>{{ ping }}</p>
+                </div>
             </div>
             <ul class="nav navbar-top-links navbar-right">
                 <li v-if="!isLoggedIn">
@@ -12,6 +15,11 @@
                 <li v-if="!isLoggedIn">
                     <router-link :to="{name: 'Register'}">
                         Register
+                    </router-link>
+                </li>
+                <li v-if="isStudent">
+                    <router-link :to="{name: 'StudentClass'}">
+                        Class List
                     </router-link>
                 </li>
                 <li v-if="isLoggedIn">
@@ -34,13 +42,30 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 
+import feathersClient from '../../feathers-client';
+
 export default {
     name: 'PageHeader',
 
+    data() {
+        return {
+            ping: '',
+            pingTime: '',
+        };
+    },
+
     computed: {
         ...mapGetters('users', {
-            isLoggedIn: 'current',
+            user: 'current',
         }),
+
+        isLoggedIn() {
+            return this.user !== null;
+        },
+
+        isStudent() {
+            return this.user && this.user.permissions.includes('student');
+        },
     },
 
     methods: {
@@ -58,6 +83,20 @@ export default {
                 this.clearCurrent();
             });
         },
+
+        checkPing() {
+            setInterval(() => {
+                this.pingTime = Date.now();
+                feathersClient.io.emit('ping-rate');
+            }, 2000);
+
+            feathersClient.io.on('pong-rate', () => {
+                this.ping = Date.now() - this.pingTime;
+            });
+        },
+    },
+    created() {
+        this.checkPing();
     },
 };
 </script>

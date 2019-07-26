@@ -89,6 +89,9 @@ export default new Router({
             meta: {
                 permissions: 'admin',
             },
+            redirect: {
+                name: 'ClassList',
+            },
             children: [
                 {
                     path: 'list',

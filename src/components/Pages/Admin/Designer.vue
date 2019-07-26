@@ -85,7 +85,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-6">
+                        <div class="offset-1 col-5">
                             <div class="col-10 class-table">
                                 <h2>Select class</h2>
                                 <table class="table">
@@ -100,7 +100,7 @@
                                     <tr v-if="!classes.total > 0">
                                         <td></td>
                                         <td>
-                                            No class.
+                                            No class
                                         </td>
                                         <td></td>
                                     </tr>
@@ -139,13 +139,14 @@
                         </button>
                     </form>
                     <div class="row mt-4">
-                        <div class="col-10 geogebra-applet">
+                        <div class="col-10">
                             <h2 class="mb-3">Geogebra applet</h2>
                             <button class="btn btn-warning reset-btn p-2 mb-3" @click="resetView">
                                 Reset view
                             </button>
-                            <div id="geogebra_designer">
-                        </div>
+                            <div class="geogebra_designer">
+                                <div id="geogebra_designer"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -416,6 +417,7 @@ export default {
 
         resetView() {
             this.GI.setXML(freshGeogebraState);
+            this.GI.registerGlobalListeners();
         },
     },
 

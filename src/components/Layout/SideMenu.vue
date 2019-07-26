@@ -1,5 +1,5 @@
 <template>
-    <nav class="navbar-static-side">
+    <nav class="navbar-default navbar-static-side">
         <ul class="nav metismenu" id="side-menu">
             <li class="nav-header">
                 <div class="dropdown profile-element" v-if="user">
@@ -10,17 +10,27 @@
                     </a>
                 </div>
             </li>
-            <li v-if="checkPermissionToSideMenu()">
-                <router-link :to="{name: 'ClassList'}">
-                    Classes
-                </router-link>
-                <router-link :to="{name: 'Designer'}">
-                    Designer
-                </router-link>
-                <router-link :to="{name: 'View'}">
-                    View
-                </router-link>
-            </li>
+            <router-link
+                v-if="user"
+                :to="/classes/"
+                tag="li"
+                active-class="active">
+                <a>Classes</a>
+            </router-link>
+            <router-link
+                v-if="user"
+                :to="{name: 'Designer'}"
+                tag="li"
+                active-class="active">
+                <a>Designer</a>
+            </router-link>
+            <router-link
+                v-if="user"
+                :to="{name: 'View'}"
+                tag="li"
+                active-class="active">
+                <a>View</a>
+            </router-link>
         </ul>
     </nav>
 </template>
@@ -35,15 +45,6 @@ export default {
         ...mapGetters('users', {
             user: 'current',
         }),
-    },
-    methods: {
-        checkPermissionToSideMenu() {
-            if (this.user) {
-                return true;
-            }
-
-            return false;
-        },
     },
 };
 </script>

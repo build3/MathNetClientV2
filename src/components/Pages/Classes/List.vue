@@ -1,7 +1,7 @@
 <template>
 <div class="view">
     <div class="row">
-        <div class="offset-2 col-8">
+        <div class="offset-2 mb-2 col-8">
             <h1>Classes</h1>
         </div>
         <div class="ibox border-bottom offset-2 col-8">
@@ -13,14 +13,12 @@
                         <tr>
                             <th>Name</th>
                             <th>Code</th>
-                            <th></th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-if="!classes.total > 0">
-                            <td></td>
-                            <td>No class.</td>
-                            <td></td>
+                            <td colspan="3" class="text-center">No class</td>
                         </tr>
                         <tr v-for="cl in classes.data" :key="cl.code">
                             <td>{{ cl.name }}</td>
@@ -34,6 +32,10 @@
                                     class="btn btn-sm btn-primary mr-2">
                                     Details
                                 </router-link>
+                                <button class="btn btn-sm btn-primary mr-2"
+                                    @click="editClass(cl)">
+                                    Edit Class
+                                </button>
                                 <button class="btn btn-sm btn-danger"
                                     @click="deleteClass(cl.code)">
                                     Delete Class
@@ -45,7 +47,8 @@
 
                 <form v-else
                     @submit.prevent="onSubmit(classname, code)">
-                    <h3>Add Class</h3>
+                    <h3 v-if="!currentlyEdited">Add Class</h3>
+                    <h3 v-else>Edit Class</h3>
 
                     <div class="form-group">
                         <input class="form-control"
@@ -54,7 +57,8 @@
                             placeholder="Class Name"
                             required>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group"
+                        v-if="!currentlyEdited">
                         <input class="form-control"
                             type="text"
                             v-model="code"
@@ -95,6 +99,7 @@ export default {
             classname: undefined,
             code: undefined,
             editMode: false,
+            currentlyEdited: undefined,
         };
     },
 
@@ -115,16 +120,33 @@ export default {
             findClasses: 'find',
             create: 'create',
             remove: 'remove',
+            patch: 'patch',
         }),
+
+        editClass(cl) {
+            this.classname = cl.name;
+            this.code = cl.code;
+            this.currentlyEdited = cl.code;
+            this.editMode = true;
+        },
 
         async onSubmit(classname, code) {
             this.dismissAlert();
 
             try {
-                await this.create({
-                    name: classname,
-                    code,
-                });
+                if (!this.currentlyEdited) {
+                    await this.create({
+                        name: classname,
+                        code,
+                    });
+                } else {
+                    await this.patch([
+                        this.currentlyEdited,
+                        {
+                            name: classname,
+                        },
+                    ]);
+                }
 
                 this.editMode = false;
             } catch (error) {
@@ -163,6 +185,7 @@ export default {
             if (!newValue) {
                 this.classname = undefined;
                 this.code = undefined;
+                this.currentlyEdited = undefined;
             }
         },
     },
