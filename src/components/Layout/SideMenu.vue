@@ -12,7 +12,7 @@
             </li>
             <router-link
                 v-if="user"
-                :to="/classes/"
+                to="/classes"
                 tag="li"
                 active-class="active">
                 <a>Classes</a>
