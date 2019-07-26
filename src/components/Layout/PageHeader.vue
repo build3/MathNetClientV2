@@ -60,7 +60,7 @@ export default {
         }),
 
         isLoggedIn() {
-            return this.user !== undefined;
+            return this.user !== null;
         },
 
         isStudent() {
@@ -83,6 +83,7 @@ export default {
                 this.clearCurrent();
             });
         },
+
         checkPing() {
             setInterval(() => {
                 this.pingTime = Date.now();

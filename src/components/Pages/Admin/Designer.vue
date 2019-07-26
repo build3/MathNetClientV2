@@ -139,13 +139,14 @@
                         </button>
                     </form>
                     <div class="row mt-4">
-                        <div class="col-10 geogebra-applet">
+                        <div class="col-10">
                             <h2 class="mb-3">Geogebra applet</h2>
                             <button class="btn btn-warning reset-btn p-2 mb-3" @click="resetView">
                                 Reset view
                             </button>
-                            <div id="geogebra_designer">
-                        </div>
+                            <div class="geogebra_designer">
+                                <div id="geogebra_designer"></div>
+                            </div>
                         </div>
                     </div>
                 </div>

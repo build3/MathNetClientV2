@@ -1,7 +1,7 @@
 <template>
 <div class="view">
     <div class="row">
-        <div class="offset-2 col-8">
+        <div class="offset-2 mb-2 col-8">
             <h1>Classes</h1>
         </div>
         <div class="ibox border-bottom offset-2 col-8">
@@ -18,9 +18,7 @@
                     </thead>
                     <tbody>
                         <tr v-if="!classes.total > 0">
-                            <td></td>
-                            <td>No class</td>
-                            <td></td>
+                            <td colspan="3" class="text-center">No class</td>
                         </tr>
                         <tr v-for="cl in classes.data" :key="cl.code">
                             <td>{{ cl.name }}</td>
