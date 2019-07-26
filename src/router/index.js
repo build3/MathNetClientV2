@@ -7,31 +7,30 @@ import store from '../store';
 
 Vue.use(Router);
 
-
-function requireAuthAdmin(to, from, next) {
-    if (store.state.auth.user !== null) {
-        const { permissions } = store.state.auth.user;
-        if (permissions.includes('admin')) {
-            next();
-        } else {
-            next('/404');
-        }
-    } else {
+function proceed(permission, next) {
+    if (store.state.auth.user.permissions.includes(permission)) {
         next();
+    } else {
+        next('/404');
     }
 }
 
-function requireAuthStudent(to, from, next) {
-    if (store.state.auth.user !== null) {
-        const { permissions } = store.state.auth.user;
-        if (permissions.includes('student')) {
-            next();
-        } else {
-            next('/404');
-        }
+function permissionCheck(permission, next) {
+    if (store.state.auth.user) {
+        proceed(permission, next);
     } else {
-        next();
+        store.watch(store.getters['auth/isAuthenticatePending'], () => {
+            proceed(permission, next);
+        });
     }
+}
+
+function requireAuthAdmin(to, from, next) {
+    permissionCheck('admin', next);
+}
+
+function requireAuthStudent(to, from, next) {
+    permissionCheck('student', next);
 }
 
 export default new Router({
