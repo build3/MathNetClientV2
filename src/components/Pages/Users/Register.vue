@@ -78,7 +78,12 @@ export default {
                 await this.authenticate({
                     strategy: 'local', username, password,
                 });
-                this.$router.push({ name: 'ClassList' });
+
+                if (this.permissions === 'student') {
+                    this.$router.push({ name: 'StudentClass' });
+                } else {
+                    this.$router.push({ name: 'ClassList' });
+                }
             } catch (error) {
                 this.alert = {
                     type: 'danger',
