@@ -22,6 +22,13 @@ export default new Vuex.Store({
         service('groups'),
         service('constructions'),
 
-        auth({ userService: 'users' }),
+        auth({
+            userService: 'users',
+            getters: {
+                isAuthenticatePending(state) {
+                    return () => state.isAuthenticatePending;
+                },
+            },
+        }),
     ],
 });

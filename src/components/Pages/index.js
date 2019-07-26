@@ -14,12 +14,14 @@ import StudentHome from './Student/Index.vue';
 import StudentClass from './Student/StudentClass.vue';
 import StudentGroup from './Student/StudentGroup.vue';
 import StudentGeogebra from './Student/StudentGeogebra.vue';
+import NotFound from './Admin/NotFound.vue';
 
 export default {
 
     Admin: {
         Designer,
         View,
+        NotFound,
     },
 
     Users: {
