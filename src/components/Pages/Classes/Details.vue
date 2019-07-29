@@ -183,6 +183,7 @@ export default {
         editMode(newValue) {
             if (!newValue) {
                 this.groupName = undefined;
+                this.currentlyEdited = undefined;
             }
         },
     },
