@@ -25,6 +25,13 @@ export default new Vuex.Store({
             idField: 'id',
         }),
 
-        auth({ userService: 'users' }),
+        auth({
+            userService: 'users',
+            getters: {
+                isAuthenticatePending(state) {
+                    return () => state.isAuthenticatePending;
+                },
+            },
+        }),
     ],
 });

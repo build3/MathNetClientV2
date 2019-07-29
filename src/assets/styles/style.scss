@@ -17,6 +17,7 @@
 .leave-option {
     position: absolute;
     right: 1em;
+    bottom: 1em;
 }
 
 .slidecontainer {
@@ -95,6 +96,12 @@ table {
     }
 }
 
+table.designer-class-table tr {
+    td:first-child, td:nth-child(2) {
+        line-height: 29px;
+    }
+}
+
 .class-table {
     overflow: auto;
     height: 36em;
@@ -160,4 +167,12 @@ table {
 .axis-label {
     margin-right: 12em;
     margin-bottom: .5em !important;
+}
+
+.student-table {
+    margin-bottom: 0rem !important;
+}
+
+.btn-leave {
+    margin-left: -.3em;
 }

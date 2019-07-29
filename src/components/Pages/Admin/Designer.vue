@@ -91,7 +91,7 @@
                         <div class="offset-1 col-5">
                             <div class="col-10 class-table">
                                 <h2>Select class</h2>
-                                <table class="table">
+                                <table class="table designer-class-table">
                                     <thead>
                                         <tr>
                                             <th>Name</th>
@@ -111,7 +111,9 @@
                                             <td>{{ cl.name }}</td>
                                             <td>{{ cl.code }}</td>
                                             <td class="text-center">
-                                                <button @click="selectGroupsInClass(cl.code)"
+                                                <button
+                                                    v-if="code !== cl.code"
+                                                    @click="selectGroupsInClass(cl.code)"
                                                     class="btn btn-sm btn-primary mr-2">
                                                     Select
                                                 </button>
@@ -142,13 +144,14 @@
                         </button>
                     </form>
                     <div class="row mt-4">
-                        <div class="col-10 geogebra-applet">
+                        <div class="col-10">
                             <h2 class="mb-3">Geogebra applet</h2>
                             <button class="btn btn-warning reset-btn p-2 mb-3" @click="resetView">
                                 Reset view
                             </button>
-                            <div id="geogebra_designer">
-                        </div>
+                            <div class="geogebra_designer">
+                                <div id="geogebra_designer"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -297,6 +300,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
+
+import ToastrMixin from '@/mixins/ToastrMixin.vue';
 import GeogebraInterface from '../../Geogebra/GeogebraInterface';
 import freshGeogebraState from '../../../helpers/fresh_geogebra_state';
 
@@ -315,10 +320,12 @@ export default {
             GI: undefined,
             classname: undefined,
             code: undefined,
-            selectedClassCode: undefined,
             groupsInClass: undefined,
         };
     },
+
+    mixins: [ToastrMixin],
+
     computed: {
         ...mapGetters('users', {
             teacher: 'current',
@@ -379,8 +386,15 @@ export default {
         }),
 
         async selectGroupsInClass(code) {
-            this.selectedClassCode = code;
+            this.clearToast();
+
+            this.code = code;
+
             this.groupsInClass = await this.findGroups({ query: { class: code } });
+
+            if (!this.groupsInClass.length) {
+                this.showToast('Selected class nas no groups', 'warning');
+            }
         },
 
         async useConstruction() {
@@ -440,13 +454,13 @@ export default {
             await this.findGroupsInStore({
                 query: {
                     name: groups,
-                    class: this.selectedClassCode,
+                    class: this.code,
                 },
             });
             const groupsObjects = await this.findGroups({
                 query: {
                     name: groups,
-                    class: this.selectedClassCode,
+                    class: this.code,
                 },
             });
             groupsObjects.forEach((g) => { this.createOrUpdateWorkshopWithXML(g._id, xml); });
@@ -454,10 +468,10 @@ export default {
 
         async sendToAll() {
             const xml = this.GI.getXML();
-            await this.findGroupsInStore({ query: { class: this.selectedClassCode } });
+            await this.findGroupsInStore({ query: { class: this.code } });
             const groupsObjects = await this.findGroups({
                 query: {
-                    class: this.selectedClassCode,
+                    class: this.code,
                 },
             });
             groupsObjects.forEach((g) => { this.createOrUpdateWorkshopWithXML(g._id, xml); });
