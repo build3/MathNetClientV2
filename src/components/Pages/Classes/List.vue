@@ -62,8 +62,7 @@
                         <input class="form-control"
                             type="text"
                             v-model="code"
-                            placeholder="Class Code"
-                            required>
+                            placeholder="Class Code">
                     </div>
                     <button type="submit" class="btn btn-primary">Save</button>
                     <button class="btn btn-secondary"
