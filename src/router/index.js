@@ -15,13 +15,34 @@ function proceed(permission, next) {
     }
 }
 
-function permissionCheck(permission, next) {
+async function permissionCheck(permission, next) {
+    /* Normal case - we're logged in, we just need to check permissions */
     if (store.state.auth.user) {
         proceed(permission, next);
     } else {
+        /* We're not logged in, so we're either just after a refresh
+         * or not logged in at all. So we set up a watcher first, then
+         * ensure it'll have something to watch by calling
+         * auth.authenticate */
         store.watch(store.getters['auth/isAuthenticatePending'], () => {
-            proceed(permission, next);
+            if (!store.getters['auth/isAuthenticatePending']()) {
+                /* We logged in with token */
+                if (store.state.auth.user) {
+                    proceed(permission, next);
+                } else {
+                    /* There's no token, we're actually logged out. */
+                    next('Login');
+                }
+            }
         });
+
+        try {
+            await store.dispatch('auth/authenticate');
+        } catch (error) {
+            if (error.name !== 'NotAuthenticated') {
+                console.log(error);
+            }
+        }
     }
 }
 
