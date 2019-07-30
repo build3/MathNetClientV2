@@ -107,6 +107,11 @@ table.designer-class-table tr {
     height: 36em;
 }
 
+.class-view-table {
+    overflow: auto;
+    height: 20em;
+}
+
 .checkbox-container {
     display: block;
     position: relative;
