@@ -90,12 +90,7 @@ class GeogebraAdminView {
 
     ggbOnInit() {
         this.applet = this.appletContainer.getAppletObject();
-        // this.registerGlobalListeners();
         this.isInitialized = true;
-        /* $(window).resize(() => {
-            this.applet.setHeight($(window).height() / 1.3);
-        }); */
-        // if (this.listener) this.listener.ggbOnInit(applet);
         this.onAppletReady();
     }
 
@@ -120,25 +115,6 @@ class GeogebraAdminView {
     }
 
     async onAppletReady() {
-        api.service('elements').on('created', (element) => {
-            console.log('Element created', element);
-            this.setElement(element);
-        });
-
-        api.service('elements').on('patched', (element) => {
-            console.log('Element patched', element);
-            this.updateElementXML(element.name, element.xml);
-        });
-
-        api.service('workshops').on('xml-changed', (workshop) => {
-            console.log('Workshop xml changed', workshop);
-            this.setXML(workshop.xml);
-        });
-
-        api.service('workshops').on('created', (workshop) => {
-            console.log('Workshop created', workshop);
-        });
-
         // Load current state of the workshops.
 
         // eslint-disable-next-line prefer-const
@@ -146,9 +122,7 @@ class GeogebraAdminView {
             query: { id: this.workshopId },
         });
 
-        console.log('Loaded workshop: ', workshop);
-        console.log('Rest is: ', rest);
-        console.log('API', api);
+        console.log('Workshop, rest', workshop, rest);
 
         if (workshop) {
             // Set initial construction based on the `xml` field.
@@ -176,7 +150,6 @@ class GeogebraAdminView {
     setConstruction(xml) {
         this.ignoreUpdates = true;
         this.evalXML(xml);
-        // this.evalCommand('UpdateConstruction()');
         this.checkLocks();
         this.ignoreUpdates = false;
     }
@@ -185,8 +158,6 @@ class GeogebraAdminView {
      * @param {Object} element
      */
     setElement(element) {
-        console.log(element);
-
         this.ignoreUpdates = true;
 
         if (element.obj_cmd_str !== '') {
@@ -197,7 +168,6 @@ class GeogebraAdminView {
 
         this.evalXML(element.xml);
         this.checkLock(element.name);
-        // this.evalCommand('UpdateConstruction()');
 
         this.ignoreUpdates = false;
     }
@@ -206,8 +176,6 @@ class GeogebraAdminView {
      * @param {Array[Object]} elements
      */
     setElements(elements) {
-        console.log(elements);
-
         this.ignoreUpdates = true;
 
         elements.forEach((el) => {
@@ -230,7 +198,6 @@ class GeogebraAdminView {
             this.checkLock(el.name);
         });
 
-        // this.evalCommand('UpdateConstruction()');
         this.ignoreUpdates = false;
     }
 
@@ -239,41 +206,13 @@ class GeogebraAdminView {
      * @param {String} xml
      */
     updateElementXML(label, xml) {
-        console.log('Updating element', label);
-
         this.ignoreUpdates = true;
         this.evalXML(xml);
-        // this.applet.evalCommand("UpdateConstruction()");
         this.ignoreUpdates = false;
     }
 
     checkLock(label) {
-        console.log('checkLock', label);
-
-        const caption = this.applet.getCaption(label);
-        const username = undefined;
-        const objType = this.applet.getObjectType(label);
-        const uCaption = `${label}_{${username}}`;
-        const unassignedCaption = `${label}_{unassigned}`;
-
-        // User is the owner of the object.
-        if (caption === uCaption || caption === unassignedCaption) {
-            if (objType === Consts.NUMERIC || objType === Consts.TEXTFIELD) {
-                this.applet.setFixed(label, false,
-                    /* is selection allowed */
-                    true);
-            } else { this.applet.setFixed(label, false); }
-
-        // Someone else is the owner of the object.
-        } else if (uCaption !== caption) {
-            if (objType === Consts.NUMERIC || objType === Consts.TEXTFIELD) {
-                this.applet.setFixed(label, true,
-                    /* is selection allowed */
-                    false);
-            } else {
-                this.applet.setFixed(label, true);
-            }
-        }
+        this.applet.setFixed(label, true);
     }
 
     /**

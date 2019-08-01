@@ -79,7 +79,7 @@
                 <div class="row">
                     <div v-for="g in groupsInClass" :key="g._id" class="admin-view-applet-holder">
                         {{ g.name }}
-                        <div :id="'ggb_applet_' + g._id" class="geogebra-applet"></div>
+                        <div :id="g.domId" class="geogebra-applet"></div>
                     </div>
                 </div>
                 <div class="row">
@@ -100,19 +100,22 @@
 import { mapGetters, mapActions } from 'vuex';
 import feathersClient from '../../../feathers-client';
 import GeogebraViews from '../../Geogebra/GeogebraViews';
-// import ToastrMixin from '@/mixins/ToastrMixin.vue';
+import ToastrMixin from '@/mixins/ToastrMixin.vue';
+
 const api = feathersClient;
 
 export default {
-    name: 'View',
+    // name: 'View',
     data() {
         return {
             code: undefined,
             groupsInClass: undefined,
-            GV: undefined,
+            GeogebraViews: undefined,
         };
     },
-    // mixins: [ToastrMixin],
+
+    mixins: [ToastrMixin],
+
     computed: {
         ...mapGetters('classes', {
             findClassesInStore: 'find',
@@ -143,31 +146,35 @@ export default {
         }),
 
         async selectAllGroupsinClass(code) {
-            // this.clearToast();
+            this.clearToast();
             this.code = code;
             this.groupsInClass = await this.findGroups({ query: { class: code } });
-            console.log(this.groupsInClass);
+
             if (!this.groupsInClass.length) {
-                // this.showToast('Selected class nas no groups', 'warning');
+                this.showToast('Selected class nas no groups', 'warning');
+            } else {
+                this.groupsInClass.forEach((g, i) => {
+                    this.groupsInClass[i].domId = `ggb_applet_${g._id}`;
+                });
+            }
+
+            this.loadApplets();
+        },
+
+        async loadApplets() {
+            if (this.groupsInClass && this.groupsInClass.length) {
+                await api.service('users').patch(this.user.username, {
+                    workshops: this.groupsInClass.map(e => e._id),
+                });
+
+                this.GeogebraViews = new GeogebraViews(this.groupsInClass);
+                this.GeogebraViews.inject();
             }
         },
     },
     async created() {
         await this.findClasses();
     },
-    async updated() {
-        if (this.groupsInClass) {
-            if (this.groupsInClass.length > 0) {
-                console.log('This.user, this.groupsInClass', this.user, this.groupsInClass);
-                console.log('lista idków', this.groupsInClass.map(e => e._id));
-                const user = await api.service('users').patch(this.user.username, {
-                    workshops: this.groupsInClass.map(e => e._id),
-                });
-                console.log('Returned user', user);
-                this.GV = new GeogebraViews(this.groupsInClass);
-                this.GV.inject();
-            }
-        }
-    },
+
 };
 </script>
