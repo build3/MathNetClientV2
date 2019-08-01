@@ -1,7 +1,7 @@
 <template>
 <div class="view">
     <div class="row">
-        <div class="offset-2 col-8">
+        <div class="offset-2 mb-2 col-8">
             <h1>Classes</h1>
         </div>
         <div class="ibox border-bottom offset-2 col-8">
@@ -18,9 +18,7 @@
                     </thead>
                     <tbody>
                         <tr v-if="!classes.total > 0">
-                            <td></td>
-                            <td>No class</td>
-                            <td></td>
+                            <td colspan="3" class="text-center">No class</td>
                         </tr>
                         <tr v-for="cl in classes.data" :key="cl.code">
                             <td>{{ cl.name }}</td>
@@ -29,7 +27,7 @@
                                 <router-link
                                     :to="{
                                         name: 'ClassDetails',
-                                        params: { id: cl._id }
+                                        params: { code: cl.code }
                                     }"
                                     class="btn btn-sm btn-primary mr-2">
                                     Details
@@ -59,7 +57,8 @@
                             placeholder="Class Name"
                             required>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group"
+                        v-if="!currentlyEdited">
                         <input class="form-control"
                             type="text"
                             v-model="code"
@@ -127,7 +126,7 @@ export default {
         editClass(cl) {
             this.classname = cl.name;
             this.code = cl.code;
-            this.currentlyEdited = cl._id;
+            this.currentlyEdited = cl.code;
             this.editMode = true;
         },
 
@@ -145,7 +144,6 @@ export default {
                         this.currentlyEdited,
                         {
                             name: classname,
-                            code,
                         },
                     ]);
                 }

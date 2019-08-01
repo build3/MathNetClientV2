@@ -2,7 +2,7 @@
 <main class="login container">
     <div class="row">
         <div class="col-12 text-center">
-            <h1 class="font-100">Create an Account</h1>
+            <h1 class="font-100">{{ title }}</h1>
         </div>
     </div>
     <div class="row">
@@ -54,6 +54,13 @@ export default {
 
     mixins: [AlertMixin],
 
+    computed: {
+        title() {
+            const type = this.permissions === 'student' ? 'Student' : 'Teacher';
+            return `Create a ${type} Account`;
+        },
+    },
+
     methods: {
         async onSubmit(username, password) {
             this.dismissAlert();
@@ -65,13 +72,18 @@ export default {
                 await this.createUser({
                     username,
                     password,
-                    permissions: ['admin'],
+                    permissions: [this.permissions],
                 });
                 // Automatically log the user in after successful signup.
                 await this.authenticate({
                     strategy: 'local', username, password,
                 });
-                this.$router.push({ name: 'ClassList' });
+
+                if (this.permissions === 'student') {
+                    this.$router.push({ name: 'StudentClass' });
+                } else {
+                    this.$router.push({ name: 'ClassList' });
+                }
             } catch (error) {
                 this.alert = {
                     type: 'danger',
@@ -89,6 +101,13 @@ export default {
         ...mapActions('auth', [
             'authenticate',
         ]),
+    },
+
+    props: {
+        permissions: {
+            default: 'student',
+            type: String,
+        },
     },
 };
 </script>

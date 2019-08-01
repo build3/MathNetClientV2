@@ -37,6 +37,7 @@
     "node-sass": "^4.12.0",
     "sass-loader": "^7.1.0",
     "socket.io-client": "^2.2.0",
+    "toastr": "^2.1.4",
     "vue": "^2.6.10",
     "vue-router": "^3.0.7",
     "vuejs-logger": "1.5.3",

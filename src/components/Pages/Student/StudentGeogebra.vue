@@ -11,7 +11,7 @@
                             :to="{
                                 name: 'StudentGroup',
                                 params: {
-                                    id: group.class,
+                                    code: group.class,
                                 },
                             }"
                             class="btn btn-danger">
@@ -23,6 +23,7 @@
                     <div id="geogebra-view">
                         <!--Geogebra applet-->
                     </div>
+                    <!-- Temporarily disabled; do not remove -->
                     <!-- <div class="control-options">
                         <div class="col-8">
                             <button class="btn btn-info center-btn-up">Up(I)</button>

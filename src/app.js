@@ -13,7 +13,7 @@ Vue.component('side-menu', SideMenu);
 Vue.component('page-header', PageHeader);
 
 const isProduction = process.env.NODE_ENV === 'production';
- 
+
 const options = {
     isEnabled: true,
     logLevel : isProduction ? 'error' : 'debug',
@@ -23,7 +23,7 @@ const options = {
     separator: '-',
     showConsoleColors: true
 };
- 
+
 Vue.use(VueLogger, options);
 
 new Vue({
@@ -31,5 +31,3 @@ new Vue({
     store,
     render: h => h(App),
 }).$mount('#app');
-
-

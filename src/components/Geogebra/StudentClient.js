@@ -3,6 +3,8 @@
  * Its public API operates as an event emitter for [listener] argument.
  */
 
+const THROTTLE_PERIOD = 50; // (ms)
+
 // Initial state of the Geogebra applet encoded in Base64
 const initialState = require('../../helpers/ggbbase64');
 
@@ -13,7 +15,7 @@ const Consts = {
     // determining how objects' names are displayed in
     // the applet. Caption style means that objects are
     // named by their captions.
-    CAPTION_STYLE: 3,
+    CAPTION_STYLE: 3, // 3 is a magic value for Geogebra's API
 
     POINT:         'point',
     TEXTFIELD:     'textfield',
@@ -110,6 +112,13 @@ class StudentClient {
         this.log = this.params.log;
         this.params.listener = undefined;
         this.appletContainer = new GGBApplet(this.params);
+
+        // This flag is used to temporarirly turn-off Geogebra
+        // callback handlers when other updates are taking place.
+        // Its used primarly to ignore updates triggered by manual
+        // changes to the element (from the code).
+        // Typical usage is as follows: flip the flag, do something,
+        // flip the flag.
         this.ignoreUpdates = false;
     }
 
@@ -139,11 +148,11 @@ class StudentClient {
     ggbOnInit() {
         this.log.debug();
 
-        // Save reference to the aplet itself. This is the main line
+        // Save reference to the applet itself. This is the main line
         // of communication between Geogebra and the rest of the code.
         this.applet = this.appletContainer.getAppletObject();
 
-        // Geogebra uses global listners on `window` to nofity of its
+        // Geogebra uses global listeners on `window` to notify of its
         // internal events (such as when element is added/modified/deleted).
         this.registerGlobalListeners();
 
@@ -157,7 +166,7 @@ class StudentClient {
     }
 
     /**
-     * Geogebra uses global listners on `window` to nofity of its
+     * Geogebra uses global listeners on `window` to notify of its
      * internal events (such as when element is added/modified/deleted).
      * This methods sets and links those listeners with this object.
      *
@@ -168,22 +177,22 @@ class StudentClient {
         // Setup `window` methods which refer to this object.
         window[`addListener${this.appletId}`] = throttle(
             label => this.onAddElement(label),
-            50
+            THROTTLE_PERIOD
         );
 
         window[`updateListener${this.appletId}`] = throttle(
             label => this.onUpdateElement(label),
-            50
+            THROTTLE_PERIOD
         );
 
         window[`removeListener${this.appletId}`] = throttle(
             label => this.onRemoveElement(label),
-            50
+            THROTTLE_PERIOD
         );
 
         window[`renameListener${this.appletId}`] = throttle(
             (oldLabel, newLabel) => this.onRenameElement(oldLabel, newLabel),
-            50
+            THROTTLE_PERIOD
         );
 
         // Clean-up any state.
@@ -337,11 +346,17 @@ class StudentClient {
      * @param {String} label Geogebra element name
      * @param {Array[Number, Number, Number]} color RGB color
      */
-    setColor(label, color) {
-        const [red, green, blue] = color;
+    setColor(label, [red, green, blue]) {
         this.applet.setColor(label, red, green, blue);
     }
 
+    /**
+     * Checks and locks Geogebra element if necessary.
+     * Locked element cannot be moved from the UI. This ensures that
+     * students can move elements owned by them or claim unassigned ones.
+     *
+     * @param {String} label
+     */
     checkLock(label) {
         this.log.debug(label);
 

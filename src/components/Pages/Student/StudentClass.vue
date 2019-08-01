@@ -1,7 +1,7 @@
 <template>
     <div class="student-class">
         <div class="row">
-            <div class="offset-2 col-8">
+            <div class="offset-2 col-8 mb-2">
                 <h1>Student Class View</h1>
             </div>
             <div class="ibox border-bottom offset-2 col-8">
@@ -25,9 +25,7 @@
                         </thead>
                         <tbody>
                             <tr v-if="!classes.total > 0">
-                                <td></td>
-                                <td>No class</td>
-                                <td></td>
+                                <td colspan="3" class="text-center">No class</td>
                             </tr>
                             <tr v-for="cl in classes.data" :key="cl.code">
                                 <td>
@@ -41,7 +39,7 @@
                                 <td class="footable-visible">
                                     <router-link :to="{
                                             name: 'StudentGroup',
-                                            params: { id: cl._id }
+                                            params: { code: cl.code }
                                         }"
                                         class="btn btn-primary btn-xs">
                                         Join Class
