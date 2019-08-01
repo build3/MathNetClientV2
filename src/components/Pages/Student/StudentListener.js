@@ -1,0 +1,215 @@
+/**
+ * {StudentListener} is an adapter between Geogebra and server.
+ * It dispatches/responds to events from the server related to manipulation
+ * of Geogebra elements and workshops. It uses API provided by [StudentClient].
+ */
+
+import api from '../../../feathers-client';
+
+// Geogebra does not support
+// superscript. Therefore, we use
+// Unicode to display them.
+const numberToSuper = {
+    '0': '⁰',
+    '1': '¹',
+    '2': '²',
+    '3': '³',
+    '4': '⁴',
+    '5': '⁵',
+    '6': '⁶',
+    '7': '⁷',
+    '8': '⁸',
+    '9': '⁹'
+}
+
+const Consts = {
+    // Ownership indicators
+    UNASSIGNED: 'unassigned',
+};
+
+export default class StudentListener {
+    /**
+     * @param {Object} gbbClient Geogebra client object, see [StudentClient].
+     * @param {String} studentUsername
+     * @param {String} workshopId
+     *
+     * @param {Array[Number, Number, Number]} studentColor RGB color for
+     * Geogebra elements.
+     *
+     * @param {Object} log Logger, for documentation see:
+     * https://www.npmjs.com/package/vuejs-logger.
+     */
+    constructor(ggbClient, studentUsername, workshopId, studentColor, log) {
+        this.client = ggbClient;
+        this.studentUsername = studentUsername;
+        this.workshopId = workshopId;
+        this.initializeServerCallbacks();
+        this.studentColor = studentColor;
+        this.log = log;
+    }
+
+    /**
+     * @param {String} workshopId ID of the workshop, corresponds in a 1:1
+     * fashion with some group.
+     * @param {String} ggbLabel Label (name) of the Geogebra element (object).
+     * @return {String}
+     */
+    getElementId(workshopId, ggbLabel) {
+        return `${workshopId}-${ggbLabel}`;
+    }
+
+    /**
+     * @param {String} label Geogebra element name.
+     * @param {String} owner Owner of the element.
+     */
+    getElementCaption(label, owner) {
+        // To differenciate between duplicate names (when cycling A-Z),
+        // a subscript number is added. For example, a sequence of As might
+        // look like: A, A_1, A_2, A_3 and so on.
+        const [name, sub] = label.split('_');
+        // Turn subscript numbering into Unicode for superscript.
+        const sup = (sub || '').split('').map(c => numberToSuper[c]).join('');
+
+        // Final caption has numbering in superscript and owner in subscript.
+        return `${name}${sup}_{${owner}}`;
+    }
+
+    isOwner(label, caption) {
+        return caption == this.getElementCaption(label, this.studentUsername);
+    }
+
+    /**
+     * Determines whether object is owned by the user or can be
+     * claimed by him.
+     */
+    isMovable(label, caption) {
+        return this.isOwner(label, caption) || this.isUnassigned(label, caption);
+    }
+
+    isUnassigned(label, caption) {
+        return caption == `${label}_{${Consts.UNASSIGNED}}`;
+    }
+
+    /**
+     * Binds server events to local callbacks; load workshop meta-data
+     * and elements and initializes applet.
+     */
+    initializeServerCallbacks() {
+        // [onAppletReady] is called by [StudentClient] when applet finished
+        // initializing.
+        this.onAppletReady = async () => {
+            api.service('elements').on('created', (element) => {
+                this.log.debug('Created: ', element.name);
+                this.client.setElement(element);
+            });
+
+            api.service('elements').on('patched', (element) => {
+                this.log.debug('Patched: ', element.name);
+                this.client.updateElementXML(element.name, element.xml);
+            });
+
+            api.service('elements').on('removed', (element) => {
+                this.log.debug('Removed: ', element.name);
+                this.client.deleteObject(element.name);
+            });
+
+            // Emitted when teacher sends construction to a workshop.
+            api.service('workshops').on('xml-changed', (workshop) => {
+                this.client.setXML(workshop.xml);
+            });
+
+            // Load current state of the workshops.
+
+            const [workshop, ...rest] = await api.service('workshops').find({
+                query: { id: this.workshopId }
+            });
+
+            this.log.debug('Loaded workshop: ', workshop);
+
+            if (workshop) {
+                // Set initial construction based on the `xml` field.
+                this.client.setConstruction(workshop.xml);
+
+                // Load any existing elements in the workshop.
+                const elements = await api.service('elements').find({
+                    query: { workshop: workshop.id }
+                }) || [];
+
+                this.log.debug('Loaded elements:', elements);
+
+                this.client.setElements(elements);
+
+            // Workshops was not created yet, create it.
+            } else {
+                // Create new workshop with the same id as the related group.
+                const workshop = await api.service('workshops').create({
+                    id: this.workshopId
+                });
+
+                this.log.debug('Created workshop: ', workshop);
+            }
+        }
+    }
+
+    /**
+     * @param {String} label Geogebra element name.
+     */
+    onUpdateElement(label) {
+        this.log.debug(label);
+
+        const id = this.getElementId(this.workshopId, label);
+
+        setTimeout(() => {
+            api.service('elements')
+                // Assume that element exists and update it.
+                .patch(id, { xml: this.client.getXML(label) })
+                .catch((error) => {
+                    // If element does not exists, create the element.
+                    // This covers the case where a student claims
+                    // unnassigned element. That is, the element was loaded
+                    // from construction's XML and exists in the applet but
+                    // was not persisted in the "elements" service.
+                    if (error.code === 404) {
+                        this.sendElement(label);
+                    }
+                });
+        }, 0)
+    }
+
+    /**
+     * Callback on element added to the applet.
+     */
+    onAddElement(label) {
+        this.log.debug(label);
+        const caption = this.getElementCaption(label, this.studentUsername);
+
+        // Adjust caption and color to differenciate between students.
+        this.client.setCaption(label, caption);
+        this.client.setColor(label, this.studentColor);
+
+        this.sendElement(label);
+    }
+
+    sendElement(label) {
+        const element = {
+            id:          this.getElementId(this.workshopId, label),
+            name:        label,
+            owner:       this.studentUsername,
+            workshop:    this.workshopId,
+            xml:         this.client.getXML(label),
+            obj_cmd_str: this.client.getCommandString(label, false)
+        };
+
+        this.log.debug(element);
+
+        api.service('elements').create(element);
+    }
+
+    onRemoveElement(label) {
+        this.log.debug(label);
+
+        api.service('elements').remove(
+            this.getElementId(this.workshopId, label)
+        );
+    }
+}

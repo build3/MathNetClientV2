@@ -1,0 +1,454 @@
+/**
+ * [StudentClient] provides API for managing Geogebra applet for students.
+ * Its public API operates as an event emitter for [listener] argument.
+ */
+
+// Initial state of the Geogebra applet encoded in Base64
+const initialState = require('../../helpers/ggbbase64');
+
+const Consts = {
+    // Geogebra specific options
+
+    // Caption style related to label style
+    // determining how objects' names are displayed in
+    // the applet. Caption style means that objects are
+    // named by their captions.
+    CAPTION_STYLE: 3,
+
+    POINT:         'point',
+    TEXTFIELD:     'textfield',
+    NUMERIC:       'numeric',
+
+    /**
+     * GGB commands have the following
+     * format: <object-label>:<command-body>.
+     *
+     * @param {String} label
+     * @param {String} cmdStrBody
+     */
+    getCommand(label, cmdStrBody) {
+        return `${label}:${cmdStrBody}`;
+    }
+};
+
+/**
+ * Throttle ensures that function [func] is evaluated at most once per
+ * [limit] period.
+ */
+function throttle (func, limit) {
+    let inThrottle;
+
+    return function() {
+        const args = arguments;
+        const context = this;
+
+        if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    }
+}
+
+/**
+ * Debounce ensures that the function [func] is evaluated after [delay]
+ * time since the last call to the function (classic debounce behavior).
+ */
+function debounce (func, delay) {
+    // [inDebounce] is a variable used to track the delay period.  If
+    // invoked for the first time, the [func] will execute at the end of
+    // the delay.  If invoked and then invoked again before the end of the
+    // delay, the delay restarts.
+    let inDebounce;
+
+    return function() {
+        const context = this;
+        const args = arguments;
+
+        clearTimeout(inDebounce);
+        inDebounce = setTimeout(() => func.apply(context, args), delay);
+    }
+}
+
+class StudentClient {
+    /**
+     * @param {Object} params Geogebra applet parameters
+     * (https://wiki.geogebra.org/en/Reference:GeoGebra_App_Parameters).
+     *
+     * @param {Object} log Vue logger.
+     */
+    constructor(params, log) {
+        this.params = {
+            container: 'geogebra_designer',
+            id: 'applet',
+            width: 800,
+            height: 600,
+            perspective: 'AG',
+            showAlgebraInput: true,
+            showToolBarHelp: false,
+            showMenubar: true,
+            enableLabelDrags: false,
+            showResetIcon: true,
+            showToolbar: true,
+            allowStyleBar: false,
+            useBrowserForJS: true,
+            enableShiftDragZoom: true,
+            errorDialogsActive: true,
+            enableRightClick: false,
+            enableCAS: false,
+            enable3d: false,
+            isPreloader: false,
+            screenshotGenerator: false,
+            preventFocus: false,
+            scaleContainerClass: 'appletContainer',
+            resizeFactor: 1.0,
+            // Initial Geogebra state encoded in Base64
+            initialState,
+            ...params,
+        };
+
+        this.log = this.params.log;
+        this.params.listener = undefined;
+        this.appletContainer = new GGBApplet(this.params);
+        this.ignoreUpdates = false;
+    }
+
+    /**
+     * Called by the client to start initializing the applet.
+     *
+     * @param listener Observer object, notified of important events such as
+     * `onAddElement`.
+     */
+    async initApplet(listener) {
+        this.log.debug(listener);
+
+        this.listener = listener;
+
+        // Geogebra uses global callbacks.
+        window.ggbOnInit = this.ggbOnInit.bind(this);
+
+        // Start applet render. When finished, `window.ggbOnInit` will be
+        // called.
+        this.appletContainer.inject(this.params.container, 'auto');
+    }
+
+    /**
+     * Internal callback for successful initialization of the applet.
+     * Finishes initialization process and notifies listener.
+     */
+    ggbOnInit() {
+        this.log.debug();
+
+        // Save reference to the aplet itself. This is the main line
+        // of communication between Geogebra and the rest of the code.
+        this.applet = this.appletContainer.getAppletObject();
+
+        // Geogebra uses global listners on `window` to nofity of its
+        // internal events (such as when element is added/modified/deleted).
+        this.registerGlobalListeners();
+
+        // Resize applet on window resize.
+        window.onresize(() => {
+            this.applet.setHeight(window.innerHeight / this.params.resizeFactor);
+        });
+
+        // Notify listener.
+        this.listener.onAppletReady();
+    }
+
+    /**
+     * Geogebra uses global listners on `window` to nofity of its
+     * internal events (such as when element is added/modified/deleted).
+     * This methods sets and links those listeners with this object.
+     *
+     * Call chain is as follows:
+     * Geogebra -> Window -> Client
+     */
+    registerGlobalListeners() {
+        // Setup `window` methods which refer to this object.
+        window[`addListener${this.appletId}`] = throttle(
+            label => this.onAddElement(label),
+            50
+        );
+
+        window[`updateListener${this.appletId}`] = throttle(
+            label => this.onUpdateElement(label),
+            50
+        );
+
+        window[`removeListener${this.appletId}`] = throttle(
+            label => this.onRemoveElement(label),
+            50
+        );
+
+        window[`renameListener${this.appletId}`] = throttle(
+            (oldLabel, newLabel) => this.onRenameElement(oldLabel, newLabel),
+            50
+        );
+
+        // Clean-up any state.
+        this.applet.unregisterAddListener(`addListener${this.appletId}`);
+        this.applet.unregisterUpdateListener(`updateListener${this.appletId}`);
+        this.applet.unregisterRemoveListener(`removeListener${this.appletId}`);
+        this.applet.unregisterRenameListener(`renameListener${this.appletId}`);
+
+        // Link `window` methods with the applet.
+        this.applet.registerAddListener(`addListener${this.appletId}`);
+        this.applet.registerUpdateListener(`updateListener${this.appletId}`);
+        this.applet.registerRemoveListener(`removeListener${this.appletId}`);
+        this.applet.registerRenameListener(`renameListener${this.appletId}`);
+    }
+
+    /**
+     * @param {String} label Name of the Geogebra element
+     */
+    onUpdateElement(label) {
+        this.log.debug(label);
+
+        if (this.ignoreUpdates === false) {
+            // Pass event to listener to handle it.
+            this.listener.onUpdateElement(label);
+        }
+    }
+
+    /**
+     * @param {String} label Name of the Geogebra element
+     */
+    onAddElement(label) {
+        this.log.debug(label);
+
+        if (this.ignoreUpdates === false) {
+            // Pass event to listener to handle it.
+            this.listener.onAddElement(label);
+        }
+    }
+
+    /**
+     * @param {String} label Name of the Geogebra element
+     */
+    onRemoveElement(label) {
+        this.log.debug(label);
+
+        if (this.ignoreUpdates === false) {
+            // Pass event to listener to handle it.
+            this.listener.onRemoveElement(label);
+        }
+    }
+
+    /**
+     * @param {String} label
+     * @param {String} xml
+     */
+    updateElementXML(label, xml) {
+        this.log.debug(label);
+
+        this.ignoreUpdates = true;
+        this.evalXML(xml);
+        this.ignoreUpdates = false;
+    }
+
+    /**
+     * Removes all elements from the applet one by one (so that
+     * [onRemoveElement] is called for each object).
+     */
+    clear() {
+        this.applet.getAllObjectNames().forEach((obj) => {
+            this.applet.deleteObject(objs[i]);
+        });
+    }
+
+    /**
+     * Assign caption (display name) to single Geogebra element.
+     *
+     * @param {String} label
+     * @param {String} caption
+     */
+    setCaption(label, caption) {
+        this.log.debug(label, caption);
+        this.ignoreUpdates = true;
+
+        // Configure element to display caption as its display name.
+        this.applet.setLabelStyle(label, Consts.CAPTION_STYLE);
+        this.applet.setCaption(label, caption);
+
+        this.ignoreUpdates = false;
+    }
+
+    /**
+     * Set initial construction for the applet. Runs "UpdateConstruction"
+     * which triggers re-render of all elements.
+     *
+     * @param {String} xml
+     */
+    setConstruction(xml) {
+        this.log.debug();
+        this.ignoreUpdates = true;
+
+        this.evalXML(xml);
+        this.evalCommand("UpdateConstruction()");
+        this.checkLocks();
+
+        this.ignoreUpdates = false;
+    }
+
+    /**
+     * @param {Object} element
+     */
+    setElement(element) {
+        this.log.debug(element);
+        this.ignoreUpdates = true;
+
+        if (element.obj_cmd_str !== '') {
+            const command = Consts.getCommand(element.name, element.obj_cmd_str);
+            this.evalCommand(command);
+        }
+
+        this.evalXML(element.xml);
+        this.checkLock(element.name);
+
+        this.ignoreUpdates = false;
+    }
+
+    /**
+     * @param {Array[Object]} elements
+     */
+    setElements(elements) {
+        this.log.debug(elements);
+        this.ignoreUpdates = true;
+
+        for (const el of elements) {
+            // If the element is a compound (e.g. a polygon),
+            // it should have a command string assigned which is to
+            // be evaluated by the applet.
+            if (el.obj_cmd_str !== '') {
+                const command = Consts.getCommand(el.name, el.obj_cmd_str)
+                this.evalCommand(command);
+            }
+
+            this.evalXML(el.xml);
+            this.checkLock(el.name);
+        }
+
+        this.evalCommand("UpdateConstruction()");
+        this.ignoreUpdates = false;
+    }
+
+    /**
+     * @param {String} label Geogebra element name
+     * @param {Array[Number, Number, Number]} color RGB color
+     */
+    setColor(label, color) {
+        const [red, green, blue] = color;
+        this.applet.setColor(label, red, green, blue);
+    }
+
+    checkLock(label) {
+        this.log.debug(label);
+
+        const caption = this.applet.getCaption(label);
+        const objType = this.applet.getObjectType(label);
+
+        // Element is free for movable by the student.
+        if (this.listener.isMovable(label, caption)) {
+            if (objType === Consts.NUMERIC || objType === Consts.TEXTFIELD) {
+                this.setFixed(label, false, /*is selection allowed*/ true);
+            } else {
+                this.setFixed(label, false);
+            }
+        }
+        // Someone else is the owner of the object.
+        else if (!this.listener.isOwner(label, caption)) {
+            if (objType === Consts.NUMERIC || objType === Consts.TEXTFIELD) {
+                this.setFixed(label, true, /*is selection allowed*/ false);
+            } else {
+                this.setFixed(label, true);
+            }
+        }
+    }
+
+    /**
+     * This function grabs all objects in the construction, and sets a
+     * lock on them if the username in the caption is not the current user.
+     */
+    checkLocks() {
+        this.log.debug();
+
+        for (let i = 0; i < this.getObjectNumber(); i++) {
+            const label = this.applet.getObjectName(i);
+            this.checkLock(label);
+        }
+    }
+
+    /**
+     * Completely reset XML content of the applet.
+     *
+     * @param {String} xml
+     */
+    setXML(xml) {
+        this.log.debug(xml);
+        this.ignoreUpdates = true;
+
+        this.applet.setXML(xml);
+        this.checkLocks();
+        this.registerGlobalListeners();
+
+        this.ignoreUpdates = false;
+    }
+
+    deleteObject(label) {
+        this.applet.deleteObject(label);
+    }
+
+    registerObjectClickListener(label, listener) {
+        this.applet.registerObjectClickListener(label, listener);
+    }
+
+    getObjectNumber() {
+        return this.applet.getObjectNumber();
+    }
+
+    isMovable(label) {
+        return this.applet.isMoveable(label);
+    }
+
+    getCaption(label) {
+        return this.applet.getCaption(label);
+    }
+
+    getCommandString(label) {
+        return this.applet.getCommandString(label);
+    }
+
+    getObjectType(label) {
+        return this.applet.getObjectType(label);
+    }
+
+    setCaptionStyle(label) {
+        this.applet.setLabelStyle(label, CAPTION_STYLE);
+    }
+
+    evalXML(xml) {
+        this.applet.evalXML(xml);
+    }
+
+    getObjectName(label) {
+        return this.applet.getObjectName(label);
+    }
+
+    getXML(label) {
+        return this.applet.getXML(label);
+    }
+
+    evalCommand(command) {
+        this.applet.evalCommand(command);
+    }
+
+    setFixed(label, isFixed, isSelectable) {
+        this.applet.setFixed(label, isFixed, isSelectable);
+    }
+}
+
+module.exports = {
+    StudentClient,
+    Consts
+}
