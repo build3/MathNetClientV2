@@ -463,7 +463,22 @@ export default {
                     class: this.code,
                 },
             });
-            groupsObjects.forEach((g) => { this.createOrUpdateWorkshopWithXML(g._id, xml); });
+
+            let successes = 0;
+            const promises = [];
+
+            for (let i = 0; i < groupsObjects.length; i += 1) {
+                const g = groupsObjects[i];
+                const promise = this.createOrUpdateWorkshopWithXML(g._id, xml);
+                promises.push(promise);
+            }
+
+            await Promise.all(promises).then((r) => {
+                successes = r.reduce((x, y) => x + y);
+            });
+
+            this.showToast(`Successfully send construction to ${successes}
+            groups out of ${groupsObjects.length} selected`, ((successes === groupsObjects.length) ? 'success' : 'warning'));
         },
 
         async sendToAll() {
@@ -474,7 +489,22 @@ export default {
                     class: this.code,
                 },
             });
-            groupsObjects.forEach((g) => { this.createOrUpdateWorkshopWithXML(g._id, xml); });
+
+            let successes = 0;
+            const promises = [];
+
+            for (let i = 0; i < groupsObjects.length; i += 1) {
+                const g = groupsObjects[i];
+                const promise = this.createOrUpdateWorkshopWithXML(g._id, xml);
+                promises.push(promise);
+            }
+
+            await Promise.all(promises).then((r) => {
+                successes = r.reduce((x, y) => x + y);
+            });
+
+            this.showToast(`Successfully send construction to ${successes}
+            groups out of ${groupsObjects.length} selected`, ((successes === groupsObjects.length) ? 'success' : 'warning'));
         },
 
         async createOrUpdateWorkshopWithXML(groupId, xml) {
@@ -484,10 +514,8 @@ export default {
                 w = await this.getWorkshop(groupId);
             } catch (error) {
                 if (error.code !== 404) {
-                    this.alert = {
-                        type: 'danger',
-                        message: `Error @ get workshop: ${error.message}`,
-                    };
+                    this.showToast(`Error @ get workshop: ${error.message}`, 'warning');
+                    return 0;
                 }
             }
             try {
@@ -496,11 +524,10 @@ export default {
                 } else {
                     await this.createWorkshop({ id: groupId, xml });
                 }
+                return 1;
             } catch (error) {
-                this.alert = {
-                    type: 'danger',
-                    message: `Error @ update/create workshop: ${error.message}`,
-                };
+                this.showToast(`Error @ update/create workshop: ${error.message}`, 'warning');
+                return 0;
             }
         },
     },
