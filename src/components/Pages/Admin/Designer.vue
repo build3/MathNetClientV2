@@ -48,17 +48,20 @@
                             <div class="col-10 mt-4">
                                 <h2>Groups</h2>
                                 <select multiple="multiple"
-                                    class="form-control select-style-extender">
+                                    class="form-control select-style-extender"
+                                    v-model="selectedGroup">
                                     <option v-for="(g, index) in groupsInClass" :key="index">
                                         {{ g.name }}
                                     </option>
                                 </select>
                                 <div class="mt-2">
                                     <div class="form-inline">
-                                        <button class="btn btn-primary p-2 mr-1 mt-2">
-                                            Send view to one</button>
-                                        <button class="btn btn-primary p-2 mr-1 mt-2">
-                                            Send view to all</button>
+                                        <button class="btn btn-primary p-2 mr-1 mt-2"
+                                            @click="send(selectedGroup)">
+                                                Send view to one</button>
+                                        <button class="btn btn-primary p-2 mr-1 mt-2"
+                                            @click="sendToAll()">
+                                                Send view to all</button>
                                     </div>
                                     <div class="checkbox mt-3">
                                         <label class="checkbox-container">
@@ -132,7 +135,7 @@
                         </button>
                     </form>
                     <div class="row mt-4">
-                        <div class="col-10">
+                        <div class="col-12" ref="geogebra_container">
                             <h2 class="mb-3">Geogebra applet</h2>
                             <button class="btn btn-warning reset-btn p-2 mb-3" @click="resetView">
                                 Reset view
@@ -303,6 +306,7 @@ export default {
             alert_add: undefined,
             constructions: undefined,
             selectedConstruction: [],
+            selectedGroup: [],
             addMode: false,
             constructionName: undefined,
             constructionXML: undefined,
@@ -337,6 +341,10 @@ export default {
             getClass: 'get',
         }),
 
+        ...mapGetters('workshops', {
+            getWorkshop: 'get',
+        }),
+
         classes() {
             return this.findClassesInStore({
                 query: { $sort: { code: 1 } },
@@ -360,10 +368,21 @@ export default {
             findClasses: 'find',
         }),
 
+        ...mapActions('users', {
+            patch: 'patch',
+        }),
+
+        ...mapActions('workshops', {
+            getWorkshopToStore: 'get',
+            createWorkshop: 'create',
+            updateWorkshop: 'update',
+        }),
+
         async selectGroupsInClass(code) {
             this.clearToast();
 
             this.code = code;
+
             this.groupsInClass = await this.findGroups({ query: { class: code } });
 
             if (!this.groupsInClass.length) {
@@ -399,6 +418,7 @@ export default {
                         con => con !== construction,
                     );
                 });
+
                 this.alert = {
                     type: 'success',
                     message: 'Construction Deleted',
@@ -410,7 +430,6 @@ export default {
                 };
             }
         },
-
         async addConstruction() {
             this.dismissAlert();
 
@@ -437,13 +456,103 @@ export default {
             this.GI.setXML(freshGeogebraState);
             this.GI.registerGlobalListeners();
         },
+
+        async send(groups) {
+            const xml = this.GI.getXML();
+
+            await this.findGroupsInStore({
+                query: {
+                    name: groups,
+                    class: this.code,
+                },
+            });
+
+            const groupsObjects = await this.findGroups({
+                query: {
+                    name: groups,
+                    class: this.code,
+                },
+            });
+
+            let successes = 0;
+            const promises = [];
+
+            for (let i = 0; i < groupsObjects.length; i += 1) {
+                const g = groupsObjects[i];
+                const promise = this.createOrUpdateWorkshopWithXML(g._id, xml);
+                promises.push(promise);
+            }
+
+            await Promise.all(promises).then((r) => {
+                successes = r.reduce((x, y) => x + y);
+            });
+
+            this.showToast(`Successfully send construction to ${successes}
+            groups out of ${groupsObjects.length} selected`, ((successes === groupsObjects.length) ? 'success' : 'warning'));
+        },
+
+        async sendToAll() {
+            const xml = this.GI.getXML();
+            await this.findGroupsInStore({ query: { class: this.code } });
+
+            const groupsObjects = await this.findGroups({
+                query: {
+                    class: this.code,
+                },
+            });
+
+            let successes = 0;
+            const promises = [];
+
+            for (let i = 0; i < groupsObjects.length; i += 1) {
+                const g = groupsObjects[i];
+                const promise = this.createOrUpdateWorkshopWithXML(g._id, xml);
+                promises.push(promise);
+            }
+
+            await Promise.all(promises).then((r) => {
+                successes = r.reduce((x, y) => x + y);
+            });
+
+            this.showToast(`Successfully send construction to ${successes}
+            groups out of ${groupsObjects.length} selected`, ((successes === groupsObjects.length) ? 'success' : 'warning'));
+        },
+
+        async createOrUpdateWorkshopWithXML(groupId, xml) {
+            let workshop;
+
+            try {
+                await this.getWorkshopToStore(groupId);
+                workshop = await this.getWorkshop(groupId);
+            } catch (error) {
+                if (error.code !== 404) {
+                    this.showToast('Error while checking workshop', 'warning');
+                    console.log(error.message);
+                    return 0;
+                }
+            }
+
+            try {
+                if (workshop) {
+                    await this.updateWorkshop([groupId, { xml }]);
+                } else {
+                    await this.createWorkshop({ id: groupId, xml });
+                }
+
+                return 1;
+            } catch (error) {
+                this.showToast('Error while creating/updating workshop', 'warning');
+                console.log(error.message);
+                return 0;
+            }
+        },
     },
 
     mounted() {
         const params = {
             container: 'geogebra_designer',
             id: 'applet',
-            width: 800,
+            width: this.$refs.geogebra_container.clientWidth + 50,
             height: 600,
         };
 
