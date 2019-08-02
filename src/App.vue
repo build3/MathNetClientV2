@@ -1,6 +1,6 @@
 <template>
     <div id="wrapper">
-        <div v-if="checkPermission()">
+        <div v-if="adminPermission">
             <side-menu />
 
         <main id="page-wrapper" class="gray-bg">
@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 
 export default {
     name: 'App',
@@ -37,37 +37,15 @@ export default {
     computed: {
         ...mapState('auth', [
             'isAuthenticatePending',
-            'user',
         ]),
+
         ...mapGetters('users', {
             user: 'current',
         }),
-    },
 
-    methods: {
-        ...mapActions('auth', [
-            'authenticate',
-        ]),
-        checkPermission() {
-            if (this.user) {
-                if (this.user.permissions.indexOf('student') > -1) {
-                    return false;
-                }
-
-                return true;
-            }
-
-            return false;
+        adminPermission() {
+            return this.user && this.user.permissions.includes('admin');
         },
-    },
-
-    mounted() {
-        this.authenticate()
-            .catch((error) => {
-                if (!error.message.includes('Could not find stored JWT')) {
-                    console.error(error);
-                }
-            });
     },
 
     watch: {
