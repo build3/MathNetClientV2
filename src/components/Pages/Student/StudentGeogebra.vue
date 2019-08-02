@@ -1,10 +1,7 @@
 <template>
     <div class="student-geogebra">
         <div class="row">
-        <div class="offset-2 col-8">
-            <h1>Student Geogebra View</h1>
-        </div>
-            <div class="ibox border-bottom offset-2 col-8">
+            <div ref="ibox" class="ibox border-bottom offset-1 col-10">
                 <div class="ibox-title form-inline">
                     <h3 v-if="group">
                         {{ group.name }}, {{ student.username }}
@@ -22,11 +19,12 @@
                         </router-link>
                     </div>
                 </div>
-                <div class="ibox-content">
-                    <div class="geogebra-view">
+                <div class="ibox-content geogebra-frame">
+                    <div id="geogebra-view">
                         <!--Geogebra applet-->
                     </div>
-                    <div class="control-options">
+                    <!-- Temporarily disabled; do not remove -->
+                    <!-- <div class="control-options">
                         <div class="col-8">
                             <button class="btn btn-info center-btn-up">Up(I)</button>
                             <div class="form-inline">
@@ -40,7 +38,7 @@
                                     class="slider" id="myRange">
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -49,6 +47,10 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import { StudentClient, Consts } from '../../Geogebra/StudentClient';
+
+import api from '../../../feathers-client';
+import StudentListener from './StudentListener';
 
 export default {
     name: 'StudentGeogebra',
@@ -71,6 +73,18 @@ export default {
         ...mapActions('groups', {
             getGroup: 'get',
         }),
+
+        /**
+         * Removes user from all workshops and joins the current one.
+         * This ensures that student is at most in one workshop channel.
+         */
+        async joinWorkshop() {
+            await api.service('users').patch(this.student.username, {
+                workshops: [this.id]
+            });
+
+            this.student.workshops = [this.id];
+        }
     },
 
     created() {
@@ -84,5 +98,27 @@ export default {
             type: String,
         },
     },
+
+    async mounted() {
+        this.$log.debug('Student: ', this.student.workshops);
+
+        await this.joinWorkshop();
+
+        const client = new StudentClient({
+            container: 'geogebra-view',
+            width: this.$refs.ibox.clientWidth,
+            log: this.$log,
+        });
+
+        const listener = new StudentListener(
+            client,
+            this.student.username,
+            this.id,
+            this.student.color,
+            this.$log,
+        );
+
+        client.initApplet(listener);
+    }
 };
 </script>
