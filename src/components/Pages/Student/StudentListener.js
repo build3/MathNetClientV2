@@ -164,6 +164,8 @@ export default class StudentListener {
                 // Assume that element exists and update it.
                 .patch(id, { xml: this.client.getXML(label) })
                 .catch((error) => {
+                    this.log.debug(error);
+
                     // If element does not exists, create the element.
                     // This covers the case where a student claims
                     // unnassigned element. That is, the element was loaded
@@ -190,7 +192,10 @@ export default class StudentListener {
         this.sendElement(label);
     }
 
-    sendElement(label) {
+    /**
+     * @param {String} label
+     */
+    async sendElement(label) {
         const element = {
             id:          this.getElementId(this.workshopId, label),
             name:        label,
@@ -201,8 +206,11 @@ export default class StudentListener {
         };
 
         this.log.debug(element);
-
-        api.service('elements').create(element);
+        try {
+            await api.service('elements').create(element);
+        } catch (error) {
+            this.log.error(error);
+        }
     }
 
     onRemoveElement(label) {
