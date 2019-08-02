@@ -409,6 +409,7 @@ export default {
 
         async deleteConstruction() {
             this.dismissAlert();
+
             try {
                 await this.removeConstruction(this.selectedConstruction);
                 this.selectedConstruction.forEach((construction) => {
@@ -416,6 +417,7 @@ export default {
                         con => con !== construction,
                     );
                 });
+
                 this.alert = {
                     type: 'sucess',
                     message: 'Construction Deleted',
@@ -427,7 +429,6 @@ export default {
                 };
             }
         },
-
         async addConstruction() {
             try {
                 await this.createConstruction({
@@ -451,12 +452,14 @@ export default {
 
         async send(groups) {
             const xml = this.GI.getXML();
+
             await this.findGroupsInStore({
                 query: {
                     name: groups,
                     class: this.code,
                 },
             });
+
             const groupsObjects = await this.findGroups({
                 query: {
                     name: groups,
@@ -484,6 +487,7 @@ export default {
         async sendToAll() {
             const xml = this.GI.getXML();
             await this.findGroupsInStore({ query: { class: this.code } });
+
             const groupsObjects = await this.findGroups({
                 query: {
                     class: this.code,
@@ -508,25 +512,30 @@ export default {
         },
 
         async createOrUpdateWorkshopWithXML(groupId, xml) {
-            let w;
+            let workshop;
+
             try {
                 await this.getWorkshopToStore(groupId);
-                w = await this.getWorkshop(groupId);
+                workshop = await this.getWorkshop(groupId);
             } catch (error) {
                 if (error.code !== 404) {
-                    this.showToast(`Error @ get workshop: ${error.message}`, 'warning');
+                    this.showToast('Error while checking workshop', 'warning');
+                    console.log(error.message);
                     return 0;
                 }
             }
+
             try {
-                if (w) {
+                if (workshop) {
                     await this.updateWorkshop([groupId, { xml }]);
                 } else {
                     await this.createWorkshop({ id: groupId, xml });
                 }
+
                 return 1;
             } catch (error) {
-                this.showToast(`Error @ update/create workshop: ${error.message}`, 'warning');
+                this.showToast('Error while creating/updating workshop', 'warning');
+                console.log(error.message);
                 return 0;
             }
         },
