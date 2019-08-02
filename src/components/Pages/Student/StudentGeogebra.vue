@@ -47,7 +47,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import { StudentClient, Consts } from '../../Geogebra/StudentClient';
+import { StudentClient } from '../../Geogebra/StudentClient';
 
 import api from '../../../feathers-client';
 import StudentListener from './StudentListener';
@@ -80,11 +80,11 @@ export default {
          */
         async joinWorkshop() {
             await api.service('users').patch(this.student.username, {
-                workshops: [this.id]
+                workshops: [this.id],
             });
 
             this.student.workshops = [this.id];
-        }
+        },
     },
 
     created() {
@@ -119,6 +119,6 @@ export default {
         );
 
         client.initApplet(listener);
-    }
+    },
 };
 </script>

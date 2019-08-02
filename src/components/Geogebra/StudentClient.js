@@ -17,9 +17,9 @@ const Consts = {
     // named by their captions.
     CAPTION_STYLE: 3, // 3 is a magic value for Geogebra's API
 
-    POINT:         'point',
-    TEXTFIELD:     'textfield',
-    NUMERIC:       'numeric',
+    POINT: 'point',
+    TEXTFIELD: 'textfield',
+    NUMERIC: 'numeric',
 
     /**
      * GGB commands have the following
@@ -30,47 +30,45 @@ const Consts = {
      */
     getCommand(label, cmdStrBody) {
         return `${label}:${cmdStrBody}`;
-    }
+    },
 };
 
 /**
  * Throttle ensures that function [func] is evaluated at most once per
  * [limit] period.
  */
-function throttle (func, limit) {
+function throttle(func, limit) {
     let inThrottle;
 
-    return function() {
-        const args = arguments;
+    return function wrapper(...args) {
         const context = this;
 
         if (!inThrottle) {
             func.apply(context, args);
             inThrottle = true;
-            setTimeout(() => inThrottle = false, limit);
+            setTimeout(() => { inThrottle = false; }, limit);
         }
-    }
+    };
 }
 
 /**
  * Debounce ensures that the function [func] is evaluated after [delay]
  * time since the last call to the function (classic debounce behavior).
  */
-function debounce (func, delay) {
-    // [inDebounce] is a variable used to track the delay period.  If
-    // invoked for the first time, the [func] will execute at the end of
-    // the delay.  If invoked and then invoked again before the end of the
-    // delay, the delay restarts.
-    let inDebounce;
+// function debounce(func, delay) {
+//     // [inDebounce] is a variable used to track the delay period.  If
+//     // invoked for the first time, the [func] will execute at the end of
+//     // the delay.  If invoked and then invoked again before the end of the
+//     // delay, the delay restarts.
+//     let inDebounce;
 
-    return function() {
-        const context = this;
-        const args = arguments;
+//     return function (...args) {
+//         const context = this;
 
-        clearTimeout(inDebounce);
-        inDebounce = setTimeout(() => func.apply(context, args), delay);
-    }
-}
+//         clearTimeout(inDebounce);
+//         inDebounce = setTimeout(() => func.apply(context, args), delay);
+//     };
+// }
 
 class StudentClient {
     /**
@@ -79,7 +77,7 @@ class StudentClient {
      *
      * @param {Object} log Vue logger.
      */
-    constructor(params, log) {
+    constructor(params) {
         this.params = {
             container: 'geogebra_designer',
             id: 'applet',
@@ -111,6 +109,7 @@ class StudentClient {
 
         this.log = this.params.log;
         this.params.listener = undefined;
+        /* eslint-disable-next-line no-undef */
         this.appletContainer = new GGBApplet(this.params);
 
         // This flag is used to temporarirly turn-off Geogebra
@@ -177,22 +176,22 @@ class StudentClient {
         // Setup `window` methods which refer to this object.
         window[`addListener${this.appletId}`] = throttle(
             label => this.onAddElement(label),
-            THROTTLE_PERIOD
+            THROTTLE_PERIOD,
         );
 
         window[`updateListener${this.appletId}`] = throttle(
             label => this.onUpdateElement(label),
-            THROTTLE_PERIOD
+            THROTTLE_PERIOD,
         );
 
         window[`removeListener${this.appletId}`] = throttle(
             label => this.onRemoveElement(label),
-            THROTTLE_PERIOD
+            THROTTLE_PERIOD,
         );
 
         window[`renameListener${this.appletId}`] = throttle(
             (oldLabel, newLabel) => this.onRenameElement(oldLabel, newLabel),
-            THROTTLE_PERIOD
+            THROTTLE_PERIOD,
         );
 
         // Clean-up any state.
@@ -262,7 +261,7 @@ class StudentClient {
      */
     clear() {
         this.applet.getAllObjectNames().forEach((obj) => {
-            this.applet.deleteObject(objs[i]);
+            this.applet.deleteObject(obj);
         });
     }
 
@@ -294,7 +293,7 @@ class StudentClient {
         this.ignoreUpdates = true;
 
         this.evalXML(xml);
-        this.evalCommand("UpdateConstruction()");
+        this.evalCommand('UpdateConstruction()');
         this.checkLocks();
 
         this.ignoreUpdates = false;
@@ -325,12 +324,13 @@ class StudentClient {
         this.log.debug(elements);
         this.ignoreUpdates = true;
 
+        /* eslint-disable-next-line no-restricted-syntax */
         for (const el of elements) {
             // If the element is a compound (e.g. a polygon),
             // it should have a command string assigned which is to
             // be evaluated by the applet.
             if (el.obj_cmd_str !== '') {
-                const command = Consts.getCommand(el.name, el.obj_cmd_str)
+                const command = Consts.getCommand(el.name, el.obj_cmd_str);
                 this.evalCommand(command);
             }
 
@@ -338,7 +338,7 @@ class StudentClient {
             this.checkLock(el.name);
         }
 
-        this.evalCommand("UpdateConstruction()");
+        this.evalCommand('UpdateConstruction()');
         this.ignoreUpdates = false;
     }
 
@@ -366,15 +366,14 @@ class StudentClient {
         // Element is free for movable by the student.
         if (this.listener.isMovable(label, caption)) {
             if (objType === Consts.NUMERIC || objType === Consts.TEXTFIELD) {
-                this.setFixed(label, false, /*is selection allowed*/ true);
+                this.setFixed(label, false, /* is selection allowed */ true);
             } else {
                 this.setFixed(label, false);
             }
-        }
         // Someone else is the owner of the object.
-        else if (!this.listener.isOwner(label, caption)) {
+        } else if (!this.listener.isOwner(label, caption)) {
             if (objType === Consts.NUMERIC || objType === Consts.TEXTFIELD) {
-                this.setFixed(label, true, /*is selection allowed*/ false);
+                this.setFixed(label, true, /* is selection allowed */ false);
             } else {
                 this.setFixed(label, true);
             }
@@ -388,7 +387,7 @@ class StudentClient {
     checkLocks() {
         this.log.debug();
 
-        for (let i = 0; i < this.getObjectNumber(); i++) {
+        for (let i = 0; i < this.getObjectNumber(); i += 1) {
             const label = this.applet.getObjectName(i);
             this.checkLock(label);
         }
@@ -439,7 +438,7 @@ class StudentClient {
     }
 
     setCaptionStyle(label) {
-        this.applet.setLabelStyle(label, CAPTION_STYLE);
+        this.applet.setLabelStyle(label, Consts.CAPTION_STYLE);
     }
 
     evalXML(xml) {
@@ -465,5 +464,5 @@ class StudentClient {
 
 module.exports = {
     StudentClient,
-    Consts
-}
+    Consts,
+};

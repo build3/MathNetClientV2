@@ -10,17 +10,17 @@ import api from '../../../feathers-client';
 // superscript. Therefore, we use
 // Unicode to display them.
 const numberToSuper = {
-    '0': '⁰',
-    '1': '¹',
-    '2': '²',
-    '3': '³',
-    '4': '⁴',
-    '5': '⁵',
-    '6': '⁶',
-    '7': '⁷',
-    '8': '⁸',
-    '9': '⁹'
-}
+    0: '⁰',
+    1: '¹',
+    2: '²',
+    3: '³',
+    4: '⁴',
+    5: '⁵',
+    6: '⁶',
+    7: '⁷',
+    8: '⁸',
+    9: '⁹',
+};
 
 const Consts = {
     // Ownership indicators
@@ -54,7 +54,7 @@ export default class StudentListener {
      * @param {String} ggbLabel Label (name) of the Geogebra element (object).
      * @return {String}
      */
-    getElementId(workshopId, ggbLabel) {
+    static getElementId(workshopId, ggbLabel) {
         return `${workshopId}-${ggbLabel}`;
     }
 
@@ -62,7 +62,7 @@ export default class StudentListener {
      * @param {String} label Geogebra element name.
      * @param {String} owner Owner of the element.
      */
-    getElementCaption(label, owner) {
+    static getElementCaption(label, owner) {
         // To differenciate between duplicate names (when cycling A-Z),
         // a subscript number is added. For example, a sequence of As might
         // look like: A, A_1, A_2, A_3 and so on.
@@ -74,8 +74,12 @@ export default class StudentListener {
         return `${name}${sup}_{${owner}}`;
     }
 
+    static isUnassigned(label, caption) {
+        return caption === `${label}_{${Consts.UNASSIGNED}}`;
+    }
+
     isOwner(label, caption) {
-        return caption == this.getElementCaption(label, this.studentUsername);
+        return caption === this.getElementCaption(label, this.studentUsername);
     }
 
     /**
@@ -84,10 +88,6 @@ export default class StudentListener {
      */
     isMovable(label, caption) {
         return this.isOwner(label, caption) || this.isUnassigned(label, caption);
-    }
-
-    isUnassigned(label, caption) {
-        return caption == `${label}_{${Consts.UNASSIGNED}}`;
     }
 
     /**
@@ -120,9 +120,11 @@ export default class StudentListener {
 
             // Load current state of the workshops.
 
-            const [workshop, ...rest] = await api.service('workshops').find({
-                query: { id: this.workshopId }
+            const workshops = await api.service('workshops').find({
+                query: { id: this.workshopId },
             });
+
+            const workshop = workshops[0];
 
             this.log.debug('Loaded workshop: ', workshop);
 
@@ -132,7 +134,7 @@ export default class StudentListener {
 
                 // Load any existing elements in the workshop.
                 const elements = await api.service('elements').find({
-                    query: { workshop: workshop.id }
+                    query: { workshop: workshop.id },
                 }) || [];
 
                 this.log.debug('Loaded elements:', elements);
@@ -142,13 +144,13 @@ export default class StudentListener {
             // Workshops was not created yet, create it.
             } else {
                 // Create new workshop with the same id as the related group.
-                const workshop = await api.service('workshops').create({
-                    id: this.workshopId
+                const newWorkshop = await api.service('workshops').create({
+                    id: this.workshopId,
                 });
 
-                this.log.debug('Created workshop: ', workshop);
+                this.log.debug('Created workshop: ', newWorkshop);
             }
-        }
+        };
     }
 
     /**
@@ -175,7 +177,7 @@ export default class StudentListener {
                         this.sendElement(label);
                     }
                 });
-        }, 0)
+        }, 0);
     }
 
     /**
@@ -197,12 +199,12 @@ export default class StudentListener {
      */
     async sendElement(label) {
         const element = {
-            id:          this.getElementId(this.workshopId, label),
-            name:        label,
-            owner:       this.studentUsername,
-            workshop:    this.workshopId,
-            xml:         this.client.getXML(label),
-            obj_cmd_str: this.client.getCommandString(label, false)
+            id: this.getElementId(this.workshopId, label),
+            name: label,
+            owner: this.studentUsername,
+            workshop: this.workshopId,
+            xml: this.client.getXML(label),
+            obj_cmd_str: this.client.getCommandString(label, false),
         };
 
         this.log.debug(element);
@@ -217,7 +219,7 @@ export default class StudentListener {
         this.log.debug(label);
 
         api.service('elements').remove(
-            this.getElementId(this.workshopId, label)
+            this.getElementId(this.workshopId, label),
         );
     }
 }
