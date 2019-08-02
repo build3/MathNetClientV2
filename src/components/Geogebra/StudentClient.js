@@ -252,6 +252,7 @@ class StudentClient {
 
         this.ignoreUpdates = true;
         this.evalXML(xml);
+        this.evalCommand('UpdateConstruction()');
         this.ignoreUpdates = false;
     }
 

@@ -79,7 +79,7 @@ export default class StudentListener {
     }
 
     isOwner(label, caption) {
-        return caption === this.getElementCaption(label, this.studentUsername);
+        return caption === StudentListener.getElementCaption(label, this.studentUsername);
     }
 
     /**
@@ -87,7 +87,7 @@ export default class StudentListener {
      * claimed by him.
      */
     isMovable(label, caption) {
-        return this.isOwner(label, caption) || this.isUnassigned(label, caption);
+        return this.isOwner(label, caption) || StudentListener.isUnassigned(label, caption);
     }
 
     /**
@@ -159,7 +159,7 @@ export default class StudentListener {
     onUpdateElement(label) {
         this.log.debug(label);
 
-        const id = this.getElementId(this.workshopId, label);
+        const id = StudentListener.getElementId(this.workshopId, label);
 
         setTimeout(() => {
             api.service('elements')
@@ -185,7 +185,7 @@ export default class StudentListener {
      */
     onAddElement(label) {
         this.log.debug(label);
-        const caption = this.getElementCaption(label, this.studentUsername);
+        const caption = StudentListener.getElementCaption(label, this.studentUsername);
 
         // Adjust caption and color to differenciate between students.
         this.client.setCaption(label, caption);
@@ -199,7 +199,7 @@ export default class StudentListener {
      */
     async sendElement(label) {
         const element = {
-            id: this.getElementId(this.workshopId, label),
+            id: StudentListener.getElementId(this.workshopId, label),
             name: label,
             owner: this.studentUsername,
             workshop: this.workshopId,
@@ -219,7 +219,7 @@ export default class StudentListener {
         this.log.debug(label);
 
         api.service('elements').remove(
-            this.getElementId(this.workshopId, label),
+            StudentListener.getElementId(this.workshopId, label),
         );
     }
 }
