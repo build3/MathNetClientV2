@@ -144,7 +144,7 @@
                         </button>
                     </form>
                     <div class="row mt-4">
-                        <div class="col-10">
+                        <div class="col-12" ref="geogebra_container">
                             <h2 class="mb-3">Geogebra applet</h2>
                             <button class="btn btn-warning reset-btn p-2 mb-3" @click="resetView">
                                 Reset view
@@ -536,7 +536,7 @@ export default {
         const params = {
             container: 'geogebra_designer',
             id: 'applet',
-            width: 800,
+            width: this.$refs.geogebra_container.clientWidth + 50,
             height: 600,
         };
 
