@@ -512,31 +512,19 @@ export default {
         },
 
         async createOrUpdateWorkshopWithXML(groupId, xml) {
-            let workshop;
-
             try {
-                await this.getWorkshopToStore(groupId);
-                workshop = await this.getWorkshop(groupId);
-            } catch (error) {
-                if (error.code !== 404) {
-                    this.showToast('Error while checking workshop', 'warning');
-                    console.log(error.message);
-                    return 0;
-                }
-            }
-
-            try {
-                if (workshop) {
-                    await this.updateWorkshop([groupId, { xml }]);
-                } else {
-                    await this.createWorkshop({ id: groupId, xml });
-                }
-
+                await this.createWorkshop({ id: groupId, xml });
                 return 1;
             } catch (error) {
-                this.showToast('Error while creating/updating workshop', 'warning');
-                console.log(error.message);
-                return 0;
+                let correct = 0;
+                if (error.code === 400) {
+                    await this.updateWorkshop([groupId, { xml }]);
+                    correct = 1;
+                } else {
+                    this.showToast('Error while creating/updating workshop', 'warning');
+                    console.log(error.message);
+                }
+                return correct;
             }
         },
     },
