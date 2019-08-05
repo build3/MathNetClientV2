@@ -1,11 +1,9 @@
 <template>
     <main class="login container">
         <div class="row">
-            <div class="col-8 offset-2">
+            <div class="col-8 offset-2 mb-2">
                 <h1>{{ user.username }}'s profile</h1>
             </div>
-        </div>
-        <div class="row">
             <div class="col-8 offset-2">
                 <alert :alert="alert" />
 
@@ -15,35 +13,38 @@
                         newPassword,
                         confirmNewPassword
                     )">
-                    <h3>Change Password</h3>
-                    <div class="form-group">
-                        <input class="form-control"
-                            type="password"
-                            v-model="oldPassword"
-                            placeholder="Old Password"
-                            required>
+
+                    <div class="ibox-content">
+                        <h3>Change Password</h3>
+                        <div class="form-group">
+                            <input class="form-control"
+                                type="password"
+                                v-model="oldPassword"
+                                placeholder="Old Password"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <input class="form-control"
+                                type="password"
+                                v-model="newPassword"
+                                placeholder="New Password"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <input class="form-control"
+                                type="password"
+                                v-model="confirmNewPassword"
+                                placeholder="Confirm New Password"
+                                required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            Change
+                        </button>
+                        <button class="btn btn-secondary"
+                            @click.prevent="backSubmit">
+                            Cancel
+                        </button>
                     </div>
-                    <div class="form-group">
-                        <input class="form-control"
-                            type="password"
-                            v-model="newPassword"
-                            placeholder="New Password"
-                            required>
-                    </div>
-                    <div class="form-group">
-                        <input class="form-control"
-                            type="password"
-                            v-model="confirmNewPassword"
-                            placeholder="Confirm New Password"
-                            required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">
-                        Change
-                    </button>
-                    <button class="btn btn-secondary"
-                        @click.prevent="backSubmit">
-                        Cancel
-                    </button>
                 </form>
 
                 <button
