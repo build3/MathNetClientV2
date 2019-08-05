@@ -23,7 +23,7 @@
                         <tr v-for="cl in classes.data" :key="cl.code">
                             <td>{{ cl.name }}</td>
                             <td>{{ cl.code }}</td>
-                            <td class="text-center">
+                            <td>
                                 <router-link
                                     :to="{
                                         name: 'ClassDetails',
@@ -62,8 +62,7 @@
                         <input class="form-control"
                             type="text"
                             v-model="code"
-                            placeholder="Class Code"
-                            required>
+                            placeholder="Class Code">
                     </div>
                     <button type="submit" class="btn btn-primary">Save</button>
                     <button class="btn btn-secondary"

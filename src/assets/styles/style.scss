@@ -107,6 +107,11 @@ table.designer-class-table tr {
     height: 36em;
 }
 
+.class-view-table {
+    overflow: auto;
+    height: 20em;
+}
+
 .checkbox-container {
     display: block;
     position: relative;
@@ -169,10 +174,18 @@ table.designer-class-table tr {
     margin-bottom: .5em !important;
 }
 
+.geogebra-frame {
+    padding: 0px;
+}
+
 .student-table {
     margin-bottom: 0rem !important;
 }
 
 .btn-leave {
     margin-left: -.3em;
+}
+
+.toast-top-center {
+    margin-top: 2em !important;
 }

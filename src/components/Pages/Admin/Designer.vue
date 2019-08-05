@@ -12,20 +12,10 @@
                     <h5>Designer</h5>
                 </div>
                 <div class="ibox-content table-responsive ibox-style-extender">
-                    <div v-if="alert"
-                        class="alert alert-dismissible fade show"
-                        :class="'alert-' + alert.type"
-                        role="alert">
-                        {{ alert.message }}
-                        <button v-if="alert.type !== 'info'"
-                            type="button"
-                            class="close"
-                            data-dismiss="alert"
-                            aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
                     <div class="row" v-if="!addMode">
+                        <div class="col-12">
+                            <alert :alert="alert" />
+                        </div>
                         <div class="col-6">
                             <div class="col-10">
                                 <h2>Constructions</h2>
@@ -58,17 +48,20 @@
                             <div class="col-10 mt-4">
                                 <h2>Groups</h2>
                                 <select multiple="multiple"
-                                    class="form-control select-style-extender">
+                                    class="form-control select-style-extender"
+                                    v-model="selectedGroup">
                                     <option v-for="(g, index) in groupsInClass" :key="index">
                                         {{ g.name }}
                                     </option>
                                 </select>
                                 <div class="mt-2">
                                     <div class="form-inline">
-                                        <button class="btn btn-primary p-2 mr-1 mt-2">
-                                            Send view to one</button>
-                                        <button class="btn btn-primary p-2 mr-1 mt-2">
-                                            Send view to all</button>
+                                        <button class="btn btn-primary p-2 mr-1 mt-2"
+                                            @click="send(selectedGroup)">
+                                                Send view to one</button>
+                                        <button class="btn btn-primary p-2 mr-1 mt-2"
+                                            @click="sendToAll()">
+                                                Send view to all</button>
                                     </div>
                                     <div class="checkbox mt-3">
                                         <label class="checkbox-container">
@@ -125,6 +118,7 @@
                         </div>
                     </div>
                     <form v-else @submit.prevent="addConstruction()">
+                        <alert :alert="alert_add" />
                         <h3>Add Constructions</h3>
                         <div class="form-group">
                             <input
@@ -141,7 +135,7 @@
                         </button>
                     </form>
                     <div class="row mt-4">
-                        <div class="col-10">
+                        <div class="col-12" ref="geogebra_container">
                             <h2 class="mb-3">Geogebra applet</h2>
                             <button class="btn btn-warning reset-btn p-2 mb-3" @click="resetView">
                                 Reset view
@@ -299,6 +293,7 @@
 import { mapGetters, mapActions } from 'vuex';
 
 import ToastrMixin from '@/mixins/ToastrMixin.vue';
+import AlertMixin from '@/mixins/AlertMixin.vue';
 import GeogebraInterface from '../../Geogebra/GeogebraInterface';
 import freshGeogebraState from '../../../helpers/fresh_geogebra_state';
 
@@ -308,8 +303,10 @@ export default {
     data() {
         return {
             alert: undefined,
+            alert_add: undefined,
             constructions: undefined,
             selectedConstruction: [],
+            selectedGroup: [],
             addMode: false,
             constructionName: undefined,
             constructionXML: undefined,
@@ -320,7 +317,7 @@ export default {
         };
     },
 
-    mixins: [ToastrMixin],
+    mixins: [AlertMixin, ToastrMixin],
 
     computed: {
         ...mapGetters('users', {
@@ -342,6 +339,10 @@ export default {
         ...mapGetters('classes', {
             findClassesInStore: 'find',
             getClass: 'get',
+        }),
+
+        ...mapGetters('workshops', {
+            getWorkshop: 'get',
         }),
 
         classes() {
@@ -367,10 +368,21 @@ export default {
             findClasses: 'find',
         }),
 
+        ...mapActions('users', {
+            patch: 'patch',
+        }),
+
+        ...mapActions('workshops', {
+            getWorkshopToStore: 'get',
+            createWorkshop: 'create',
+            updateWorkshop: 'update',
+        }),
+
         async selectGroupsInClass(code) {
             this.clearToast();
 
             this.code = code;
+
             this.groupsInClass = await this.findGroups({ query: { class: code } });
 
             if (!this.groupsInClass.length) {
@@ -379,17 +391,26 @@ export default {
         },
 
         async useConstruction() {
-            await this.get(this.selectedConstruction).then((res) => {
-                this.GI.setXML(res.xml);
-            });
+            try {
+                await this.get(this.selectedConstruction).then((res) => {
+                    this.GI.setXML(res.xml);
+                });
+            } catch (error) {
+                this.alert = {
+                    type: 'danger',
+                    message: 'Please select construction',
+                };
+            }
         },
 
         dismissAlert() {
             this.alert = undefined;
+            this.alert_add = undefined;
         },
 
         async deleteConstruction() {
             this.dismissAlert();
+
             try {
                 await this.removeConstruction(this.selectedConstruction);
                 this.selectedConstruction.forEach((construction) => {
@@ -397,8 +418,9 @@ export default {
                         con => con !== construction,
                     );
                 });
+
                 this.alert = {
-                    type: 'sucess',
+                    type: 'success',
                     message: 'Construction Deleted',
                 };
             } catch (error) {
@@ -408,8 +430,9 @@ export default {
                 };
             }
         },
-
         async addConstruction() {
+            this.dismissAlert();
+
             try {
                 await this.createConstruction({
                     name: this.constructionName,
@@ -417,8 +440,12 @@ export default {
                 });
                 this.addMode = false;
                 this.teacher.constructions = [...this.teacher.constructions, this.constructionName];
-            } catch (error) {
                 this.alert = {
+                    type: 'success',
+                    message: 'Construction saved',
+                };
+            } catch (error) {
+                this.alert_add = {
                     type: 'danger',
                     message: error.message,
                 };
@@ -429,13 +456,91 @@ export default {
             this.GI.setXML(freshGeogebraState);
             this.GI.registerGlobalListeners();
         },
+
+        async send(groups) {
+            const xml = this.GI.getXML();
+
+            await this.findGroupsInStore({
+                query: {
+                    name: groups,
+                    class: this.code,
+                },
+            });
+
+            const groupsObjects = await this.findGroups({
+                query: {
+                    name: groups,
+                    class: this.code,
+                },
+            });
+
+            let successes = 0;
+            const promises = [];
+
+            for (let i = 0; i < groupsObjects.length; i += 1) {
+                const g = groupsObjects[i];
+                const promise = this.createOrUpdateWorkshopWithXML(g._id, xml);
+                promises.push(promise);
+            }
+
+            await Promise.all(promises).then((r) => {
+                successes = r.reduce((x, y) => x + y);
+            });
+
+            this.showToast(`Successfully send construction to ${successes}
+            groups out of ${groupsObjects.length} selected`, ((successes === groupsObjects.length) ? 'success' : 'warning'));
+        },
+
+        async sendToAll() {
+            const xml = this.GI.getXML();
+            await this.findGroupsInStore({ query: { class: this.code } });
+
+            const groupsObjects = await this.findGroups({
+                query: {
+                    class: this.code,
+                },
+            });
+
+            let successes = 0;
+            const promises = [];
+
+            for (let i = 0; i < groupsObjects.length; i += 1) {
+                const g = groupsObjects[i];
+                const promise = this.createOrUpdateWorkshopWithXML(g._id, xml);
+                promises.push(promise);
+            }
+
+            await Promise.all(promises).then((r) => {
+                successes = r.reduce((x, y) => x + y);
+            });
+
+            this.showToast(`Successfully send construction to ${successes}
+            groups out of ${groupsObjects.length} selected`, ((successes === groupsObjects.length) ? 'success' : 'warning'));
+        },
+
+        async createOrUpdateWorkshopWithXML(groupId, xml) {
+            try {
+                await this.createWorkshop({ id: groupId, xml });
+                return 1;
+            } catch (error) {
+                let correct = 0;
+                if (error.code === 400) {
+                    await this.updateWorkshop([groupId, { xml }]);
+                    correct = 1;
+                } else {
+                    this.showToast('Error while creating/updating workshop', 'warning');
+                    console.log(error.message);
+                }
+                return correct;
+            }
+        },
     },
 
     mounted() {
         const params = {
             container: 'geogebra_designer',
             id: 'applet',
-            width: 800,
+            width: this.$refs.geogebra_container.clientWidth + 50,
             height: 600,
         };
 

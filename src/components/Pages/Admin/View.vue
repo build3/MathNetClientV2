@@ -24,13 +24,11 @@
                                 <span class="checkmark"></span>
                             </label>
                         </div>
+                        <button class="btn btn-primary p-2 my-3">Merge checked groups</button>
                     </div>
                 </div>
                 <div class="row mt-3">
                     <div class="col-12">
-                        <div class="col-3">
-                            <button class="btn btn-primary p-2">Merge checked groups</button>
-                        </div>
                         <div class="offset-7 col-5">
                             <div class="col-12 class-view-table">
                                 <h2>Select class</h2>
@@ -66,7 +64,6 @@
                                 </table>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -105,7 +102,8 @@ import ToastrMixin from '@/mixins/ToastrMixin.vue';
 const api = feathersClient;
 
 export default {
-    // name: 'View',
+    name: 'View',
+
     data() {
         return {
             code: undefined,
@@ -136,6 +134,7 @@ export default {
             });
         },
     },
+
     methods: {
         ...mapActions('classes', {
             findClasses: 'find',
@@ -147,6 +146,7 @@ export default {
 
         async selectAllGroupsinClass(code) {
             this.clearToast();
+
             this.code = code;
             this.groupsInClass = await this.findGroups({ query: { class: code } });
 
