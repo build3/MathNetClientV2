@@ -20,6 +20,7 @@ export default new Vuex.Store({
 
         service('classes'),
         service('groups'),
+        service('elements'),
         service('constructions'),
         service('workshops', {
             idField: 'id',

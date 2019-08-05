@@ -378,6 +378,11 @@ export default {
             updateWorkshop: 'update',
         }),
 
+        ...mapActions('elements', {
+            removeElement: 'remove',
+            createElement: 'create'
+        }),
+
         async selectGroupsInClass(code) {
             this.clearToast();
 
@@ -413,6 +418,7 @@ export default {
 
             try {
                 await this.removeConstruction(this.selectedConstruction);
+
                 this.selectedConstruction.forEach((construction) => {
                     this.teacher.constructions = this.teacher.constructions.filter(
                         con => con !== construction,
@@ -430,6 +436,7 @@ export default {
                 };
             }
         },
+
         async addConstruction() {
             this.dismissAlert();
 
@@ -438,8 +445,11 @@ export default {
                     name: this.constructionName,
                     xml: this.GI.getXML(),
                 });
+
                 this.addMode = false;
+
                 this.teacher.constructions = [...this.teacher.constructions, this.constructionName];
+
                 this.alert = {
                     type: 'success',
                     message: 'Construction saved',
@@ -524,13 +534,31 @@ export default {
                 return 1;
             } catch (error) {
                 let correct = 0;
+
                 if (error.code === 400) {
-                    await this.updateWorkshop([groupId, { xml }]);
+                    await this.removeElement(null, { workshop: groupId });
+
+                    for (let i = 0; i < this.GI.applet.getObjectNumber(); i += 1) {
+                        const label = this.GI.applet.getObjectName(i);
+
+                        await this.createElement({
+                            id: `${groupId}-${label}`,
+                            name: label,
+                            owner: null,
+                            workshop: groupId,
+                            xml: this.GI.applet.getXML(label),
+                            obj_cmd_str: this.GI.applet.getCommandString(label, false),
+                        });
+                    }
+
+                    // await this.updateWorkshop([groupId, { xml }]);
+
                     correct = 1;
                 } else {
                     this.showToast('Error while creating/updating workshop', 'warning');
                     console.log(error.message);
                 }
+
                 return correct;
             }
         },
