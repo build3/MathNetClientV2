@@ -6,10 +6,6 @@
     height: 100vh;
 }
 
-.ibox-style-extender {
-    //display: none;
-}
-
 .select-extender {
     height: 162px;
 }
@@ -68,6 +64,7 @@ ol.breadcrumb {
 
 .ping-section {
     display: inline-flex;
+    margin-left: 14px;
 
     p:first-child {
         padding: 14px 4px 14px 25px;
@@ -80,6 +77,10 @@ ol.breadcrumb {
         padding: 14px 4px 14px 4px;
         color: #999c9e;
     }
+}
+
+.navbar-top-links li:last-child {
+    margin-right: 45px;
 }
 
 .geogebra-applet {
