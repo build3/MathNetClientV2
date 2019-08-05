@@ -55,20 +55,20 @@ function throttle(func, limit) {
  * Debounce ensures that the function [func] is evaluated after [delay]
  * time since the last call to the function (classic debounce behavior).
  */
-// function debounce(func, delay) {
-//     // [inDebounce] is a variable used to track the delay period.  If
-//     // invoked for the first time, the [func] will execute at the end of
-//     // the delay.  If invoked and then invoked again before the end of the
-//     // delay, the delay restarts.
-//     let inDebounce;
+function debounce(func, delay) {
+    // [inDebounce] is a variable used to track the delay period.  If
+    // invoked for the first time, the [func] will execute at the end of
+    // the delay.  If invoked and then invoked again before the end of the
+    // delay, the delay restarts.
+    let inDebounce;
 
-//     return function (...args) {
-//         const context = this;
+    return function (...args) {
+        const context = this;
 
-//         clearTimeout(inDebounce);
-//         inDebounce = setTimeout(() => func.apply(context, args), delay);
-//     };
-// }
+        clearTimeout(inDebounce);
+        inDebounce = setTimeout(() => func.apply(context, args), delay);
+    };
+}
 
 class StudentClient {
     /**
@@ -174,7 +174,7 @@ class StudentClient {
      */
     registerGlobalListeners() {
         // Setup `window` methods which refer to this object.
-        window[`addListener${this.appletId}`] = throttle(
+        window[`addListener${this.appletId}`] = debounce(
             label => this.onAddElement(label),
             THROTTLE_PERIOD,
         );
@@ -211,8 +211,6 @@ class StudentClient {
      * @param {String} label Name of the Geogebra element
      */
     onUpdateElement(label) {
-        this.log.debug(label);
-
         if (this.ignoreUpdates === false) {
             // Pass event to listener to handle it.
             this.listener.onUpdateElement(label);
@@ -223,8 +221,6 @@ class StudentClient {
      * @param {String} label Name of the Geogebra element
      */
     onAddElement(label) {
-        this.log.debug(label);
-
         if (this.ignoreUpdates === false) {
             // Pass event to listener to handle it.
             this.listener.onAddElement(label);
