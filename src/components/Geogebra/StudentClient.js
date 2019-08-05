@@ -431,7 +431,7 @@ class StudentClient {
     }
 
     getCommandString(label) {
-        return this.applet.getCommandString(label);
+        return this.applet.getCommandString(label, false);
     }
 
     getObjectType(label) {

@@ -115,6 +115,7 @@ export default class StudentListener {
 
             // Emitted when teacher sends construction to a workshop.
             api.service('workshops').on('xml-changed', (workshop) => {
+                this.log.debug('XML has changed', workshop);
                 this.client.setXML(workshop.xml);
             });
 
@@ -160,11 +161,27 @@ export default class StudentListener {
         this.log.debug(label);
 
         const id = StudentListener.getElementId(this.workshopId, label);
+        const caption = this.client.getCaption(label);
+
+        if (StudentListener.isUnassigned(label, caption)) {
+            this.log.debug(`${label} is unassigned, claiming`);
+
+            // Adjust caption and color to differenciate between students.
+            this.client.setCaption(
+                label,
+                StudentListener.getElementCaption(label, this.studentUsername),
+            );
+
+            this.client.setColor(label, this.studentColor);
+        }
 
         setTimeout(() => {
             api.service('elements')
                 // Assume that element exists and update it.
-                .patch(id, { xml: this.client.getXML(label) })
+                .patch(id, {
+                    xml: this.client.getXML(label),
+                    owner: this.studentUsername,
+                })
                 .catch((error) => {
                     this.log.debug(error);
 
