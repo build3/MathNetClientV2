@@ -93,5 +93,15 @@ export default {
             'authenticate',
         ]),
     },
+
+    mounted() {
+        if (this.user) {
+            if (this.user.permissions.indexOf('admin') > -1) {
+                this.$router.push({ name: 'ClassList' });
+            } else {
+                this.$router.push({ name: 'StudentClass' });
+            }
+        }
+    },
 };
 </script>
