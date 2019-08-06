@@ -9,6 +9,16 @@ Vue.use(Vuex);
 Vue.use(FeathersVuex);
 
 export default new Vuex.Store({
+    state: {
+        studentGroup: undefined,
+    },
+
+    mutations: {
+        setStudentGroup(state, group) {
+            state.studentGroup = group;
+        },
+    },
+
     plugins: [
         service('users', {
             actions: {
