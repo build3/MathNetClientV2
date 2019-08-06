@@ -46,6 +46,21 @@ export default class StudentListener {
         this.initializeServerCallbacks();
         this.studentColor = studentColor;
         this.log = log;
+
+        // Elements loaded from the server. [onAddElement] should not
+        // be processed for those elements. Therefore, we need to keep
+        // track of them.
+        this.initialElements = new Set();
+
+        // Claimed elements are the ones that have owners. For such elements,
+        // we should avoid making updates to the server in [onUpdateElement].
+        this.claimed = new Set();
+
+        // Geogebra applet is emitting an 'update' event right after adding
+        // the element (after the 'create' event).. For performance reasons,
+        // we should ignore the update (it doesn't contain any change in
+        // information).
+        this.shouldUpdate = {};
     }
 
     /**
@@ -100,11 +115,13 @@ export default class StudentListener {
         this.onAppletReady = async () => {
             api.service('elements').on('created', (element) => {
                 this.log.debug('Created: ', element.name);
+                this.claimed.add(element.name);
                 this.client.setElement(element);
             });
 
             api.service('elements').on('patched', (element) => {
                 this.log.debug('Patched: ', element.name);
+                this.claimed.add(element.name);
                 this.client.updateElementXML(element.name, element.xml);
             });
 
@@ -140,6 +157,10 @@ export default class StudentListener {
 
                 this.log.debug('Loaded elements:', elements);
 
+                for (const el of elements) {
+                    this.initialElements.add(el.name);
+                };
+
                 this.client.setElements(elements);
 
             // Workshops was not created yet, create it.
@@ -158,6 +179,11 @@ export default class StudentListener {
      * @param {String} label Geogebra element name.
      */
     onUpdateElement(label) {
+        if (!this.shouldUpdate[label]) {
+            this.shouldUpdate[label] = true;
+            return;
+        }
+
         this.log.debug(label);
 
         const id = StudentListener.getElementId(this.workshopId, label);
@@ -165,50 +191,45 @@ export default class StudentListener {
 
         if (StudentListener.isUnassigned(label, caption)) {
             this.log.debug(`${label} is unassigned, claiming`);
-
-            // Adjust caption and color to differenciate between students.
-            this.client.setCaption(
-                label,
-                StudentListener.getElementCaption(label, this.studentUsername),
-            );
-
-            this.client.setColor(label, this.studentColor);
+            this.claimed.delete(label);
+            this.adjustForDisplay(label);
         }
 
-        setTimeout(() => {
-            api.service('elements')
-                // Assume that element exists and update it.
-                .patch(id, {
-                    xml: this.client.getXML(label),
-                    owner: this.studentUsername,
-                })
-                .catch((error) => {
-                    this.log.debug(error);
+        if (!this.claimed.has(label)) {
+            this.log.debug(label, id);
 
-                    // If element does not exists, create the element.
-                    // This covers the case where a student claims
-                    // unnassigned element. That is, the element was loaded
-                    // from construction's XML and exists in the applet but
-                    // was not persisted in the "elements" service.
-                    if (error.code === 404) {
-                        this.sendElement(label);
-                    }
-                });
-        }, 0);
+            setTimeout(() => {
+                api.service('elements')
+                    .patch(id, {
+                        xml: this.client.getXML(label),
+                        owner: this.studentUsername,
+                    })
+            }, 0);
+        } else {
+            this.client.checkLock(label);
+        }
+    }
+
+    /**
+     * Adjust caption and color of the element to differenciate between
+     * elements of different students.
+     */
+    adjustForDisplay(label) {
+        const caption = StudentListener.getElementCaption(label, this.studentUsername);
+        this.client.setCaption(label, caption);
+        this.client.setColor(label, this.studentColor);
     }
 
     /**
      * Callback on element added to the applet.
      */
     onAddElement(label) {
-        this.log.debug(label);
-        const caption = StudentListener.getElementCaption(label, this.studentUsername);
-
-        // Adjust caption and color to differenciate between students.
-        this.client.setCaption(label, caption);
-        this.client.setColor(label, this.studentColor);
-
-        this.sendElement(label);
+        if (!(this.initialElements.has(label) || this.claimed.has(label))) {
+            this.log.debug(label);
+            this.shouldUpdate[label] = false;
+            this.adjustForDisplay(label);
+            this.sendElement(label);
+        }
     }
 
     /**
@@ -225,6 +246,7 @@ export default class StudentListener {
         };
 
         this.log.debug(element);
+
         try {
             await api.service('elements').create(element);
         } catch (error) {

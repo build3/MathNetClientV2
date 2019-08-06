@@ -1,7 +1,7 @@
 <template>
     <div class="student-geogebra">
         <div class="row">
-            <div ref="ibox" class="ibox border-bottom offset-1 col-10">
+            <div ref="ibox" class="ibox col-12">
                 <div class="ibox-title form-inline">
                     <h3 v-if="group">
                         {{ group.name }}, {{ student.username }}
