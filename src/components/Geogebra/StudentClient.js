@@ -306,6 +306,7 @@ class StudentClient {
         }
 
         this.evalXML(element.xml);
+        this.evalCommand('UpdateConstruction()');
         this.checkLock(element.name);
 
         this.ignoreUpdates = false;
