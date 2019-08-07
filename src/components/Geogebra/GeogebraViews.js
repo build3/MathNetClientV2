@@ -40,7 +40,7 @@ export default class {
             ...this.params,
         }));
 
-        this.GAVs = this.multiParams.map(p => new GeogebraAdminView(p, p.groupId));
+        this.GAVs = this.multiParams.map(p => new GeogebraAdminView(p, p.groupId, this));
 
         // eslint-disable-next-line no-underscore-dangle
         this.workshopIds = this.groups.map(g => g._id);
@@ -56,6 +56,8 @@ export default class {
     }
 
     initListener() {
+        console.log('InitListener()');
+
         api.service('elements').on('created', (element) => {
             const pos = this.workshopIds.indexOf(element.workshop);
             if (pos !== -1) {
