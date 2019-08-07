@@ -55,20 +55,20 @@ function throttle(func, limit) {
  * Debounce ensures that the function [func] is evaluated after [delay]
  * time since the last call to the function (classic debounce behavior).
  */
-function debounce(func, delay) {
-    // [inDebounce] is a variable used to track the delay period.  If
-    // invoked for the first time, the [func] will execute at the end of
-    // the delay.  If invoked and then invoked again before the end of the
-    // delay, the delay restarts.
-    let inDebounce;
+// function debounce(func, delay) {
+//     // [inDebounce] is a variable used to track the delay period.  If
+//     // invoked for the first time, the [func] will execute at the end of
+//     // the delay.  If invoked and then invoked again before the end of the
+//     // delay, the delay restarts.
+//     let inDebounce;
 
-    return function (...args) {
-        const context = this;
+//     return function (...args) {
+//         const context = this;
 
-        clearTimeout(inDebounce);
-        inDebounce = setTimeout(() => func.apply(context, args), delay);
-    };
-}
+//         clearTimeout(inDebounce);
+//         inDebounce = setTimeout(() => func.apply(context, args), delay);
+//     };
+// }
 
 class StudentClient {
     /**
@@ -176,10 +176,7 @@ class StudentClient {
         // Setup `window` methods which refer to this object.
         window[`addListener${this.appletId}`] = label => this.onAddElement(label);
 
-        window[`updateListener${this.appletId}`] = throttle(
-            label => this.onUpdateElement(label),
-            THROTTLE_PERIOD,
-        );
+        window[`updateListener${this.appletId}`] = label => this.onUpdateElement(label);
 
         window[`removeListener${this.appletId}`] = throttle(
             label => this.onRemoveElement(label),

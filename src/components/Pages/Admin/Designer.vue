@@ -380,7 +380,7 @@ export default {
 
         ...mapActions('elements', {
             removeElement: 'remove',
-            createElement: 'create'
+            createElement: 'create',
         }),
 
         async selectGroupsInClass(code) {
@@ -541,6 +541,7 @@ export default {
                     for (let i = 0; i < this.GI.applet.getObjectNumber(); i += 1) {
                         const label = this.GI.applet.getObjectName(i);
 
+                        /* eslint-disable-next-line no-await-in-loop */
                         await this.createElement({
                             id: `${groupId}-${label}`,
                             name: label,

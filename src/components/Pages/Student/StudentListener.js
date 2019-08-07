@@ -157,9 +157,10 @@ export default class StudentListener {
 
                 this.log.debug('Loaded elements:', elements);
 
+                /* eslint-disable-next-line no-restricted-syntax */
                 for (const el of elements) {
                     this.initialElements.add(el.name);
-                };
+                }
 
                 this.client.setElements(elements);
 
@@ -203,7 +204,7 @@ export default class StudentListener {
                     .patch(id, {
                         xml: this.client.getXML(label),
                         owner: this.studentUsername,
-                    })
+                    });
             }, 0);
         } else {
             this.client.checkLock(label);
