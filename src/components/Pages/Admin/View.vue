@@ -11,86 +11,134 @@
             </div>
             <div class="ibox-content">
                 <div class="row">
-                    <div class="col-6">
-                        <div class="checkbox form-inline">
-                            <label class="checkbox-container">
-                                Show menu bar
-                                <input type="checkbox">
-                                <span class="checkmark"></span>
-                            </label>
-                            <label class="checkbox-container">
-                                Send toolbar
-                                <input type="checkbox">
-                                <span class="checkmark"></span>
-                            </label>
-                        </div>
-                        <button class="btn btn-primary p-2 my-3">Merge checked groups</button>
-                    </div>
-                </div>
-                <div class="row mt-3">
                     <div class="col-12">
-                        <div class="offset-7 col-5">
-                            <div class="col-12 class-view-table">
-                                <h2>Select class</h2>
-                                <table class="table designer-class-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Code</th>
-                                            <th></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                    <tr v-if="!classes.total > 0">
-                                        <td></td>
-                                        <td>
-                                            No class
-                                        </td>
-                                        <td></td>
-                                    </tr>
-                                        <tr v-for="cl in classes.data" :key="cl.id">
-                                            <td>{{ cl.name }}</td>
-                                            <td>{{ cl.code }}</td>
-                                            <td class="text-center">
-                                                <button
-                                                    v-if="code !== cl.code"
-                                                    @click="selectAllGroupsinClass(cl.code)"
-                                                    class="btn btn-sm btn-primary mr-2">
-                                                    Select
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                        <div class="row">
+                            <div class="col-4">
+                                <!-- <div v-if="classSelected">
+                                    <div class="mt-1 group-choices">
+                                        <h3 class="mb-3">Check groups to merge:</h3>
+                                        <div v-for="g in groupsInClass"
+                                            :key="g._id"
+                                            class="admin-view-check-panel">
+                                                <label class="checkbox-container"
+                                                    :for="`checkbox_${g._id}`">
+                                                    {{ g.name }}
+                                                    <input type="checkbox"
+                                                        :id="`checkbox_${g._id}`"
+                                                        :value="g._id"
+                                                        v-model="checkedGroups">
+                                                    <span class="checkmark"></span>
+                                                </label>
+                                        </div>
+                                        <button class="btn btn-primary p-2 mt-2"
+                                            @click="mergeViews(checkedGroups)">
+                                            Merge checked groups
+                                        </button>
+                                    </div>
+                                    <div class="checkbox form-inline mt-4">
+                                        <label class="checkbox-container">
+                                            Show menu bar
+                                            <input type="checkbox"
+                                                id="menu_bar_checkbox"
+                                                v-model="showMenuBar">
+                                            <span class="checkmark"></span>
+                                        </label>
+
+                                        <label class="checkbox-container">
+                                            Send toolbar
+                                            <input type="checkbox">
+                                            <span class="checkmark"></span>
+                                        </label>
+
+                                    </div>
+                                </div> -->
                             </div>
+                            <div class="offset-3 col-5">
+                                <div class="col-12">
+                                    <h2>Select class</h2>
+                                    <table class="table designer-class-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Code</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-if="!classes.total > 0">
+                                                <td></td>
+                                                <td>
+                                                    No class
+                                                </td>
+                                                <td></td>
+                                            </tr>
+                                            <tr v-for="cl in classes.data" :key="cl.id">
+                                                <td>{{ cl.name }}</td>
+                                                <td>{{ cl.code }}</td>
+                                                <td class="text-center">
+                                                    <button
+                                                        v-if="code !== cl.code"
+                                                        @click="selectAllGroupsinClass(cl.code)"
+                                                        class="btn btn-sm btn-primary mr-2">
+                                                        Select
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <!-- <div v-if="showMergedApplet">
+                                <div class="merged-live-switch">
+                                    <div class="onoffswitch">
+                                        <input type="checkbox" checked
+                                            class="onoffswitch-checkbox"
+                                            id="example1"
+                                            v-model="liveMergeSwitch">
+                                        <label class="onoffswitch-label" for="example1">
+                                            <span class="onoffswitch-inner"></span>
+                                            <span class="onoffswitch-switch"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-if="showMergedApplet"
+                                id="merged_ggb_applet"
+                                class="merged-geogebra-applet"
+                                ref="geogebra_merged_applet_container">
+                                Merged Geogebra Applet Here
+                            </div> -->
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    <div class="ibox border-bottom offset-2 col-8">
-                <div class="ibox-title">
-                    <h5>List groups</h5>
-                </div>
-            <div class="ibox-content">
-                <div class="row">
-                    <div v-for="g in groupsInClass" :key="g._id" class="admin-view-applet-holder">
-                        {{ g.name }}
-                        <div :id="g.domId" class="geogebra-applet"></div>
+        <div class="ibox border-bottom offset-2 col-8">
+                    <div class="ibox-title">
+                        <h5>List groups</h5>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-12 form-inline">
-                        <button class="btn btn-warning p-2">Clear Class</button>
-                        <button class="btn btn-warning p-2 ml-2">Clear Group</button>
+                <div class="ibox-content">
+                    <div class="row">
+                        <div v-for="g in groupsInClass" :key="g._id"
+                            class="admin-view-applet-holder">
+                            <h3>{{ g.name }}</h3>
+                            <div :id="g.domId" class="geogebra-applet"></div>
+                        </div>
                     </div>
+                    <!-- <div class="row">
+                        <div class="col-12 form-inline">
+                            <button class="btn btn-warning p-2">Clear Class</button>
+                            <button class="btn btn-warning p-2 ml-2">Clear Group</button>
+                        </div>
+                    </div> -->
+                <div class="row groups-xml">
+                    <!--All groups xml-->
                 </div>
-            <div class="row groups-xml">
-                <!--All groups xml-->
             </div>
         </div>
     </div>
-</div>
 </template>
 
 <script>
