@@ -7,6 +7,20 @@
                 </div>
             </div>
             <ul class="nav navbar-top-links navbar-right">
+                <li v-if="isStudent && studentGroup !== undefined" class="group-info">
+                    <h4>Group: {{ studentGroup.name }}</h4>
+                </li>
+                <li v-if="isStudent && studentGroup !== undefined">
+                    <router-link
+                        :to="{
+                            name: 'StudentGroup',
+                            params: {
+                            code: studentGroup.class,
+                            },
+                        }">
+                        Leave Group
+                    </router-link>
+                </li>
                 <li v-if="!isLoggedIn">
                     <router-link :to="{name: 'Login'}">
                         Login
@@ -53,7 +67,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters, mapActions, mapState } from 'vuex';
 
 import feathersClient from '../../feathers-client';
 
@@ -79,6 +93,10 @@ export default {
         isStudent() {
             return this.user && this.user.permissions.includes('student');
         },
+
+        ...mapState([
+            'studentGroup',
+        ]),
     },
 
     methods: {
@@ -111,5 +129,6 @@ export default {
     created() {
         this.checkPing();
     },
+
 };
 </script>

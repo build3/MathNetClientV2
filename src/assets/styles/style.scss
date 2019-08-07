@@ -87,6 +87,13 @@ ol.breadcrumb {
     margin-left: .9em;
 }
 
+.geogebra-interface {
+    margin-left: 1.3em;
+    margin-top: 1.3em;
+    margin-bottom: .5em;
+    height: 80vh;
+}
+
 .group-buttons {
     margin-left: .8em;
 }
@@ -189,4 +196,18 @@ table.designer-class-table tr {
 
 .toast-top-center {
     margin-top: 2em !important;
+}
+
+.student-main {
+    .wrapper-content {
+        padding: 0 !important;
+    }
+}
+
+.group-info {
+    h4 {
+        margin-top: 9px;
+        font-size: 1.3em;
+        margin-right: 8px;
+    }
 }

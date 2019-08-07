@@ -2,27 +2,13 @@
     <div class="student-geogebra">
         <div class="row">
             <div ref="ibox" class="ibox col-12">
-                <div class="ibox-title form-inline">
-                    <h3 v-if="group">
-                        {{ group.name }}, {{ student.username }}
-                    </h3>
-                    <div class="leave-option">
-                        <router-link v-if="group"
-                            :to="{
-                                name: 'StudentGroup',
-                                params: {
-                                    code: group.class,
-                                },
-                            }"
-                            class="btn btn-danger">
-                            Leave Group
-                        </router-link>
+                <div class="ibox-content geogebra-frame1">
+                    <div ref="content" class="geogebra-interface">
+                        <div id="geogebra-view">
+                            <!--Geogebra applet-->
+                        </div>
                     </div>
-                </div>
-                <div class="ibox-content geogebra-frame">
-                    <div id="geogebra-view">
-                        <!--Geogebra applet-->
-                    </div>
+
                     <!-- Temporarily disabled; do not remove -->
                     <!-- <div class="control-options">
                         <div class="col-8">
@@ -89,6 +75,7 @@ export default {
 
     created() {
         this.getGroup(this.id);
+        this.$store.commit('setStudentGroup', this.group);
     },
 
     props: {
@@ -106,7 +93,8 @@ export default {
 
         const client = new StudentClient({
             container: 'geogebra-view',
-            width: this.$refs.ibox.clientWidth,
+            width: this.$refs.content.clientWidth,
+            height: this.$refs.content.clientHeight,
             log: this.$log,
         });
 
@@ -119,6 +107,10 @@ export default {
         );
 
         client.initApplet(listener);
+    },
+
+    beforeDestroy() {
+        this.$store.commit('setStudentGroup', undefined);
     },
 };
 </script>
