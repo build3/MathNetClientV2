@@ -357,13 +357,12 @@ class StudentClient {
 
         // Element is free for movable by the student.
         if (this.listener.isMovable(label, caption)) {
-            this.setFixed(label, objType !== Consts.POINT);
-
-            // if (objType === Consts.NUMERIC || objType === Consts.TEXTFIELD) {
-            //     this.setFixed(label, false, /* is selection allowed */ true);
-            // } else {
-            //     this.setFixed(label, false);
-            // }
+            // this.setFixed(label, objType !== Consts.POINT);
+            if (objType === Consts.NUMERIC || objType === Consts.TEXTFIELD) {
+                this.setFixed(label, false, /* is selection allowed */ true);
+            } else {
+                this.setFixed(label, false);
+            }
         // Someone else is the owner of the object.
         } else if (!this.listener.isOwner(label, caption)) {
             if (objType === Consts.NUMERIC || objType === Consts.TEXTFIELD) {
