@@ -150,6 +150,7 @@ class GeogebraAdminView {
     setConstruction(xml) {
         this.ignoreUpdates = true;
         this.evalXML(xml);
+        this.evalCommand('UpdateConstruction()');
         this.checkLocks();
         this.ignoreUpdates = false;
     }
@@ -167,6 +168,7 @@ class GeogebraAdminView {
         }
 
         this.evalXML(element.xml);
+        this.evalCommand('UpdateConstruction()');
         this.checkLock(element.name);
 
         this.ignoreUpdates = false;
@@ -189,6 +191,7 @@ class GeogebraAdminView {
             }
 
             this.evalXML(el.xml);
+            this.evalCommand('UpdateConstruction()');
 
             if (el.colors) {
                 const [red, green, blue] = el.colors;
@@ -208,6 +211,7 @@ class GeogebraAdminView {
     updateElementXML(label, xml) {
         this.ignoreUpdates = true;
         this.evalXML(xml);
+        this.evalCommand('UpdateConstruction()');
         this.ignoreUpdates = false;
     }
 
