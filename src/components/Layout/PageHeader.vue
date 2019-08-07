@@ -21,7 +21,7 @@
                         Register Student
                     </router-link>
                 </li>
-                <li v-if="!isLoggedIn">
+                <li v-if="!isLoggedIn" class="register-teacher">
                     <router-link
                         :to="{
                             name: 'Register',
