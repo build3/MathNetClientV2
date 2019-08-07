@@ -7,6 +7,14 @@ import store from '../store';
 
 Vue.use(Router);
 
+function destinationError(to, from, next) {
+    if (store.state.auth.user) {
+        next('/404');
+    } else {
+        next('/users/login');
+    }
+}
+
 function proceed(permission, next) {
     if (store.state.auth.user.permissions.includes(permission)) {
         next();
@@ -74,8 +82,6 @@ export default new Router({
                 permissions: 'admin',
             },
         },
-        { path: '/404', name: 'NotFound', component: Pages.Admin.NotFound },
-        { path: '*', redirect: '/404' },
 
         {
             path: '/users',
@@ -100,6 +106,7 @@ export default new Router({
                     component: Pages.Users.Profile,
                     props: true,
                 },
+                { path: '*', redirect: '/404' },
             ],
         },
 
@@ -126,7 +133,6 @@ export default new Router({
                     component: Pages.Classes.Details,
                     props: true,
                 },
-                { path: '/404', name: 'NotFound', component: Pages.NotFound },
                 { path: '*', redirect: '/404' },
             ],
         },
@@ -157,9 +163,10 @@ export default new Router({
                     component: Pages.Student.Group,
                     props: true,
                 },
-                { path: '/404', name: 'NotFound', component: Pages.NotFound },
                 { path: '*', redirect: '/404' },
             ],
         },
+        { path: '/404', name: 'NotFound', component: Pages.Admin.NotFound },
+        { path: '*', beforeEnter: destinationError },
     ],
 });
