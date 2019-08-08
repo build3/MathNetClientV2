@@ -90,7 +90,7 @@ export default class StudentListener {
     }
 
     static isUnassigned(label, caption) {
-        return caption === `${label}_{${Consts.UNASSIGNED}}`;
+        return caption === StudentListener.getElementCaption(label, Consts.UNASSIGNED);
     }
 
     isOwner(label, caption) {
