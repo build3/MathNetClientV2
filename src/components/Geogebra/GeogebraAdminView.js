@@ -130,7 +130,9 @@ class GeogebraAdminView {
         this.log.debug();
         this.applet = this.appletContainer.getAppletObject();
         this.isInitialized = true;
+
         this.onAppletReady();
+        this.centerView();
     }
 
     getXML() {
@@ -151,6 +153,10 @@ class GeogebraAdminView {
 
     getObjectNumber() {
         return this.applet.getObjectNumber();
+    }
+
+    centerView() {
+        this.evalCommand('CenterView[(0,0)]');
     }
 
     async onAppletReady() {
