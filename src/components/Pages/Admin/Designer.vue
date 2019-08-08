@@ -381,6 +381,7 @@ export default {
             try {
                 await this.get(this.selectedConstruction).then((res) => {
                     this.GI.setXML(res.xml);
+                    this.GI.registerGlobalListeners();
                 });
             } catch (error) {
                 this.alert = {
