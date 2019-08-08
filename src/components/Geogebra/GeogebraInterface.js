@@ -1,7 +1,9 @@
 import ggbBase64 from '../../helpers/ggbbase64';
+import StudentListener from '../Pages/Student/StudentListener';
 
 const POINT = 'point';
 const CAPTION_STYLE = 3;
+const UNASSIGNED = 'unassigned';
 
 export default class {
     constructor(params) {
@@ -68,7 +70,8 @@ export default class {
 
     onAddElement(label) {
         if (!this.ignoreUpdates) {
-            this.setCaption(label, `${label}_{unassigned}`);
+            const caption = StudentListener.getElementCaption(label, UNASSIGNED);
+            this.setCaption(label, caption);
         }
     }
 
