@@ -34,7 +34,7 @@ const Consts = {
 };
 
 class GeogebraAdminView {
-    constructor(params, workshopId) {
+    constructor(params, workshopId /* geogebraViewsParent */) {
         this.params = {
             showAlgebraInput: true,
             showToolBarHelp: false,
@@ -52,14 +52,22 @@ class GeogebraAdminView {
             isPreloader: false,
             screenshotGenerator: false,
             preventFocus: false,
+            log: undefined,
             ...params,
         };
+
+        this.log = this.params.log;
 
         this.workshopId = workshopId;
 
         GeogebraAdminView.registerApplet(this.params.id, this.ggbOnInit.bind(this));
+
         // eslint-disable-next-line no-undef
         this.appletContainer = new GGBApplet(this.params);
+
+        window.ggbOnInit = GeogebraAdminView.globalInitHandler;
+
+        this.ignoreUpdates = false;
     }
 
     static initRegistry() {
@@ -89,9 +97,12 @@ class GeogebraAdminView {
     }
 
     ggbOnInit() {
+        this.log.debug();
         this.applet = this.appletContainer.getAppletObject();
         this.isInitialized = true;
+
         this.onAppletReady();
+        this.centerView();
     }
 
     getXML() {
@@ -114,7 +125,12 @@ class GeogebraAdminView {
         return this.applet.getObjectNumber();
     }
 
+    centerView() {
+        this.evalCommand('CenterView[(0,0)]');
+    }
+
     async onAppletReady() {
+        this.log.debug();
         // Load current state of the workshops.
 
         // eslint-disable-next-line prefer-const
@@ -150,6 +166,7 @@ class GeogebraAdminView {
     setConstruction(xml) {
         this.ignoreUpdates = true;
         this.evalXML(xml);
+        this.evalCommand('UpdateConstruction()');
         this.checkLocks();
         this.ignoreUpdates = false;
     }
@@ -167,6 +184,7 @@ class GeogebraAdminView {
         }
 
         this.evalXML(element.xml);
+        this.evalCommand('UpdateConstruction()');
         this.checkLock(element.name);
 
         this.ignoreUpdates = false;
@@ -189,6 +207,7 @@ class GeogebraAdminView {
             }
 
             this.evalXML(el.xml);
+            this.evalCommand('UpdateConstruction()');
 
             if (el.colors) {
                 const [red, green, blue] = el.colors;
@@ -208,6 +227,7 @@ class GeogebraAdminView {
     updateElementXML(label, xml) {
         this.ignoreUpdates = true;
         this.evalXML(xml);
+        this.evalCommand('UpdateConstruction()');
         this.ignoreUpdates = false;
     }
 
@@ -226,7 +246,5 @@ class GeogebraAdminView {
         }
     }
 }
-
-window.ggbOnInit = GeogebraAdminView.globalInitHandler;
 
 export default GeogebraAdminView;

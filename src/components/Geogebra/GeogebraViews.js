@@ -8,8 +8,8 @@ export default class {
         this.groups = groups;
 
         this.params = {
-            width: 300,
-            height: 300,
+            width: 600,
+            height: 600,
             perspective: 'G',
             // showAlgebraInput: false,
             showToolBarHelp: false,
@@ -27,8 +27,11 @@ export default class {
             isPreloader: false,
             screenshotGenerator: false,
             preventFocus: true,
+            log: undefined,
             ...params,
         };
+
+        this.log = this.params.log;
 
         this.multiParams = this.groups.map(g => ({
             // eslint-disable-next-line no-underscore-dangle
@@ -40,22 +43,23 @@ export default class {
             ...this.params,
         }));
 
-        this.GAVs = this.multiParams.map(p => new GeogebraAdminView(p, p.groupId));
+        this.GAVs = this.multiParams.map(p => new GeogebraAdminView(p, p.groupId, this));
 
         // eslint-disable-next-line no-underscore-dangle
         this.workshopIds = this.groups.map(g => g._id);
     }
 
     inject() {
+        this.initListener();
+
         this.GAVs.forEach((GAV) => {
             GAV.inject();
         });
-
-        setTimeout(() => this.initListener(), 5000); // this should be in inject callback, not here
-        // problem is to make such a callback
     }
 
     initListener() {
+        this.log.debug('initListener');
+
         api.service('elements').on('created', (element) => {
             const pos = this.workshopIds.indexOf(element.workshop);
             if (pos !== -1) {
