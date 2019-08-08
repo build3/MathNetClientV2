@@ -431,8 +431,6 @@ export default {
 
                 this.addMode = false;
 
-                this.teacher.constructions = [...this.teacher.constructions, this.constructionName];
-
                 this.alert = {
                     type: 'success',
                     message: 'Construction saved',
