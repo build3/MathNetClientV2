@@ -211,7 +211,7 @@ export default {
                 this.$log.debug(this.groupsInClass);
 
                 await api.service('users').patch(this.user.username, {
-                    workshops: this.groupsInClass.map(e => e._id),
+                    workshops: this.groupsInClass.map(g => g._id),
                 });
 
                 this.GeogebraViews = new GeogebraViews(this.groupsInClass, {

@@ -61,7 +61,7 @@ class GeogebraAdminView {
         this.workshopId = workshopId;
 
         GeogebraAdminView.registerApplet(this.params.id, this.ggbOnInit.bind(this));
-        // GeogebraAdminView.registerParentViewObject(geogebraViewsParent);
+
         // eslint-disable-next-line no-undef
         this.appletContainer = new GGBApplet(this.params);
 
@@ -81,31 +81,6 @@ class GeogebraAdminView {
         GeogebraAdminView.appletRegistry[appletId] = initCallback;
     }
 
-    // static registerParentViewObject(geogebraViewsObject) {
-    //     console.log('registerParentViewObject');
-    //     if (!GeogebraAdminView.parentObject) {
-    //         GeogebraAdminView.parentObject = geogebraViewsObject;
-    //     }
-    // }
-    //
-    // static checkIfAllObjectsInitialized() {
-    //     const num = GeogebraAdminView.parentObject.GVs.length;
-    //     let numInitialized = 0;
-    //
-    //     console.log('num, numInitialized', num, numInitialized);
-    //
-    //     GeogebraAdminView.parentObject.GVs.forEach((obj) => {
-    //         if (obj.isInitialized) numInitialized += 1;
-    //     });
-    //
-    //     if (num === numInitialized) {
-    //         console.log('All objects initialized, firing initListener');
-    //         GeogebraAdminView.parentObject.initListener();
-    //     } else {
-    //         console.log('Not all objects initialized');
-    //     }
-    // }
-
     static globalInitHandler(applet) {
         console.log(`Initializing ${applet}`);
         GeogebraAdminView.initRegistry();
@@ -115,11 +90,6 @@ class GeogebraAdminView {
         } else {
             console.log(`Could not find applet for ID ${applet}`);
         }
-
-        // if (GeogebraAdminView.parentObject) {
-        //     console.log('checkIfAllObjectsInitialized');
-        //     GeogebraAdminView.checkIfAllObjectsInitialized();
-        // }
     }
 
     inject() {
