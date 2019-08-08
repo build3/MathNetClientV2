@@ -8,8 +8,8 @@ export default class {
         this.groups = groups;
 
         this.params = {
-            width: 300,
-            height: 300,
+            width: 600,
+            height: 600,
             perspective: 'G',
             // showAlgebraInput: false,
             showToolBarHelp: false,
@@ -27,8 +27,11 @@ export default class {
             isPreloader: false,
             screenshotGenerator: false,
             preventFocus: true,
+            log: undefined,
             ...params,
         };
+
+        this.log = this.params.log;
 
         this.multiParams = this.groups.map(g => ({
             // eslint-disable-next-line no-underscore-dangle
@@ -55,7 +58,7 @@ export default class {
     }
 
     initListener() {
-        console.log('InitListener()');
+        this.log.debug('initListener');
 
         api.service('elements').on('created', (element) => {
             const pos = this.workshopIds.indexOf(element.workshop);

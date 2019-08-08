@@ -1,15 +1,10 @@
 <template>
     <div class="view">
-        <div class="row">
-            <div class="offset-2 col-8">
-                <h1 class="ml-2">Class view</h1>
-            </div>
-        </div>
-        <div class="ibox border-bottom offset-2 col-8">
+        <div class="ibox border-bottom col-12">
             <div class="ibox-title">
                 <h5>Groups</h5>
             </div>
-            <div class="ibox-content">
+            <div ref="ibox_content" class="ibox-content">
                 <div class="row">
                     <div class="col-12">
                         <div class="row">
@@ -53,40 +48,38 @@
                                     </div>
                                 </div> -->
                             </div>
-                            <div class="offset-3 col-5">
-                                <div class="col-12">
-                                    <h2>Select class</h2>
-                                    <table class="table designer-class-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Name</th>
-                                                <th>Code</th>
-                                                <th></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr v-if="!classes.total > 0">
-                                                <td></td>
-                                                <td>
-                                                    No class
-                                                </td>
-                                                <td></td>
-                                            </tr>
-                                            <tr v-for="cl in classes.data" :key="cl.id">
-                                                <td>{{ cl.name }}</td>
-                                                <td>{{ cl.code }}</td>
-                                                <td class="text-center">
-                                                    <button
-                                                        v-if="code !== cl.code"
-                                                        @click="selectAllGroupsinClass(cl.code)"
-                                                        class="btn btn-sm btn-primary mr-2">
-                                                        Select
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+                            <div class="col-12">
+                                <h2>Select class</h2>
+                                <table class="table designer-class-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Code</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-if="!classes.total > 0">
+                                            <td></td>
+                                            <td>
+                                                No class
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                        <tr v-for="cl in classes.data" :key="cl.id">
+                                            <td>{{ cl.name }}</td>
+                                            <td>{{ cl.code }}</td>
+                                            <td class="text-center">
+                                                <button
+                                                    v-if="code !== cl.code"
+                                                    @click="selectAllGroupsinClass(cl.code)"
+                                                    class="btn btn-sm btn-primary mr-2">
+                                                    Select
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                         <div class="col-12">
@@ -115,7 +108,7 @@
                 </div>
             </div>
         </div>
-        <div class="ibox border-bottom offset-2 col-8">
+        <div class="ibox border-bottom col-12">
                     <div class="ibox-title">
                         <h5>List groups</h5>
                     </div>
@@ -193,6 +186,8 @@ export default {
         }),
 
         async selectAllGroupsinClass(code) {
+            this.$log.debug(code);
+
             this.clearToast();
 
             this.code = code;
@@ -210,12 +205,20 @@ export default {
         },
 
         async loadApplets() {
+            this.$log.debug();
+
             if (this.groupsInClass && this.groupsInClass.length) {
+                this.$log.debug(this.groupsInClass);
+
                 await api.service('users').patch(this.user.username, {
                     workshops: this.groupsInClass.map(e => e._id),
                 });
 
-                this.GeogebraViews = new GeogebraViews(this.groupsInClass);
+                this.GeogebraViews = new GeogebraViews(this.groupsInClass, {
+                    log: this.$log,
+                    width: this.$refs.ibox_content.clientWidth - 60,
+                });
+
                 this.GeogebraViews.inject();
             }
         },
