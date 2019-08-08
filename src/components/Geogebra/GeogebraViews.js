@@ -47,12 +47,11 @@ export default class {
     }
 
     inject() {
+        this.initListener();
+
         this.GAVs.forEach((GAV) => {
             GAV.inject();
         });
-
-        setTimeout(() => this.initListener(), 5000); // this should be in inject callback, not here
-        // problem is to make such a callback
     }
 
     initListener() {
