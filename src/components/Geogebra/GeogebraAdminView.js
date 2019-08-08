@@ -52,8 +52,11 @@ class GeogebraAdminView {
             isPreloader: false,
             screenshotGenerator: false,
             preventFocus: false,
+            log: undefined,
             ...params,
         };
+
+        this.log = this.params.log;
 
         this.workshopId = workshopId;
 
@@ -61,6 +64,8 @@ class GeogebraAdminView {
         // GeogebraAdminView.registerParentViewObject(geogebraViewsParent);
         // eslint-disable-next-line no-undef
         this.appletContainer = new GGBApplet(this.params);
+
+        window.ggbOnInit = GeogebraAdminView.globalInitHandler;
 
         this.ignoreUpdates = false;
     }
@@ -122,6 +127,7 @@ class GeogebraAdminView {
     }
 
     ggbOnInit() {
+        this.log.debug();
         this.applet = this.appletContainer.getAppletObject();
         this.isInitialized = true;
         this.onAppletReady();
@@ -148,6 +154,7 @@ class GeogebraAdminView {
     }
 
     async onAppletReady() {
+        this.log.debug();
         // Load current state of the workshops.
 
         // eslint-disable-next-line prefer-const
@@ -263,7 +270,5 @@ class GeogebraAdminView {
         }
     }
 }
-
-window.ggbOnInit = GeogebraAdminView.globalInitHandler;
 
 export default GeogebraAdminView;
