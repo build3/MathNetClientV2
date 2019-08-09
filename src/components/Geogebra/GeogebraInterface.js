@@ -1,9 +1,5 @@
-import ggbBase64 from '../../helpers/ggbbase64';
+import Consts from './Consts';
 import StudentListener from '../Pages/Student/StudentListener';
-
-const POINT = 'point';
-const CAPTION_STYLE = 3;
-const UNASSIGNED = 'unassigned';
 
 export default class {
     constructor(params) {
@@ -12,25 +8,8 @@ export default class {
             id: 'geogebra_designer',
             width: 800,
             height: 600,
-            perspective: 'AG',
-            showAlgebraInput: true,
-            showToolBarHelp: false,
-            showMenubar: true,
-            enableLabelDrags: false,
-            showResetIcon: true,
-            showToolbar: true,
-            allowStyleBar: false,
-            useBrowserForJS: true,
-            enableShiftDragZoom: true,
-            errorDialogsActive: true,
-            enableRightClick: false,
-            enableCAS: false,
-            enable3d: false,
-            isPreloader: false,
-            screenshotGenerator: false,
-            preventFocus: false,
             scaleContainerClass: 'appletContainer',
-            ggbBase64,
+            ...Consts.DEFAULT_PARAMS,
             ...params,
         };
 
@@ -70,7 +49,7 @@ export default class {
 
     onAddElement(label) {
         if (!this.ignoreUpdates) {
-            const caption = StudentListener.getElementCaption(label, UNASSIGNED);
+            const caption = StudentListener.getElementCaption(label, Consts.UNASSIGNED);
             this.setCaption(label, caption);
         }
     }
@@ -78,8 +57,8 @@ export default class {
     setCaption(objectLabel, caption) {
         this.ignoreUpdates = true;
         const objType = this.applet.getObjectType(objectLabel);
-        if (objType === POINT) {
-            this.applet.setLabelStyle(objectLabel, CAPTION_STYLE);
+        if (objType === Consts.POINT) {
+            this.applet.setLabelStyle(objectLabel, Consts.CAPTION_STYLE);
         }
         this.applet.setCaption(objectLabel, caption);
         this.ignoreUpdates = false;

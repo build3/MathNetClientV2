@@ -1,37 +1,11 @@
+import Consts from './Consts';
+
 /**
  * [StudentClient] provides API for managing Geogebra applet for students.
  * Its public API operates as an event emitter for [listener] argument.
  */
 
 const THROTTLE_PERIOD = 50; // (ms)
-
-// Initial state of the Geogebra applet encoded in Base64
-const initialState = require('../../helpers/ggbbase64');
-
-const Consts = {
-    // Geogebra specific options
-
-    // Caption style related to label style
-    // determining how objects' names are displayed in
-    // the applet. Caption style means that objects are
-    // named by their captions.
-    CAPTION_STYLE: 3, // 3 is a magic value for Geogebra's API
-
-    POINT: 'point',
-    TEXTFIELD: 'textfield',
-    NUMERIC: 'numeric',
-
-    /**
-     * GGB commands have the following
-     * format: <object-label>:<command-body>.
-     *
-     * @param {String} label
-     * @param {String} cmdStrBody
-     */
-    getCommand(label, cmdStrBody) {
-        return `${label}:${cmdStrBody}`;
-    },
-};
 
 /**
  * Throttle ensures that function [func] is evaluated at most once per
@@ -70,7 +44,7 @@ function throttle(func, limit) {
 //     };
 // }
 
-class StudentClient {
+export default class StudentClient {
     /**
      * @param {Object} params Geogebra applet parameters
      * (https://wiki.geogebra.org/en/Reference:GeoGebra_App_Parameters).
@@ -83,27 +57,9 @@ class StudentClient {
             id: 'applet',
             width: 800,
             height: 600,
-            perspective: 'AG',
-            showAlgebraInput: true,
-            showToolBarHelp: false,
-            showMenubar: true,
-            enableLabelDrags: false,
-            showResetIcon: true,
-            showToolbar: true,
-            allowStyleBar: false,
-            useBrowserForJS: true,
-            enableShiftDragZoom: true,
-            errorDialogsActive: true,
-            enableRightClick: false,
-            enableCAS: false,
-            enable3d: false,
-            isPreloader: false,
-            screenshotGenerator: false,
-            preventFocus: false,
             scaleContainerClass: 'appletContainer',
             resizeFactor: 1.0,
-            // Initial Geogebra state encoded in Base64
-            initialState,
+            ...Consts.DEFAULT_PARAMS,
             ...params,
         };
 
@@ -454,8 +410,3 @@ class StudentClient {
         this.applet.setFixed(label, isFixed, isSelectable);
     }
 }
-
-module.exports = {
-    StudentClient,
-    Consts,
-};

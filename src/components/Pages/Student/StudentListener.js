@@ -1,3 +1,5 @@
+import Consts from '../../Geogebra/Consts';
+
 /**
  * {StudentListener} is an adapter between Geogebra and server.
  * It dispatches/responds to events from the server related to manipulation
@@ -20,11 +22,6 @@ const numberToSuper = {
     7: '⁷',
     8: '⁸',
     9: '⁹',
-};
-
-const Consts = {
-    // Ownership indicators
-    UNASSIGNED: 'unassigned',
 };
 
 export default class StudentListener {

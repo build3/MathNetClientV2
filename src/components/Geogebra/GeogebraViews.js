@@ -1,3 +1,4 @@
+import Consts from './Consts';
 import GeogebraAdminView from './GeogebraAdminView';
 import feathersClient from '../../feathers-client';
 
@@ -8,26 +9,13 @@ export default class {
         this.groups = groups;
 
         this.params = {
+            ...Consts.DEFAULT_PARAMS,
             width: 600,
             height: 600,
             perspective: 'G',
-            // showAlgebraInput: false,
-            showToolBarHelp: false,
             showMenubar: false,
-            enableLabelDrags: false,
-            showResetIcon: false,
             showToolbar: false,
-            allowStyleBar: false,
-            useBrowserForJS: true,
-            enableShiftDragZoom: true,
-            errorDialogsActive: true,
-            enableRightClick: false,
-            enableCAS: false,
-            enable3d: false,
-            isPreloader: false,
-            screenshotGenerator: false,
             preventFocus: true,
-            log: undefined,
             ...params,
         };
 

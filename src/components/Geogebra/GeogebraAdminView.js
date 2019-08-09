@@ -1,58 +1,12 @@
+import Consts from './Consts';
 import feathersClient from '../../feathers-client';
 
 const api = feathersClient;
 
-const Consts = {
-    // Ownership indicators
-
-    UNASSIGNED: 'unassigned',
-    ADMIN: 'admin', // ~teacher
-    USERNAME: 'username',
-
-    // Geogebra specific options
-
-    // Caption style related to label style
-    // determining how objects' names are displayed in
-    // the applet. Caption style means that objects are
-    // named by their captions.
-    CAPTION_STYLE: 3,
-
-    POINT: 'point',
-    TEXTFIELD: 'textfield',
-    NUMERIC: 'numeric',
-
-    /**
-     * GGB commands have the following
-     * format: <object-label>:<command-body>.
-     *
-     * @param {String} label
-     * @param {String} cmdStrBody
-     */
-    getCommand(label, cmdStrBody) {
-        return `${label}:${cmdStrBody}`;
-    },
-};
-
 class GeogebraAdminView {
     constructor(params, workshopId /* geogebraViewsParent */) {
         this.params = {
-            showAlgebraInput: true,
-            showToolBarHelp: false,
-            showMenubar: true,
-            enableLabelDrags: false,
-            showResetIcon: true,
-            showToolbar: true,
-            allowStyleBar: false,
-            useBrowserForJS: true,
-            enableShiftDragZoom: true,
-            errorDialogsActive: true,
-            enableRightClick: false,
-            enableCAS: false,
-            enable3d: false,
-            isPreloader: false,
-            screenshotGenerator: false,
-            preventFocus: false,
-            log: undefined,
+            ...Consts.DEFAULT_PARAMS,
             ...params,
         };
 
