@@ -61,6 +61,21 @@ class GeogebraAdminView extends BaseGeogebraClient {
         this.centerView();
     }
 
+    /**
+     * Completely reset XML content of the applet.
+     *
+     * @param {String} xml
+     */
+    setXML(xml) {
+        this.log.debug(xml);
+        this.ignoreUpdates = true;
+
+        this.applet.setXML(xml);
+        this.checkLocks();
+
+        this.ignoreUpdates = false;
+    }
+
     centerView() {
         this.evalCommand('CenterView[(0,0)]');
     }
