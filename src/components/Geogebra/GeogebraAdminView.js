@@ -1,10 +1,12 @@
+import BaseGeogebraClient from './BaseGeogebraClient';
 import Consts from './Consts';
 import feathersClient from '../../feathers-client';
 
 const api = feathersClient;
 
-class GeogebraAdminView {
-    constructor(params, workshopId /* geogebraViewsParent */) {
+class GeogebraAdminView extends BaseGeogebraClient {
+    constructor(params, workshopId) {
+        super();
         this.params = {
             ...Consts.DEFAULT_PARAMS,
             ...params,
@@ -59,26 +61,6 @@ class GeogebraAdminView {
         this.centerView();
     }
 
-    getXML() {
-        return this.applet.getXML();
-    }
-
-    setXML(xml) {
-        this.applet.setXML(xml);
-    }
-
-    evalXML(xml) {
-        this.applet.evalXML(xml);
-    }
-
-    evalCommand(command) {
-        this.applet.evalCommand(command);
-    }
-
-    getObjectNumber() {
-        return this.applet.getObjectNumber();
-    }
-
     centerView() {
         this.evalCommand('CenterView[(0,0)]');
     }
@@ -117,87 +99,8 @@ class GeogebraAdminView {
         }
     }
 
-    setConstruction(xml) {
-        this.ignoreUpdates = true;
-        this.evalXML(xml);
-        this.evalCommand('UpdateConstruction()');
-        this.checkLocks();
-        this.ignoreUpdates = false;
-    }
-
-    /**
-     * @param {Object} element
-     */
-    setElement(element) {
-        this.ignoreUpdates = true;
-
-        if (element.obj_cmd_str !== '') {
-            // TODO: Explain this
-            const command = Consts.getCommand(element.name, element.obj_cmd_str);
-            this.evalCommand(command);
-        }
-
-        this.evalXML(element.xml);
-        this.evalCommand('UpdateConstruction()');
-        this.checkLock(element.name);
-
-        this.ignoreUpdates = false;
-    }
-
-    /**
-     * @param {Array[Object]} elements
-     */
-    setElements(elements) {
-        this.ignoreUpdates = true;
-
-        elements.forEach((el) => {
-            // If the element is a compound (e.g. a polygon),
-            // it should have a command string assigned which is to
-            // be evaluated by the applet.
-            if (el.obj_cmd_str !== '') {
-                // TODO: Explain this
-                const command = Consts.getCommand(el.name, el.obj_cmd_str);
-                this.evalCommand(command);
-            }
-
-            this.evalXML(el.xml);
-            this.evalCommand('UpdateConstruction()');
-
-            if (el.colors) {
-                const [red, green, blue] = el.colors;
-                this.setColor(el.name, red, green, blue);
-            }
-
-            this.checkLock(el.name);
-        });
-
-        this.ignoreUpdates = false;
-    }
-
-    /**
-     * @param {String} label
-     * @param {String} xml
-     */
-    updateElementXML(label, xml) {
-        this.ignoreUpdates = true;
-        this.evalXML(xml);
-        this.evalCommand('UpdateConstruction()');
-        this.ignoreUpdates = false;
-    }
-
     checkLock(label) {
         this.applet.setFixed(label, true);
-    }
-
-    /**
-     * This function grabs all objects in the construction, and sets a
-     * lock on them if the username in the caption is not the current user.
-     */
-    checkLocks() {
-        for (let i = 0; i < this.getObjectNumber(); i += 1) {
-            const label = this.applet.getObjectName(i);
-            this.checkLock(label);
-        }
     }
 }
 

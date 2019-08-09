@@ -1,8 +1,10 @@
+import BaseGeogebraClient from './BaseGeogebraClient';
 import Consts from './Consts';
 import StudentListener from '../Pages/Student/StudentListener';
 
-export default class {
+export default class extends BaseGeogebraClient {
     constructor(params) {
+        super();
         this.params = {
             container: 'geogebra_designer',
             id: 'geogebra_designer',
@@ -33,12 +35,18 @@ export default class {
         this.registerGlobalListeners();
     }
 
-    getXML() {
-        return this.applet.getXML();
-    }
-
+    /**
+     * Completely reset XML content of the applet.
+     *
+     * @param {String} xml
+     */
     setXML(xml) {
+        this.ignoreUpdates = true;
+
         this.applet.setXML(xml);
+        this.registerGlobalListeners();
+
+        this.ignoreUpdates = false;
     }
 
     registerGlobalListeners() {

@@ -381,7 +381,6 @@ export default {
             try {
                 await this.get(this.selectedConstruction).then((res) => {
                     this.GI.setXML(res.xml);
-                    this.GI.registerGlobalListeners();
                 });
             } catch (error) {
                 this.alert = {
@@ -445,7 +444,6 @@ export default {
 
         resetView() {
             this.GI.setXML(freshGeogebraState);
-            this.GI.registerGlobalListeners();
         },
 
         async send(groups) {
