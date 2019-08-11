@@ -67,29 +67,24 @@ export default class BaseGeogebraClient {
      * @param {Array[Object]} elements
      */
     setElements(elements) {
+        this.log.debug(elements);
         this.ignoreUpdates = true;
 
-        elements.forEach((el) => {
+        /* eslint-disable-next-line no-restricted-syntax */
+        for (const el of elements) {
             // If the element is a compound (e.g. a polygon),
             // it should have a command string assigned which is to
             // be evaluated by the applet.
             if (el.obj_cmd_str !== '') {
-                // TODO: Explain this
                 const command = Consts.getCommand(el.name, el.obj_cmd_str);
                 this.evalCommand(command);
             }
 
             this.evalXML(el.xml);
-            this.evalCommand('UpdateConstruction()');
-
-            if (el.colors) {
-                const [red, green, blue] = el.colors;
-                this.setColor(el.name, red, green, blue);
-            }
-
             this.checkLock(el.name);
-        });
+        }
 
+        this.evalCommand('UpdateConstruction()');
         this.ignoreUpdates = false;
     }
 
