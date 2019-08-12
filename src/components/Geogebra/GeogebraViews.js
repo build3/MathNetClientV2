@@ -49,31 +49,35 @@ export default class {
         this.log.debug('initListener');
 
         api.service('elements').on('created', (element) => {
-            const pos = this.workshopIds.indexOf(element.workshop);
-            if (pos !== -1) {
-                this.GAVs[pos].setElement(element);
+            const index = this.workshopIds.indexOf(element.workshop);
+
+            if (index !== -1) {
+                this.GAVs[index].setElement(element);
             }
         });
 
         api.service('elements').on('patched', (element) => {
-            const pos = this.workshopIds.indexOf(element.workshop);
-            if (pos !== -1) {
-                this.GAVs[pos].updateElementXML(element.name, element.xml);
+            const index = this.workshopIds.indexOf(element.workshop);
+
+            if (index !== -1) {
+                this.GAVs[index].updateElementXML(element.name, element.xml);
             }
         });
 
         api.service('elements').on('removed', (element) => {
-            const pos = this.workshopIds.indexOf(element.workshop);
-            if (pos !== -1) {
-                this.GAVs[pos].deleteObject(element.name);
+            const index = this.workshopIds.indexOf(element.workshop);
+
+            if (index !== -1) {
+                this.GAVs[index].deleteObject(element.name);
             }
         });
 
         api.service('workshops').on('xml-changed', (workshop) => {
             this.log.debug('XML-changed', workshop);
-            const pos = this.workshopIds.indexOf(workshop.id);
-            if (pos !== -1) {
-                this.GAVs[pos].setXML(workshop.xml);
+            const index = this.workshopIds.indexOf(workshop.id);
+
+            if (index !== -1) {
+                this.GAVs[index].setXML(workshop.xml);
             }
         });
     }

@@ -1,3 +1,4 @@
+import BaseGeogebraClient from './BaseGeogebraClient';
 import Consts from './Consts';
 
 /**
@@ -44,7 +45,7 @@ function throttle(func, limit) {
 //     };
 // }
 
-export default class StudentClient {
+export default class StudentClient extends BaseGeogebraClient {
     /**
      * @param {Object} params Geogebra applet parameters
      * (https://wiki.geogebra.org/en/Reference:GeoGebra_App_Parameters).
@@ -52,6 +53,7 @@ export default class StudentClient {
      * @param {Object} log Vue logger.
      */
     constructor(params) {
+        super();
         this.params = {
             container: 'geogebra_designer',
             id: 'applet',

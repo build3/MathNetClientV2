@@ -14,8 +14,6 @@ export default {
     NUMERIC: 'numeric',
     UNASSIGNED: 'unassigned',
 
-    // Initial state of the Geogebra applet encoded in Base64
-
 
     /**
      * GGB commands have the following

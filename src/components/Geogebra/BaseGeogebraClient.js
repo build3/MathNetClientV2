@@ -1,5 +1,7 @@
 import Consts from './Consts';
 
+// Some methods need this linting exception.
+// Methods throwing Error (not implemented) but not using 'this' are triggering linter.
 /* eslint class-methods-use-this: ["error", { "exceptMethods": [
     "inject","ggbOnInit", "setXML", "registerGlobalListeners",
     "checkLock", "setCaption"] }
@@ -70,7 +72,6 @@ export default class BaseGeogebraClient {
         this.log.debug(elements);
         this.ignoreUpdates = true;
 
-        /* eslint-disable-next-line no-restricted-syntax */
         for (const el of elements) {
             // If the element is a compound (e.g. a polygon),
             // it should have a command string assigned which is to
@@ -96,8 +97,7 @@ export default class BaseGeogebraClient {
         this.log.debug();
 
         for (let i = 0; i < this.getObjectNumber(); i += 1) {
-            const label = this.applet.getObjectName(i);
-            this.checkLock(label);
+            const label = this.applet.getObjectName(i); this.checkLock(label);
         }
     }
 
