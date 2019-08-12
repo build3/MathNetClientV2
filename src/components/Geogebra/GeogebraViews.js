@@ -1,3 +1,4 @@
+import Consts from './Consts';
 import GeogebraAdminView from './GeogebraAdminView';
 import feathersClient from '../../feathers-client';
 
@@ -8,26 +9,13 @@ export default class {
         this.groups = groups;
 
         this.params = {
+            ...Consts.DEFAULT_PARAMS,
             width: 600,
             height: 600,
             perspective: 'G',
-            // showAlgebraInput: false,
-            showToolBarHelp: false,
             showMenubar: false,
-            enableLabelDrags: false,
-            showResetIcon: false,
             showToolbar: false,
-            allowStyleBar: false,
-            useBrowserForJS: true,
-            enableShiftDragZoom: true,
-            errorDialogsActive: true,
-            enableRightClick: false,
-            enableCAS: false,
-            enable3d: false,
-            isPreloader: false,
-            screenshotGenerator: false,
             preventFocus: true,
-            log: undefined,
             ...params,
         };
 
@@ -61,28 +49,36 @@ export default class {
         this.log.debug('initListener');
 
         api.service('elements').on('created', (element) => {
-            const pos = this.workshopIds.indexOf(element.workshop);
-            if (pos !== -1) {
-                this.GAVs[pos].setElement(element);
+            const index = this.workshopIds.indexOf(element.workshop);
+
+            if (index !== -1) {
+                this.GAVs[index].setElement(element);
             }
         });
 
         api.service('elements').on('patched', (element) => {
-            const pos = this.workshopIds.indexOf(element.workshop);
-            if (pos !== -1) {
-                this.GAVs[pos].updateElementXML(element.name, element.xml);
+            const index = this.workshopIds.indexOf(element.workshop);
+
+            if (index !== -1) {
+                this.GAVs[index].updateElementXML(element.name, element.xml);
+            }
+        });
+
+        api.service('elements').on('removed', (element) => {
+            const index = this.workshopIds.indexOf(element.workshop);
+
+            if (index !== -1) {
+                this.GAVs[index].deleteObject(element.name);
             }
         });
 
         api.service('workshops').on('xml-changed', (workshop) => {
-            const pos = this.workshopIds.indexOf(workshop.id);
-            if (pos !== -1) {
-                this.GAVs[pos].setXML(workshop.xml);
-            }
-        });
+            this.log.debug('XML-changed', workshop);
+            const index = this.workshopIds.indexOf(workshop.id);
 
-        api.service('workshops').on('created', (workshop) => {
-            console.log('Workshop created', workshop);
+            if (index !== -1) {
+                this.GAVs[index].setXML(workshop.xml);
+            }
         });
     }
 }

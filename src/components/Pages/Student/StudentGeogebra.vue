@@ -33,7 +33,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import { StudentClient } from '../../Geogebra/StudentClient';
+import StudentClient from '../../Geogebra/StudentClient';
 
 import api from '../../../feathers-client';
 import StudentListener from './StudentListener';

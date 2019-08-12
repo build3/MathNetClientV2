@@ -1,36 +1,17 @@
-import ggbBase64 from '../../helpers/ggbbase64';
+import BaseGeogebraClient from './BaseGeogebraClient';
+import Consts from './Consts';
 import StudentListener from '../Pages/Student/StudentListener';
 
-const POINT = 'point';
-const CAPTION_STYLE = 3;
-const UNASSIGNED = 'unassigned';
-
-export default class {
+export default class extends BaseGeogebraClient {
     constructor(params) {
+        super();
         this.params = {
             container: 'geogebra_designer',
             id: 'geogebra_designer',
             width: 800,
             height: 600,
-            perspective: 'AG',
-            showAlgebraInput: true,
-            showToolBarHelp: false,
-            showMenubar: true,
-            enableLabelDrags: false,
-            showResetIcon: true,
-            showToolbar: true,
-            allowStyleBar: false,
-            useBrowserForJS: true,
-            enableShiftDragZoom: true,
-            errorDialogsActive: true,
-            enableRightClick: false,
-            enableCAS: false,
-            enable3d: false,
-            isPreloader: false,
-            screenshotGenerator: false,
-            preventFocus: false,
             scaleContainerClass: 'appletContainer',
-            ggbBase64,
+            ...Consts.DEFAULT_PARAMS,
             ...params,
         };
 
@@ -54,12 +35,18 @@ export default class {
         this.registerGlobalListeners();
     }
 
-    getXML() {
-        return this.applet.getXML();
-    }
-
+    /**
+     * Completely reset XML content of the applet.
+     *
+     * @param {String} xml
+     */
     setXML(xml) {
+        this.ignoreUpdates = true;
+
         this.applet.setXML(xml);
+        this.registerGlobalListeners();
+
+        this.ignoreUpdates = false;
     }
 
     registerGlobalListeners() {
@@ -70,7 +57,7 @@ export default class {
 
     onAddElement(label) {
         if (!this.ignoreUpdates) {
-            const caption = StudentListener.getElementCaption(label, UNASSIGNED);
+            const caption = StudentListener.getElementCaption(label, Consts.UNASSIGNED);
             this.setCaption(label, caption);
         }
     }
@@ -78,8 +65,8 @@ export default class {
     setCaption(objectLabel, caption) {
         this.ignoreUpdates = true;
         const objType = this.applet.getObjectType(objectLabel);
-        if (objType === POINT) {
-            this.applet.setLabelStyle(objectLabel, CAPTION_STYLE);
+        if (objType === Consts.POINT) {
+            this.applet.setLabelStyle(objectLabel, Consts.CAPTION_STYLE);
         }
         this.applet.setCaption(objectLabel, caption);
         this.ignoreUpdates = false;

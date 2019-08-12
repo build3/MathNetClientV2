@@ -1,37 +1,12 @@
+import BaseGeogebraClient from './BaseGeogebraClient';
+import Consts from './Consts';
+
 /**
  * [StudentClient] provides API for managing Geogebra applet for students.
  * Its public API operates as an event emitter for [listener] argument.
  */
 
 const THROTTLE_PERIOD = 50; // (ms)
-
-// Initial state of the Geogebra applet encoded in Base64
-const initialState = require('../../helpers/ggbbase64');
-
-const Consts = {
-    // Geogebra specific options
-
-    // Caption style related to label style
-    // determining how objects' names are displayed in
-    // the applet. Caption style means that objects are
-    // named by their captions.
-    CAPTION_STYLE: 3, // 3 is a magic value for Geogebra's API
-
-    POINT: 'point',
-    TEXTFIELD: 'textfield',
-    NUMERIC: 'numeric',
-
-    /**
-     * GGB commands have the following
-     * format: <object-label>:<command-body>.
-     *
-     * @param {String} label
-     * @param {String} cmdStrBody
-     */
-    getCommand(label, cmdStrBody) {
-        return `${label}:${cmdStrBody}`;
-    },
-};
 
 /**
  * Throttle ensures that function [func] is evaluated at most once per
@@ -70,7 +45,7 @@ function throttle(func, limit) {
 //     };
 // }
 
-class StudentClient {
+export default class StudentClient extends BaseGeogebraClient {
     /**
      * @param {Object} params Geogebra applet parameters
      * (https://wiki.geogebra.org/en/Reference:GeoGebra_App_Parameters).
@@ -78,32 +53,15 @@ class StudentClient {
      * @param {Object} log Vue logger.
      */
     constructor(params) {
+        super();
         this.params = {
             container: 'geogebra_designer',
             id: 'applet',
             width: 800,
             height: 600,
-            perspective: 'AG',
-            showAlgebraInput: true,
-            showToolBarHelp: false,
-            showMenubar: true,
-            enableLabelDrags: false,
-            showResetIcon: true,
-            showToolbar: true,
-            allowStyleBar: false,
-            useBrowserForJS: true,
-            enableShiftDragZoom: true,
-            errorDialogsActive: true,
-            enableRightClick: false,
-            enableCAS: false,
-            enable3d: false,
-            isPreloader: false,
-            screenshotGenerator: false,
-            preventFocus: false,
             scaleContainerClass: 'appletContainer',
             resizeFactor: 1.0,
-            // Initial Geogebra state encoded in Base64
-            initialState,
+            ...Consts.DEFAULT_PARAMS,
             ...params,
         };
 
@@ -234,19 +192,6 @@ class StudentClient {
     }
 
     /**
-     * @param {String} label
-     * @param {String} xml
-     */
-    updateElementXML(label, xml) {
-        this.log.debug(label);
-
-        this.ignoreUpdates = true;
-        this.evalXML(xml);
-        this.evalCommand('UpdateConstruction()');
-        this.ignoreUpdates = false;
-    }
-
-    /**
      * Removes all elements from the applet one by one (so that
      * [onRemoveElement] is called for each object).
      */
@@ -274,42 +219,6 @@ class StudentClient {
     }
 
     /**
-     * Set initial construction for the applet. Runs "UpdateConstruction"
-     * which triggers re-render of all elements.
-     *
-     * @param {String} xml
-     */
-    setConstruction(xml) {
-        this.log.debug();
-        this.ignoreUpdates = true;
-
-        this.evalXML(xml);
-        this.evalCommand('UpdateConstruction()');
-        this.checkLocks();
-
-        this.ignoreUpdates = false;
-    }
-
-    /**
-     * @param {Object} element
-     */
-    setElement(element) {
-        this.log.debug(element);
-        this.ignoreUpdates = true;
-
-        if (element.obj_cmd_str !== '') {
-            const command = Consts.getCommand(element.name, element.obj_cmd_str);
-            this.evalCommand(command);
-        }
-
-        this.evalXML(element.xml);
-        this.evalCommand('UpdateConstruction()');
-        this.checkLock(element.name);
-
-        this.ignoreUpdates = false;
-    }
-
-    /**
      * @param {Array[Object]} elements
      */
     setElements(elements) {
@@ -332,14 +241,6 @@ class StudentClient {
 
         this.evalCommand('UpdateConstruction()');
         this.ignoreUpdates = false;
-    }
-
-    /**
-     * @param {String} label Geogebra element name
-     * @param {Array[Number, Number, Number]} color RGB color
-     */
-    setColor(label, [red, green, blue]) {
-        this.applet.setColor(label, red, green, blue);
     }
 
     /**
@@ -374,19 +275,6 @@ class StudentClient {
     }
 
     /**
-     * This function grabs all objects in the construction, and sets a
-     * lock on them if the username in the caption is not the current user.
-     */
-    checkLocks() {
-        this.log.debug();
-
-        for (let i = 0; i < this.getObjectNumber(); i += 1) {
-            const label = this.applet.getObjectName(i);
-            this.checkLock(label);
-        }
-    }
-
-    /**
      * Completely reset XML content of the applet.
      *
      * @param {String} xml
@@ -402,60 +290,15 @@ class StudentClient {
         this.ignoreUpdates = false;
     }
 
-    deleteObject(label) {
-        this.applet.deleteObject(label);
-    }
-
     registerObjectClickListener(label, listener) {
         this.applet.registerObjectClickListener(label, listener);
-    }
-
-    getObjectNumber() {
-        return this.applet.getObjectNumber();
     }
 
     isMovable(label) {
         return this.applet.isMoveable(label);
     }
 
-    getCaption(label) {
-        return this.applet.getCaption(label);
-    }
-
-    getCommandString(label) {
-        return this.applet.getCommandString(label, false);
-    }
-
-    getObjectType(label) {
-        return this.applet.getObjectType(label);
-    }
-
-    setCaptionStyle(label) {
-        this.applet.setLabelStyle(label, Consts.CAPTION_STYLE);
-    }
-
-    evalXML(xml) {
-        this.applet.evalXML(xml);
-    }
-
-    getObjectName(label) {
-        return this.applet.getObjectName(label);
-    }
-
-    getXML(label) {
-        return this.applet.getXML(label);
-    }
-
-    evalCommand(command) {
-        this.applet.evalCommand(command);
-    }
-
     setFixed(label, isFixed, isSelectable) {
         this.applet.setFixed(label, isFixed, isSelectable);
     }
 }
-
-module.exports = {
-    StudentClient,
-    Consts,
-};

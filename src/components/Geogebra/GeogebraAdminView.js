@@ -1,58 +1,14 @@
+import BaseGeogebraClient from './BaseGeogebraClient';
+import Consts from './Consts';
 import feathersClient from '../../feathers-client';
 
 const api = feathersClient;
 
-const Consts = {
-    // Ownership indicators
-
-    UNASSIGNED: 'unassigned',
-    ADMIN: 'admin', // ~teacher
-    USERNAME: 'username',
-
-    // Geogebra specific options
-
-    // Caption style related to label style
-    // determining how objects' names are displayed in
-    // the applet. Caption style means that objects are
-    // named by their captions.
-    CAPTION_STYLE: 3,
-
-    POINT: 'point',
-    TEXTFIELD: 'textfield',
-    NUMERIC: 'numeric',
-
-    /**
-     * GGB commands have the following
-     * format: <object-label>:<command-body>.
-     *
-     * @param {String} label
-     * @param {String} cmdStrBody
-     */
-    getCommand(label, cmdStrBody) {
-        return `${label}:${cmdStrBody}`;
-    },
-};
-
-class GeogebraAdminView {
-    constructor(params, workshopId /* geogebraViewsParent */) {
+class GeogebraAdminView extends BaseGeogebraClient {
+    constructor(params, workshopId) {
+        super();
         this.params = {
-            showAlgebraInput: true,
-            showToolBarHelp: false,
-            showMenubar: true,
-            enableLabelDrags: false,
-            showResetIcon: true,
-            showToolbar: true,
-            allowStyleBar: false,
-            useBrowserForJS: true,
-            enableShiftDragZoom: true,
-            errorDialogsActive: true,
-            enableRightClick: false,
-            enableCAS: false,
-            enable3d: false,
-            isPreloader: false,
-            screenshotGenerator: false,
-            preventFocus: false,
-            log: undefined,
+            ...Consts.DEFAULT_PARAMS,
             ...params,
         };
 
@@ -105,24 +61,19 @@ class GeogebraAdminView {
         this.centerView();
     }
 
-    getXML() {
-        return this.applet.getXML();
-    }
-
+    /**
+     * Completely reset XML content of the applet.
+     *
+     * @param {String} xml
+     */
     setXML(xml) {
+        this.log.debug(xml);
+        this.ignoreUpdates = true;
+
         this.applet.setXML(xml);
-    }
+        this.checkLocks();
 
-    evalXML(xml) {
-        this.applet.evalXML(xml);
-    }
-
-    evalCommand(command) {
-        this.applet.evalCommand(command);
-    }
-
-    getObjectNumber() {
-        return this.applet.getObjectNumber();
+        this.ignoreUpdates = false;
     }
 
     centerView() {
@@ -163,87 +114,8 @@ class GeogebraAdminView {
         }
     }
 
-    setConstruction(xml) {
-        this.ignoreUpdates = true;
-        this.evalXML(xml);
-        this.evalCommand('UpdateConstruction()');
-        this.checkLocks();
-        this.ignoreUpdates = false;
-    }
-
-    /**
-     * @param {Object} element
-     */
-    setElement(element) {
-        this.ignoreUpdates = true;
-
-        if (element.obj_cmd_str !== '') {
-            // TODO: Explain this
-            const command = Consts.getCommand(element.name, element.obj_cmd_str);
-            this.evalCommand(command);
-        }
-
-        this.evalXML(element.xml);
-        this.evalCommand('UpdateConstruction()');
-        this.checkLock(element.name);
-
-        this.ignoreUpdates = false;
-    }
-
-    /**
-     * @param {Array[Object]} elements
-     */
-    setElements(elements) {
-        this.ignoreUpdates = true;
-
-        elements.forEach((el) => {
-            // If the element is a compound (e.g. a polygon),
-            // it should have a command string assigned which is to
-            // be evaluated by the applet.
-            if (el.obj_cmd_str !== '') {
-                // TODO: Explain this
-                const command = Consts.getCommand(el.name, el.obj_cmd_str);
-                this.evalCommand(command);
-            }
-
-            this.evalXML(el.xml);
-            this.evalCommand('UpdateConstruction()');
-
-            if (el.colors) {
-                const [red, green, blue] = el.colors;
-                this.setColor(el.name, red, green, blue);
-            }
-
-            this.checkLock(el.name);
-        });
-
-        this.ignoreUpdates = false;
-    }
-
-    /**
-     * @param {String} label
-     * @param {String} xml
-     */
-    updateElementXML(label, xml) {
-        this.ignoreUpdates = true;
-        this.evalXML(xml);
-        this.evalCommand('UpdateConstruction()');
-        this.ignoreUpdates = false;
-    }
-
     checkLock(label) {
         this.applet.setFixed(label, true);
-    }
-
-    /**
-     * This function grabs all objects in the construction, and sets a
-     * lock on them if the username in the caption is not the current user.
-     */
-    checkLocks() {
-        for (let i = 0; i < this.getObjectNumber(); i += 1) {
-            const label = this.applet.getObjectName(i);
-            this.checkLock(label);
-        }
     }
 }
 
