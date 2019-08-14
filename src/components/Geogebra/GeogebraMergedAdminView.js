@@ -58,7 +58,7 @@ class GeogebraMergedAdminView {
         console.log('GeogebraMergedAdminView', this);
 
         this.workshopIds = workshopIds;
-        this.initializeServerCallbacks();
+        this.initializeReactionsToServerEvents();
         // eslint-disable-next-line no-undef
         this.appletContainer = new GGBApplet(this.params);
     }
@@ -76,7 +76,7 @@ class GeogebraMergedAdminView {
         this.applet = this.appletContainer.getAppletObject();
         this.isInitialized = true;
         // this.constructionLoadingFunction();
-        this.onAppletReady();
+        this.loadWorkshops();
 
         this.centerView();
     }
@@ -105,11 +105,21 @@ class GeogebraMergedAdminView {
      * Binds server events to local callbacks; load workshop meta-data
      * and elements and initializes applet.
      */
-    initializeServerCallbacks() {
+    initializeReactionsToServerEvents() {
         // [onAppletReady] is called by [StudentClient] when applet finished
         // initializing.
-        this.onAppletReady = async () => {
-            console.log('Loading OnAppletReady');
+        this.loadWorkshops = async () => {
+            console.log('loadWorkshops');
+
+            await this.workshopIds.map(
+                async (workshopId, iter) => this.loadWorkshopState(workshopId, iter),
+            );
+
+            console.log('this.workshopIds', this.workshopIds);
+        };
+
+        this.initializeCallbacks = async () => {
+            console.log('Loading initializeCallbacks');
 
             api.service('elements').on('created', (element) => {
                 const pos = this.workshopIds.indexOf(element.workshop);
@@ -137,17 +147,11 @@ class GeogebraMergedAdminView {
             api.service('workshops').on('created', (workshop) => {
                 console.log('Workshop created', workshop);
             });
-
-            await this.workshopIds.map(
-                async (workshopId, iter) => this.loadWorkshopStates(workshopId, iter),
-            );
-
-            console.log('this.workshopIds', this.workshopIds);
         };
     }
 
     // Load current state of the workshops.
-    async loadWorkshopStates(workshopId, iter) {
+    async loadWorkshopState(workshopId, iter) {
         // eslint-disable-next-line prefer-const
         let [workshop, ...rest] = await api.service('workshops').find({
             query: { id: workshopId },

@@ -99,6 +99,7 @@ export default class {
 
     mergeGoLive() {
         this.log.debug('Going live');
+        this.mergedView.initializeCallbacks();
     }
 
     mergeStopLive() {
