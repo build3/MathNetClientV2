@@ -137,15 +137,19 @@ class GeogebraMergedAdminView {
                 }
             });
 
+            api.service('elements').on('removed', (element) => {
+                const pos = this.workshopIds.indexOf(element.workshop);
+                if (pos !== -1) {
+                    console.log('Element removed', element);
+                    this.applet.deleteObject(`${element.name}grp${pos + 1}`);
+                }
+            });
+
             api.service('workshops').on('xml-changed', (workshop) => {
                 if (this.workshopIds.indexOf(workshop.id) !== -1) {
                     console.log('Workshop xml changed', workshop);
                     this.setXML(workshop.xml);
                 }
-            });
-
-            api.service('workshops').on('created', (workshop) => {
-                console.log('Workshop created', workshop);
             });
         };
     }
@@ -416,6 +420,16 @@ class GeogebraMergedAdminView {
         console.log('objCmdStr', objCmdStr);
 
         return objCmdStr;
+    }
+
+    /**
+     * Removes all elements from the applet one by one (so that
+     * [onRemoveElement] is called for each object).
+     */
+    clear() {
+        this.applet.getAllObjectNames().forEach((obj) => {
+            this.applet.deleteObject(obj);
+        });
     }
 
     centerView() {
