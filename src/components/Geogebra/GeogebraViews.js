@@ -113,5 +113,6 @@ export default class {
 
     mergeStopLive() {
         this.log.debug('Stopping live');
+        this.mergedView.clearListeners();
     }
 }

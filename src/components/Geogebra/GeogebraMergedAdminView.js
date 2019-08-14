@@ -121,36 +121,48 @@ class GeogebraMergedAdminView {
         this.initializeCallbacks = async () => {
             console.log('Loading initializeCallbacks');
 
-            api.service('elements').on('created', (element) => {
+            this.createdListener = (element) => {
                 const pos = this.workshopIds.indexOf(element.workshop);
                 if (pos !== -1) {
                     console.log('Element created', element);
                     this.addElementAfterRenameToMergedGroupNotation(element, pos);
                 }
-            });
+            };
 
-            api.service('elements').on('patched', (element) => {
+            this.patchedListener = (element) => {
                 const pos = this.workshopIds.indexOf(element.workshop);
                 if (pos !== -1) {
                     console.log('Element patched', element);
                     this.updateElementAfterRenameToMergedGroupNotation(element, pos);
                 }
-            });
+            };
 
-            api.service('elements').on('removed', (element) => {
+            this.removedListener = (element) => {
                 const pos = this.workshopIds.indexOf(element.workshop);
                 if (pos !== -1) {
                     console.log('Element removed', element);
                     this.applet.deleteObject(`${element.name}grp${pos + 1}`);
                 }
-            });
+            };
 
-            api.service('workshops').on('xml-changed', (workshop) => {
+            this.xmlChangedListener = (workshop) => {
                 if (this.workshopIds.indexOf(workshop.id) !== -1) {
                     console.log('Workshop xml changed', workshop);
                     this.setXML(workshop.xml);
                 }
-            });
+            };
+
+            api.service('elements').on('created', this.createdListener);
+            api.service('elements').on('patched', this.patchedListener);
+            api.service('elements').on('removed', this.removedListener);
+            api.service('workshops').on('xml-changed', this.xmlChangedListener);
+        };
+
+        this.clearListeners = () => {
+            api.service('elements').removeListener('created', this.createdListener);
+            api.service('elements').removeListener('patched', this.patchedListener);
+            api.service('elements').removeListener('removed', this.removedListener);
+            api.service('workshops').removeListener('xml-changed', this.xmlChangedListener);
         };
     }
 
