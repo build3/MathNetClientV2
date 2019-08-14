@@ -239,6 +239,10 @@ class GeogebraAdminView {
             this.checkLock(label);
         }
     }
+
+    deleteObject(label) {
+        this.applet.deleteObject(label);
+    }
 }
 
 export default GeogebraAdminView;
