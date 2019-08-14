@@ -7,7 +7,7 @@
             <div ref="ibox_content" class="ibox-content">
                 <div class="row">
                     <div class="col-12">
-                        <div class="row mb-5">
+                        <div class="row mb-5" ref="geogebra_merge_ref">
                             <div class="col-4">
                                 <div v-if="classSelected">
                                     <div class="mt-1 group-choices">
@@ -240,32 +240,34 @@ export default {
         },
 
         async mergeViews(checkedGroupIds) {
+            this.showMergedApplet = true;
+
             this.selectedGroups = await this.findGroups({ query: { _id: checkedGroupIds } });
 
             this.$log.debug('checkedGroups', checkedGroupIds);
             this.$log.debug('this.selectedGroups', this.selectedGroups);
 
             if (this.selectedGroups && this.selectedGroups.length) {
-                this.showMergedApplet = true;
-
-                await api.service('users').patch(this.user.username, {
+                /* await api.service('users').patch(this.user.username, {
                     workshops: this.selectedGroups.map(g => g._id),
-                });
+                }); */
 
                 this.$log.debug('this.showMenuBar', this.showMenuBar);
                 this.$log.debug('this.$refs.geogebra_merged_applet_container.clientWidth',
-                    this.$refs.geogebra_merged_applet_container.clientWidth);
+                    this.$refs.geogebra_merge_ref.clientWidth);
 
 
                 this.GeogebraViews.mergeViews(
                     this.selectedGroups.map(g => g._id),
                     { // params for geogebra
                         showMenubar: this.showMenuBar,
-                        width: this.$refs.geogebra_merged_applet_container.clientWidth,
+                        width: this.$refs.geogebra_merge_ref.clientWidth - 60,
+                        height: (this.$refs.geogebra_merge_ref.clientWidth - 60) * 3 / 4,
                     },
                 );
             } else {
                 this.showToast('Select groups for merged view', 'warning');
+                this.showMergedApplet = false;
             }
         },
     },

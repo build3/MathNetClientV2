@@ -87,10 +87,12 @@ export default class {
         });
     }
 
-    mergeViews(workshopIds) {
+    mergeViews(workshopIds, params) {
         this.mergedView = new GeogebraMergedAdminView({
             container: 'merged_ggb_applet',
             id: 'merged_ggb_applet',
+            perspective: 'G',
+            ...params,
         }, workshopIds);
         this.mergedView.inject();
     }

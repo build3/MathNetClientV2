@@ -77,6 +77,8 @@ class GeogebraMergedAdminView {
         this.isInitialized = true;
         // this.constructionLoadingFunction();
         this.onAppletReady();
+
+        this.centerView();
     }
 
     getXML() {
@@ -290,7 +292,7 @@ class GeogebraMergedAdminView {
         objLabels = objLabels.filter((label) => {
             const regex = RegExp(`grp${groupNum + 1}$`, 'g');
             const matches = (regex.exec(label) !== null);
-            console.log('Label ', label, `(groupNum + 1) ${groupNum + 1}`, ' matches?', matches);
+            // console.log('Label ', label, `(groupNum + 1) ${groupNum + 1}`, ' matches?', matches);
             return matches;
         });
 
@@ -410,6 +412,10 @@ class GeogebraMergedAdminView {
         console.log('objCmdStr', objCmdStr);
 
         return objCmdStr;
+    }
+
+    centerView() {
+        this.evalCommand('CenterView[(0,0)]');
     }
 }
 
