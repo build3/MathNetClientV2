@@ -208,12 +208,6 @@ class GeogebraAdminView {
 
             this.evalXML(el.xml);
             this.evalCommand('UpdateConstruction()');
-
-            if (el.colors) {
-                const [red, green, blue] = el.colors;
-                this.setColor(el.name, red, green, blue);
-            }
-
             this.checkLock(el.name);
         });
 

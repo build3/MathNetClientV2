@@ -280,13 +280,10 @@ class StudentClient {
      * @param {String} xml
      */
     setConstruction(xml) {
-        this.log.debug();
         this.ignoreUpdates = true;
-
         this.evalXML(xml);
         this.evalCommand('UpdateConstruction()');
         this.checkLocks();
-
         this.ignoreUpdates = false;
     }
 
