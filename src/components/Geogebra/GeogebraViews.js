@@ -88,10 +88,6 @@ export default class {
                 this.GAVs[pos].setXML(workshop.xml);
             }
         });
-
-        api.service('workshops').on('created', (workshop) => {
-            console.log('Workshop created', workshop);
-        });
     }
 
     mergeViews(workshopIds, params) {
@@ -100,6 +96,7 @@ export default class {
             id: 'merged_ggb_applet',
             perspective: 'G',
             ...params,
+            log: this.log,
         }, workshopIds);
         this.mergedView.inject();
     }

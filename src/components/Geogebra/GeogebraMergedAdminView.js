@@ -55,7 +55,7 @@ class GeogebraMergedAdminView {
             ...params,
         };
 
-        console.log('GeogebraMergedAdminView', this);
+        this.log = this.params.log;
 
         this.workshopIds = workshopIds;
         this.initializeReactionsToServerEvents();
@@ -109,22 +109,22 @@ class GeogebraMergedAdminView {
         // [onAppletReady] is called by [StudentClient] when applet finished
         // initializing.
         this.loadWorkshops = async () => {
-            console.log('loadWorkshops');
+            this.log.debug('loadWorkshops');
 
             await this.workshopIds.map(
                 async (workshopId, iter) => this.loadWorkshopState(workshopId, iter),
             );
 
-            console.log('this.workshopIds', this.workshopIds);
+            this.log.debug('this.workshopIds', this.workshopIds);
         };
 
         this.initializeCallbacks = async () => {
-            console.log('Loading initializeCallbacks');
+            this.log.debug('Loading initializeCallbacks');
 
             this.createdListener = (element) => {
                 const pos = this.workshopIds.indexOf(element.workshop);
                 if (pos !== -1) {
-                    console.log('Element created', element);
+                    this.log.debug('Element created', element);
                     this.addElementAfterRenameToMergedGroupNotation(element, pos);
                 }
             };
@@ -132,7 +132,7 @@ class GeogebraMergedAdminView {
             this.patchedListener = (element) => {
                 const pos = this.workshopIds.indexOf(element.workshop);
                 if (pos !== -1) {
-                    console.log('Element patched', element);
+                    this.log.debug('Element patched', element);
                     this.updateElementAfterRenameToMergedGroupNotation(element, pos);
                 }
             };
@@ -140,14 +140,14 @@ class GeogebraMergedAdminView {
             this.removedListener = (element) => {
                 const pos = this.workshopIds.indexOf(element.workshop);
                 if (pos !== -1) {
-                    console.log('Element removed', element);
+                    this.log.debug('Element removed', element);
                     this.applet.deleteObject(`${element.name}grp${pos + 1}`);
                 }
             };
 
             this.xmlChangedListener = (workshop) => {
                 if (this.workshopIds.indexOf(workshop.id) !== -1) {
-                    console.log('Workshop xml changed', workshop);
+                    this.log.debug('Workshop xml changed', workshop);
                     this.setXML(workshop.xml);
                 }
             };
@@ -173,9 +173,9 @@ class GeogebraMergedAdminView {
             query: { id: workshopId },
         });
 
-        console.log('Loaded workshop: ', workshop);
-        console.log('Rest is: ', rest);
-        console.log('API', api);
+        this.log.debug('Loaded workshop: ', workshop);
+        this.log.debug('Rest is: ', rest);
+        // this.log.debug('API', api);
 
         if (workshop) {
             // Set initial construction based on the `xml` field.
@@ -186,7 +186,7 @@ class GeogebraMergedAdminView {
                 query: { workshop: workshop.id },
             }) || [];
 
-            console.log(`Loaded elements for workshop[${iter}]:`, elements);
+            this.log.debug(`Loaded elements for workshop[${iter}]:`, elements);
 
             this.setElements(
                 elements,
@@ -198,7 +198,7 @@ class GeogebraMergedAdminView {
                 id: workshopId,
             });
 
-            console.log(`Created workshop[${iter}]: `, workshop);
+            this.log.debug(`Created workshop[${iter}]: `, workshop);
         }
     }
 
@@ -213,7 +213,7 @@ class GeogebraMergedAdminView {
      * @param {Object} element
      */
     setElement(element) {
-        console.log(element);
+        this.log.debug(element);
 
         this.ignoreUpdates = true;
 
@@ -234,7 +234,7 @@ class GeogebraMergedAdminView {
      * @param {Array[Object]} elements
      */
     setElements(elements, groupNum) {
-        console.log('Elements ', elements);
+        this.log.debug('Elements ', elements);
 
         this.ignoreUpdates = true;
 
@@ -254,7 +254,7 @@ class GeogebraMergedAdminView {
      * @param {String} xml
      */
     updateElementXML(label, xml) {
-        console.log('Updating element', label);
+        this.log.debug('Updating element', label);
 
         this.ignoreUpdates = true;
         this.evalXML(xml);
@@ -312,11 +312,12 @@ class GeogebraMergedAdminView {
         objLabels = objLabels.filter((label) => {
             const regex = RegExp(`grp${groupNum + 1}$`, 'g');
             const matches = (regex.exec(label) !== null);
-            // console.log('Label ', label, `(groupNum + 1) ${groupNum + 1}`, ' matches?', matches);
+            // this.log.debug('Label ', label,
+            // `(groupNum + 1) ${groupNum + 1}`, ' matches?', matches);
             return matches;
         });
 
-        console.log('matched objLabels', objLabels);
+        this.log.debug('matched objLabels', objLabels);
 
         // new label
         const newLabel = `${objLabel}grp${groupNum + 1}`;
@@ -365,7 +366,7 @@ class GeogebraMergedAdminView {
         const magicOffset = -2; // to take whats before "> in this regex
 
         let newObjXML = objXML;
-        // console.log('objXML', objXML);
+        // this.log.debug('objXML', objXML);
 
         let result = {};
         const indices = [];
@@ -374,23 +375,23 @@ class GeogebraMergedAdminView {
         // searching for occurences of <element blabla label="sth">
         // eslint-disable-next-line no-cond-assign
         while (result = regex.exec(newObjXML)) {
-            // console.log('Result is', result);
+            // this.log.debug('Result is', result);
             indices.push({
                 index: result.index + result[0].length + magicOffset,
                 variable: result[0],
             });
         }
-        // console.log('indices', indices);
+        // this.log.debug('indices', indices);
 
         // morphing string
         // eslint-disable-next-line no-cond-assign
         while (varRes = indices.pop()) {
             if (varRes === null) break;
             newObjXML = `${newObjXML.slice(0, varRes.index)}grp${groupNum + 1}${newObjXML.slice(varRes.index)}`;
-            // console.log('newObjXML', newObjXML);
+            // this.log.debug('newObjXML', newObjXML);
         }
 
-        console.log('newObjXML', newObjXML);
+        // this.log.debug('newObjXML', newObjXML);
         return newObjXML;
     }
 
@@ -410,7 +411,7 @@ class GeogebraMergedAdminView {
 
         // eslint-disable-next-line no-cond-assign
         while (result = regex.exec(objCmdStr)) {
-            // console.log('Result is', result);
+            // this.log.debug('Result is', result);
             indices.push({ index: result.index + result[0].length, variable: result[0] });
         }
 
@@ -429,7 +430,7 @@ class GeogebraMergedAdminView {
             }
         }
 
-        console.log('objCmdStr', objCmdStr);
+        // this.log.debug('objCmdStr', objCmdStr);
 
         return objCmdStr;
     }
