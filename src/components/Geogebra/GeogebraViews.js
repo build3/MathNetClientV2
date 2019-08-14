@@ -1,4 +1,5 @@
 import GeogebraAdminView from './GeogebraAdminView';
+import GeogebraMergedAdminView from './GeogebraMergedAdminView';
 import feathersClient from '../../feathers-client';
 
 const api = feathersClient;
@@ -84,5 +85,21 @@ export default class {
         api.service('workshops').on('created', (workshop) => {
             console.log('Workshop created', workshop);
         });
+    }
+
+    mergeViews(workshopIds) {
+        this.mergedView = new GeogebraMergedAdminView({
+            container: 'merged_ggb_applet',
+            id: 'merged_ggb_applet',
+        }, workshopIds);
+        this.mergedView.inject();
+    }
+
+    mergeGoLive() {
+        this.log.debug('Going live');
+    }
+
+    mergeStopLive() {
+        this.log.debug('Stopping live');
     }
 }
