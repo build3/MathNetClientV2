@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.local.js",
     "build": "webpack --config build/webpack.local.js --mode development",
+    "build-dist": "webpack --config build/webpack.dist.js --mode production --progress",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Makimo",
