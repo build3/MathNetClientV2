@@ -34,7 +34,7 @@ const Consts = {
 };
 
 class GeogebraAdminView {
-    constructor(params, workshopId /* geogebraViewsParent */) {
+    constructor(params, workshopId) {
         this.params = {
             showAlgebraInput: true,
             showToolBarHelp: false,

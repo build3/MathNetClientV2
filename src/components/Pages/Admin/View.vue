@@ -7,7 +7,7 @@
             <div ref="ibox_content" class="ibox-content">
                 <div class="row">
                     <div class="col-12">
-                        <div class="row mb-5" ref="geogebra_merge_ref">
+                        <div class="row mb-5">
                             <div class="col-4">
                                 <div v-if="classSelected">
                                     <div class="mt-1 group-choices">
@@ -117,7 +117,9 @@
                         <div v-for="g in groupsInClass" :key="g._id"
                             class="admin-view-applet-holder">
                             <h3>{{ g.name }}</h3>
-                            <div :id="g.domId" class="geogebra-applet"></div>
+                            <div :id="g.domId" class="geogebra-applet">
+                                <!-- Geogebra Teacher's view applets -->
+                            </div>
                         </div>
                     </div>
                     <!-- <div class="row">
@@ -241,6 +243,7 @@ export default {
 
         async mergeViews(checkedGroupIds) {
             this.showMergedApplet = true;
+            this.liveMergeSwitch = false;
 
             this.selectedGroups = await this.findGroups({ query: { _id: checkedGroupIds } });
 
@@ -253,16 +256,15 @@ export default {
                 }); */
 
                 this.$log.debug('this.showMenuBar', this.showMenuBar);
-                this.$log.debug('this.$refs.geogebra_merged_applet_container.clientWidth',
-                    this.$refs.geogebra_merge_ref.clientWidth);
-
+                this.$log.debug('this.$refs.ibox_content.clientWidth',
+                    this.$refs.ibox_content.clientWidth);
 
                 this.GeogebraViews.mergeViews(
                     this.selectedGroups.map(g => g._id),
                     { // params for geogebra
                         showMenubar: this.showMenuBar,
-                        width: this.$refs.geogebra_merge_ref.clientWidth - 60,
-                        height: (this.$refs.geogebra_merge_ref.clientWidth - 60) * 3 / 4,
+                        width: (this.$refs.ibox_content.clientWidth - 60),
+                        height: (this.$refs.ibox_content.clientWidth - 60) * 3 / 4,
                     },
                 );
             } else {

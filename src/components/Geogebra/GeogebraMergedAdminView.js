@@ -41,7 +41,7 @@ class GeogebraMergedAdminView {
             showMenubar: true,
             enableLabelDrags: false,
             showResetIcon: true,
-            showToolbar: true,
+            showToolbar: false,
             allowStyleBar: false,
             useBrowserForJS: true,
             enableShiftDragZoom: true,
@@ -75,7 +75,6 @@ class GeogebraMergedAdminView {
     ggbOnInit() {
         this.applet = this.appletContainer.getAppletObject();
         this.isInitialized = true;
-        // this.constructionLoadingFunction();
         this.loadWorkshops();
 
         this.centerView();
@@ -145,24 +144,24 @@ class GeogebraMergedAdminView {
                 }
             };
 
-            this.xmlChangedListener = (workshop) => {
+            /* this.xmlChangedListener = (workshop) => {
                 if (this.workshopIds.indexOf(workshop.id) !== -1) {
                     this.log.debug('Workshop xml changed', workshop);
                     this.setXML(workshop.xml);
                 }
-            };
+            }; */
 
             api.service('elements').on('created', this.createdListener);
             api.service('elements').on('patched', this.patchedListener);
             api.service('elements').on('removed', this.removedListener);
-            api.service('workshops').on('xml-changed', this.xmlChangedListener);
+            // api.service('workshops').on('xml-changed', this.xmlChangedListener);
         };
 
         this.clearListeners = () => {
             api.service('elements').removeListener('created', this.createdListener);
             api.service('elements').removeListener('patched', this.patchedListener);
             api.service('elements').removeListener('removed', this.removedListener);
-            api.service('workshops').removeListener('xml-changed', this.xmlChangedListener);
+            // api.service('workshops').removeListener('xml-changed', this.xmlChangedListener);
         };
     }
 

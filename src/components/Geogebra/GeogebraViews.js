@@ -44,7 +44,7 @@ export default class {
             ...this.params,
         }));
 
-        this.GAVs = this.multiParams.map(p => new GeogebraAdminView(p, p.groupId, this));
+        this.GAVs = this.multiParams.map(p => new GeogebraAdminView(p, p.groupId));
 
         // eslint-disable-next-line no-underscore-dangle
         this.workshopIds = this.groups.map(g => g._id);
@@ -95,9 +95,11 @@ export default class {
             container: 'merged_ggb_applet',
             id: 'merged_ggb_applet',
             perspective: 'G',
+            showResetIcon: false,
             ...params,
             log: this.log,
         }, workshopIds);
+
         this.mergedView.inject();
     }
 
