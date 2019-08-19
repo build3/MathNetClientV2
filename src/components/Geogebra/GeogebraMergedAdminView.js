@@ -399,7 +399,7 @@ class GeogebraMergedAdminView {
         // const regex = /[A-Z]+(?![a-z])|^[A-Z]*[a-z]+[0-9]*(?![a-zA-Z])/g; // old regex
 
         // eslint-disable-next-line no-useless-escape
-        const regex = RegExp('[A-Za-zα-ωΑ-Ω][A-Za-zα-ωΑ-Ω0-9\^\_\{\}]*(?![A-Za-zα-ωΑ-Ω0-9\^\_\{\}\[])', 'g');
+        const regex = RegExp('[A-Za-zα-ωΑ-Ω][A-Za-zα-ωΑ-Ω0-9\^\_\{\}]*(?![A-Za-zα-ωΑ-Ω0-9\^\_\{\}\[\(])', 'g');
 
         let objCmdStr = cmdStr;
 
