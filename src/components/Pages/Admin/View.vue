@@ -264,7 +264,7 @@ export default {
                     { // params for geogebra
                         showMenubar: this.showMenuBar,
                         width: (this.$refs.ibox_content.clientWidth - 60),
-                        height: (this.$refs.ibox_content.clientWidth - 60) * 3 / 4,
+                        height: (this.$refs.ibox_content.clientWidth - 60) * 2 / 3,
                     },
                 );
             } else {
