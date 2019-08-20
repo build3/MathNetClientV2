@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.local.js",
-    "build": "webpack --config build/webpack.local.js --mode development",
+    "build": "webpack --config build/webpack.dist.js --mode development",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Makimo",
