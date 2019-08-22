@@ -12,10 +12,11 @@
                 </li>
                 <li v-if="isStudent && studentGroup !== undefined">
                     <router-link
+                        @click.native="leaveGroup"
                         :to="{
                             name: 'StudentGroup',
                             params: {
-                            code: studentGroup.class,
+                                code: studentGroup.class,
                             },
                         }">
                         Leave Group
@@ -106,9 +107,14 @@ export default {
 
         ...mapActions('users', [
             'clearCurrent',
+            'patch',
         ]),
 
-        logoutUser() {
+        async logoutUser() {
+            if (this.user.permissions.includes('student')) {
+                await this.patch([this.user.username, { workshops: [] }]);
+            }
+
             this.logout().then(() => {
                 this.$router.push({ name: 'Login' });
                 this.clearCurrent();
@@ -124,6 +130,10 @@ export default {
             feathersClient.io.on('pong-rate', () => {
                 this.ping = Date.now() - this.pingTime;
             });
+        },
+
+        async leaveGroup() {
+            await this.patch([this.user.username, { workshops: [] }]);
         },
     },
     created() {
