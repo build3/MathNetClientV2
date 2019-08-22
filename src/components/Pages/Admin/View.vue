@@ -234,7 +234,8 @@ export default {
 
                 this.GeogebraViews = new GeogebraViews(this.groupsInClass, {
                     log: this.$log,
-                    width: this.$refs.ibox_content.clientWidth - 60,
+                    width: 400, // this.$refs.ibox_content.clientWidth - 60,
+                    height: 400,
                 });
 
                 this.GeogebraViews.inject();
