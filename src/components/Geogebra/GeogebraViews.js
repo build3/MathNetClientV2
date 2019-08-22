@@ -1,4 +1,5 @@
 import GeogebraAdminView from './GeogebraAdminView';
+import GeogebraMergedAdminView from './GeogebraMergedAdminView';
 import feathersClient from '../../feathers-client';
 
 const api = feathersClient;
@@ -43,7 +44,7 @@ export default class {
             ...this.params,
         }));
 
-        this.GAVs = this.multiParams.map(p => new GeogebraAdminView(p, p.groupId, this));
+        this.GAVs = this.multiParams.map(p => new GeogebraAdminView(p, p.groupId));
 
         // eslint-disable-next-line no-underscore-dangle
         this.workshopIds = this.groups.map(g => g._id);
@@ -74,15 +75,43 @@ export default class {
             }
         });
 
+        api.service('elements').on('removed', (element) => {
+            const pos = this.workshopIds.indexOf(element.workshop);
+            if (pos !== -1) {
+                this.GAVs[pos].deleteObject(element.name);
+            }
+        });
+
         api.service('workshops').on('xml-changed', (workshop) => {
             const pos = this.workshopIds.indexOf(workshop.id);
             if (pos !== -1) {
                 this.GAVs[pos].setXML(workshop.xml);
             }
         });
+    }
 
-        api.service('workshops').on('created', (workshop) => {
-            console.log('Workshop created', workshop);
-        });
+    mergeViews(workshopIds, params) {
+        this.mergedView = new GeogebraMergedAdminView({
+            container: 'merged_ggb_applet',
+            id: 'merged_ggb_applet',
+            perspective: 'G',
+            showResetIcon: false,
+            ...params,
+            log: this.log,
+        }, workshopIds);
+
+        this.mergedView.inject();
+    }
+
+    mergeGoLive() {
+        this.log.debug('Going live');
+        this.mergedView.clear();
+        this.mergedView.loadWorkshops();
+        this.mergedView.initializeCallbacks();
+    }
+
+    mergeStopLive() {
+        this.log.debug('Stopping live');
+        this.mergedView.clearListeners();
     }
 }

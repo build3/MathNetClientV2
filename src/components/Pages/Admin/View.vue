@@ -7,9 +7,9 @@
             <div ref="ibox_content" class="ibox-content">
                 <div class="row">
                     <div class="col-12">
-                        <div class="row">
+                        <div class="row mb-5">
                             <div class="col-4">
-                                <!-- <div v-if="classSelected">
+                                <div v-if="classSelected">
                                     <div class="mt-1 group-choices">
                                         <h3 class="mb-3">Check groups to merge:</h3>
                                         <div v-for="g in groupsInClass"
@@ -38,59 +38,59 @@
                                                 v-model="showMenuBar">
                                             <span class="checkmark"></span>
                                         </label>
-
-                                        <label class="checkbox-container">
+                                        <!-- <label class="checkbox-container">
                                             Send toolbar
                                             <input type="checkbox">
                                             <span class="checkmark"></span>
-                                        </label>
-
+                                        </label> -->
                                     </div>
-                                </div> -->
+                                </div>
                             </div>
-                            <div class="col-12">
-                                <h2>Select class</h2>
-                                <table class="table designer-class-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Code</th>
-                                            <th></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr v-if="!classes.total > 0">
-                                            <td></td>
-                                            <td>
-                                                No class
-                                            </td>
-                                            <td></td>
-                                        </tr>
-                                        <tr v-for="cl in classes.data" :key="cl.id">
-                                            <td>{{ cl.name }}</td>
-                                            <td>{{ cl.code }}</td>
-                                            <td class="text-center">
-                                                <button
-                                                    v-if="code !== cl.code"
-                                                    @click="selectAllGroupsinClass(cl.code)"
-                                                    class="btn btn-sm btn-primary mr-2">
-                                                    Select
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <div class="offset-3 col-5">
+                                <div class="col-12">
+                                    <h2>Select class</h2>
+                                    <table class="table designer-class-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Code</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-if="!classes.total > 0">
+                                                <td></td>
+                                                <td>
+                                                    No class
+                                                </td>
+                                                <td></td>
+                                            </tr>
+                                            <tr v-for="cl in classes.data" :key="cl.id">
+                                                <td>{{ cl.name }}</td>
+                                                <td>{{ cl.code }}</td>
+                                                <td class="text-center">
+                                                    <button
+                                                        v-if="code !== cl.code"
+                                                        @click="selectAllGroupsinClass(cl.code)"
+                                                        class="btn btn-sm btn-primary mr-2">
+                                                        Select
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                         <div class="col-12">
-                            <!-- <div v-if="showMergedApplet">
+                            <div v-if="showMergedApplet">
                                 <div class="merged-live-switch">
                                     <div class="onoffswitch">
                                         <input type="checkbox" checked
                                             class="onoffswitch-checkbox"
-                                            id="example1"
+                                            id="live_switch"
                                             v-model="liveMergeSwitch">
-                                        <label class="onoffswitch-label" for="example1">
+                                        <label class="onoffswitch-label" for="live_switch">
                                             <span class="onoffswitch-inner"></span>
                                             <span class="onoffswitch-switch"></span>
                                         </label>
@@ -101,23 +101,25 @@
                                 id="merged_ggb_applet"
                                 class="merged-geogebra-applet"
                                 ref="geogebra_merged_applet_container">
-                                Merged Geogebra Applet Here
-                            </div> -->
+                                <!-- Merged Geogebra Applet Here -->
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="ibox border-bottom col-12">
-                    <div class="ibox-title">
-                        <h5>List groups</h5>
-                    </div>
+                <div class="ibox-title">
+                    <h5>List groups</h5>
+                </div>
                 <div class="ibox-content">
                     <div class="row">
                         <div v-for="g in groupsInClass" :key="g._id"
                             class="admin-view-applet-holder">
                             <h3>{{ g.name }}</h3>
-                            <div :id="g.domId" class="geogebra-applet"></div>
+                            <div :id="g.domId" class="geogebra-applet">
+                                <!-- Geogebra Teacher's view applets -->
+                            </div>
                         </div>
                     </div>
                     <!-- <div class="row">
@@ -150,6 +152,11 @@ export default {
             code: undefined,
             groupsInClass: undefined,
             GeogebraViews: undefined,
+            checkedGroups: [],
+            showMenuBar: false,
+            showMergedApplet: false,
+            liveMergeSwitch: false,
+            classSelected: false,
         };
     },
 
@@ -185,19 +192,30 @@ export default {
             findGroups: 'find',
         }),
 
+        /**
+         * async selectAllGroupsinClass
+         *
+         * @param  {String} code Class code
+         * @return {undefined}
+         */
         async selectAllGroupsinClass(code) {
             this.$log.debug(code);
 
             this.clearToast();
 
+            this.showMergedApplet = false;
             this.code = code;
-            this.groupsInClass = await this.findGroups({ query: { class: code } });
+            this.groupsInClass = await this.findGroups({
+                query: { class: code },
+            });
 
             if (!this.groupsInClass.length) {
                 this.showToast('Selected class nas no groups', 'warning');
             } else {
-                this.groupsInClass.forEach((g, i) => {
-                    this.groupsInClass[i].domId = `ggb_applet_${g._id}`;
+                this.classSelected = true;
+
+                this.groupsInClass.forEach((group, idx) => {
+                    this.groupsInClass[idx].domId = `ggb_applet_${group._id}`;
                 });
             }
 
@@ -216,15 +234,56 @@ export default {
 
                 this.GeogebraViews = new GeogebraViews(this.groupsInClass, {
                     log: this.$log,
-                    width: this.$refs.ibox_content.clientWidth - 60,
+                    width: 400, // this.$refs.ibox_content.clientWidth - 60,
+                    height: 400,
                 });
 
                 this.GeogebraViews.inject();
             }
         },
+
+        async mergeViews(checkedGroupIds) {
+            this.showMergedApplet = true;
+            this.liveMergeSwitch = false;
+
+            this.selectedGroups = await this.findGroups({ query: { _id: checkedGroupIds } });
+
+            this.$log.debug('checkedGroups', checkedGroupIds);
+            this.$log.debug('this.selectedGroups', this.selectedGroups);
+
+            if (this.selectedGroups && this.selectedGroups.length) {
+                /* await api.service('users').patch(this.user.username, {
+                    workshops: this.selectedGroups.map(g => g._id),
+                }); */
+
+                this.$log.debug('this.showMenuBar', this.showMenuBar);
+                this.$log.debug('this.$refs.ibox_content.clientWidth',
+                    this.$refs.ibox_content.clientWidth);
+
+                this.GeogebraViews.mergeViews(
+                    this.selectedGroups.map(g => g._id),
+                    { // params for geogebra
+                        showMenubar: this.showMenuBar,
+                        width: (this.$refs.ibox_content.clientWidth - 60),
+                        height: (this.$refs.ibox_content.clientWidth - 60) * 2 / 3,
+                    },
+                );
+            } else {
+                this.showToast('Select groups for merged view', 'warning');
+                this.showMergedApplet = false;
+            }
+        },
     },
+
     async created() {
         await this.findClasses();
+    },
+
+    watch: {
+        liveMergeSwitch(newVal) {
+            if (newVal) this.GeogebraViews.mergeGoLive();
+            else this.GeogebraViews.mergeStopLive();
+        },
     },
 
 };
