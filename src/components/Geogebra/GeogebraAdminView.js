@@ -111,6 +111,7 @@ class GeogebraAdminView {
 
     setXML(xml) {
         this.applet.setXML(xml);
+        this.checkLocks();
     }
 
     evalXML(xml) {

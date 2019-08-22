@@ -424,7 +424,7 @@ class GeogebraMergedAdminView {
 
             const { index, variable } = varRes;
 
-            if (objLabels.indexOf(`${variable}grp${groupNum + 1}`) !== -1) {
+            if (objLabels.includes(`${variable}grp${groupNum + 1}`)) {
                 objCmdStr = `${objCmdStr.slice(0, index)}grp${groupNum + 1}${objCmdStr.slice(index)}`;
             }
         }
