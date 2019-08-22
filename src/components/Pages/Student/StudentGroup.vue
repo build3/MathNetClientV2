@@ -16,6 +16,9 @@
                                     Groups
                                     <span class="footable-sort-indicator"></span>
                                 </th>
+                                <th>
+                                    Number of students
+                                </th>
                                 <th data-hide="action"
                                     class="footable-visible footable-sortable">
                                     Action
@@ -34,6 +37,9 @@
                                 <td class="footable-visible footable-first-column">
                                     <span class="footable-toggle"></span>
                                     {{ g.name }}
+                                </td>
+                                <td>
+                                    {{ countStudentsInGroup(g._id) }}
                                 </td>
                                 <td class="footable-visible">
                                     <router-link :to="{
@@ -70,6 +76,11 @@ export default {
             findGroupsInStore: 'find',
         }),
 
+        ...mapGetters('users', {
+            user: 'current',
+            findStudentInStore: 'find',
+        }),
+
         groups() {
             return this.findGroupsInStore({
                 query: { class: this.code },
@@ -81,10 +92,29 @@ export default {
         ...mapActions('groups', {
             findGroups: 'find',
         }),
+
+        ...mapActions('users', {
+            findStudent: 'find',
+        }),
+
+        countStudentsInGroup(group) {
+            const students = this.findStudentInStore({
+                query: {
+                    workshops: {
+                        $in: [group],
+                    },
+                    permissions: {
+                        $in: ['student'],
+                    },
+                },
+            });
+            return students.data.length;
+        },
     },
 
     created() {
         this.findGroups();
+        this.findStudent();
     },
 
     props: {
