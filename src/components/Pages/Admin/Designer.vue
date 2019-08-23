@@ -530,6 +530,8 @@ export default {
                 let correct = 0;
 
                 if (error.code === 400) {
+                    this.$log.debug('error code 400 ', error.message);
+
                     await this.removeThenAddElements(groupId);
 
                     // await this.updateWorkshop([groupId, { xml }]);
@@ -565,11 +567,11 @@ export default {
         async removeThenAddElements(groupId) {
             this.$log.debug('groupId', groupId);
 
-            await this.removeElement(null, {
+            await this.removeElement([null, {
                 query: {
                     workshop: groupId,
                 },
-            });
+            }]);
             this.$log.debug('groupId', groupId);
             await this.addElements(groupId);
         },
