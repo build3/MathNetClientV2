@@ -44,6 +44,7 @@ export default {
     computed: {
         ...mapGetters('users', {
             student: 'current',
+            findStudentInStore: 'find',
         }),
 
         ...mapGetters('groups', [
@@ -60,6 +61,10 @@ export default {
             getGroup: 'get',
         }),
 
+        ...mapActions('users', [
+            'patch',
+        ]),
+
         /**
          * Removes user from all workshops and joins the current one.
          * This ensures that student is at most in one workshop channel.
@@ -71,11 +76,46 @@ export default {
 
             this.student.workshops = [this.id];
         },
+
+        studentNumber() {
+            const numberOfStudentsInGroup = this.findStudentInStore({
+                query: {
+                    workshops: {
+                        $in: [this.group._id],
+                    },
+                    permissions: {
+                        $in: ['student'],
+                    },
+                    numberInGroup: {
+                        $ne: null,
+                    },
+                    $select: ['numberInGroup'],
+                },
+            });
+
+            if (numberOfStudentsInGroup.data.length === 0) {
+                return 1;
+            }
+
+            const number = numberOfStudentsInGroup.data
+                .findIndex(({ numberInGroup }, index) => numberInGroup !== index + 1);
+
+            if (number === -1) {
+                return numberOfStudentsInGroup.data.length + 1;
+            }
+
+            return number + 1;
+        },
+
+        async saveUserNumber() {
+            await this.patch([this.student.username, { numberInGroup: this.studentNumber() }]);
+        },
     },
 
     created() {
         this.getGroup(this.id);
         this.$store.commit('setStudentGroup', this.group);
+        this.saveUserNumber();
     },
 
     props: {

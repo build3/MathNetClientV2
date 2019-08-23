@@ -6,6 +6,10 @@
     height: 100vh;
 }
 
+.student-info {
+    display: inline-flex;
+}
+
 .select-extender {
     height: 162px;
 }
@@ -18,7 +22,7 @@
 
 .slidecontainer {
     width: 100%;
-  }
+}
 
 .slider {
     -webkit-appearance: none;

@@ -8,7 +8,10 @@
             </div>
             <ul class="nav navbar-top-links navbar-right">
                 <li v-if="isStudent && studentGroup !== undefined" class="group-info">
-                    <h4>Group: {{ studentGroup.name }}</h4>
+                    <div class="student-info">
+                        <h4>Student number: {{ user.numberInGroup }} </h4>
+                        <h4>Group: {{ studentGroup.name }}</h4>
+                    </div>
                 </li>
                 <li v-if="isStudent && studentGroup !== undefined">
                     <router-link
@@ -46,7 +49,9 @@
                     </router-link>
                 </li>
                 <li v-if="isStudent">
-                    <router-link :to="{name: 'StudentClass'}">
+                    <router-link
+                        @click.native="leaveGroup"
+                        :to="{name: 'StudentClass'}">
                         Class List
                     </router-link>
                 </li>
@@ -112,7 +117,7 @@ export default {
 
         async logoutUser() {
             if (this.user.permissions.includes('student')) {
-                await this.patch([this.user.username, { workshops: [] }]);
+                await this.patch([this.user.username, { workshops: [], numberInGroup: null }]);
             }
 
             this.logout().then(() => {
@@ -133,7 +138,7 @@ export default {
         },
 
         async leaveGroup() {
-            await this.patch([this.user.username, { workshops: [] }]);
+            await this.patch([this.user.username, { workshops: [], numberInGroup: null }]);
         },
     },
     created() {
