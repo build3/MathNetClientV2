@@ -449,6 +449,8 @@ export default {
         },
 
         async send(groups) {
+            this.$log.debug('Send');
+
             const xml = this.GI.getXML();
 
             await this.findGroupsInStore({
@@ -468,6 +470,8 @@ export default {
             let successes = 0;
             const promises = [];
 
+            this.$log.debug('GroupsObjects', groupsObjects);
+
             for (let i = 0; i < groupsObjects.length; i += 1) {
                 const g = groupsObjects[i];
                 const promise = this.createOrUpdateWorkshopWithXML(g._id, xml);
@@ -483,6 +487,8 @@ export default {
         },
 
         async sendToAll() {
+            this.$log.debug('SendToAll');
+
             const xml = this.GI.getXML();
             await this.findGroupsInStore({ query: { class: this.code } });
 
@@ -509,9 +515,30 @@ export default {
             groups out of ${groupsObjects.length} selected`, ((successes === groupsObjects.length) ? 'success' : 'warning'));
         },
 
-        async createOrUpdateWorkshopWithXML(groupId, xml) {
+        async createOrUpdateWorkshopWithXML(groupId/* , xml */) {
+            this.$log.debug(groupId);
+
             try {
-                await this.createWorkshop({ id: groupId, xml });
+                await this.createWorkshop({ id: groupId });
+
+                await this.removeElement(null, { workshop: groupId });
+
+                for (let i = 0; i < this.GI.applet.getObjectNumber(); i += 1) {
+                    const label = this.GI.applet.getObjectName(i);
+
+                    /* eslint-disable-next-line no-await-in-loop */
+                    await this.createElement({
+                        id: `${groupId}-${label}`,
+                        name: label,
+                        owner: null,
+                        workshop: groupId,
+                        xml: this.GI.applet.getXML(label),
+                        obj_cmd_str: this.GI.applet.getCommandString(label, false),
+                    });
+
+                    this.$log.debug('createdElement', label);
+                }
+
                 return 1;
             } catch (error) {
                 let correct = 0;
@@ -531,6 +558,8 @@ export default {
                             xml: this.GI.applet.getXML(label),
                             obj_cmd_str: this.GI.applet.getCommandString(label, false),
                         });
+
+                        this.$log.debug('createdElement', label);
                     }
 
                     // await this.updateWorkshop([groupId, { xml }]);

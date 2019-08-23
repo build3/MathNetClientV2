@@ -62,6 +62,7 @@ export default class {
         this.log.debug('initListener');
 
         api.service('elements').on('created', (element) => {
+            this.log.debug('Created element', element.name, element.workshop);
             const pos = this.workshopIds.indexOf(element.workshop);
             if (pos !== -1) {
                 this.GAVs[pos].setElement(element);
@@ -69,6 +70,7 @@ export default class {
         });
 
         api.service('elements').on('patched', (element) => {
+            this.log.debug('Patched element', element.name, element.workshop);
             const pos = this.workshopIds.indexOf(element.workshop);
             if (pos !== -1) {
                 this.GAVs[pos].updateElementXML(element.name, element.xml);
@@ -76,6 +78,7 @@ export default class {
         });
 
         api.service('elements').on('removed', (element) => {
+            this.log.debug('Removed element', element.name, element.workshop);
             const pos = this.workshopIds.indexOf(element.workshop);
             if (pos !== -1) {
                 this.GAVs[pos].deleteObject(element.name);
@@ -83,6 +86,7 @@ export default class {
         });
 
         api.service('workshops').on('xml-changed', (workshop) => {
+            this.log.debug('Created workshop', workshop.name, workshop.id);
             const pos = this.workshopIds.indexOf(workshop.id);
             if (pos !== -1) {
                 this.GAVs[pos].setXML(workshop.xml);
