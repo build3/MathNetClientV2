@@ -547,12 +547,11 @@ export default {
         },
 
         async addElements(groupId) {
-            const promises = [];
-
             for (let i = 0; i < this.GI.applet.getObjectNumber(); i += 1) {
                 const label = this.GI.applet.getObjectName(i);
 
-                const promise = this.createElement({
+                /* eslint-disable-next-line no-await-in-loop */
+                await this.createElement({
                     id: `${groupId}-${label}`,
                     name: label,
                     owner: null,
@@ -560,12 +559,9 @@ export default {
                     xml: this.GI.applet.getXML(label),
                     obj_cmd_str: this.GI.applet.getCommandString(label, false),
                 });
-                promises.push(promise);
 
                 this.$log.debug('createdElement', label);
             }
-
-            await Promise.all(promises);
         },
 
         async removeThenAddElements(groupId) {
