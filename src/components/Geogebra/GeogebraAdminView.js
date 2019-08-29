@@ -34,7 +34,7 @@ const Consts = {
 };
 
 class GeogebraAdminView {
-    constructor(params, workshopId /* geogebraViewsParent */) {
+    constructor(params, workshopId) {
         this.params = {
             showAlgebraInput: true,
             showToolBarHelp: false,
@@ -111,6 +111,7 @@ class GeogebraAdminView {
 
     setXML(xml) {
         this.applet.setXML(xml);
+        this.checkLocks();
     }
 
     evalXML(xml) {
@@ -238,6 +239,10 @@ class GeogebraAdminView {
             const label = this.applet.getObjectName(i);
             this.checkLock(label);
         }
+    }
+
+    deleteObject(label) {
+        this.applet.deleteObject(label);
     }
 }
 
