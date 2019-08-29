@@ -48,6 +48,8 @@ export default class {
 
         // eslint-disable-next-line no-underscore-dangle
         this.workshopIds = this.groups.map(g => g._id);
+
+        this.mergedAppletId = 'merged_ggb_applet';
     }
 
     inject() {
@@ -92,8 +94,8 @@ export default class {
 
     mergeViews(workshopIds, params) {
         this.mergedView = new GeogebraMergedAdminView({
-            container: 'merged_ggb_applet',
-            id: 'merged_ggb_applet',
+            container: this.mergedAppletId,
+            id: this.mergedAppletId,
             perspective: 'G',
             showResetIcon: false,
             ...params,
@@ -106,8 +108,8 @@ export default class {
     mergeGoLive() {
         this.log.debug('Going live');
         this.mergedView.clear();
-        this.mergedView.loadWorkshops();
         this.mergedView.initializeCallbacks();
+        this.mergedView.loadWorkshops();
     }
 
     mergeStopLive() {

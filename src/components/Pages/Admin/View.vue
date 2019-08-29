@@ -117,7 +117,7 @@
                         <div v-for="g in groupsInClass" :key="g._id"
                             class="admin-view-applet-holder">
                             <h3>{{ g.name }}</h3>
-                            <div :id="g.domId" class="geogebra-applet">
+                            <div :id="getAppletId(g._id)" class="geogebra-applet">
                                 <!-- Geogebra Teacher's view applets -->
                             </div>
                         </div>
@@ -213,13 +213,13 @@ export default {
                 this.showToast('Selected class nas no groups', 'warning');
             } else {
                 this.classSelected = true;
-
-                this.groupsInClass.forEach((group, idx) => {
-                    this.groupsInClass[idx].domId = `ggb_applet_${group._id}`;
-                });
             }
 
             this.loadApplets();
+        },
+
+        getAppletId(id) {
+            return `ggb_applet_${id}`;
         },
 
         async loadApplets() {
@@ -232,10 +232,12 @@ export default {
                     workshops: this.groupsInClass.map(g => g._id),
                 });
 
+                const tileSize = 400;
+
                 this.GeogebraViews = new GeogebraViews(this.groupsInClass, {
                     log: this.$log,
-                    width: 400, // this.$refs.ibox_content.clientWidth - 60,
-                    height: 400,
+                    width: tileSize, // this.$refs.ibox_content.clientWidth - 60,
+                    height: tileSize,
                 });
 
                 this.GeogebraViews.inject();
@@ -257,15 +259,20 @@ export default {
                 }); */
 
                 this.$log.debug('this.showMenuBar', this.showMenuBar);
-                this.$log.debug('this.$refs.ibox_content.clientWidth',
-                    this.$refs.ibox_content.clientWidth);
+
+                const ggbWidth = this.$refs.ibox_content.clientWidth - 60;
+
+                this.$log.debug('ggbWidth', ggbWidth);
 
                 this.GeogebraViews.mergeViews(
                     this.selectedGroups.map(g => g._id),
                     { // params for geogebra
                         showMenubar: this.showMenuBar,
-                        width: (this.$refs.ibox_content.clientWidth - 60),
-                        height: (this.$refs.ibox_content.clientWidth - 60) * 2 / 3,
+                        // Geogebra reprocesses this width/height.
+                        // The proper width, to fill the window
+                        // was obtained with ratio height/width = 2/3
+                        width: ggbWidth,
+                        height: ggbWidth * 2 / 3,
                     },
                 );
             } else {
@@ -281,8 +288,12 @@ export default {
 
     watch: {
         liveMergeSwitch(newVal) {
-            if (newVal) this.GeogebraViews.mergeGoLive();
-            else this.GeogebraViews.mergeStopLive();
+            if (newVal) {
+                this.GeogebraViews.mergeGoLive();
+            }
+            else {
+                this.GeogebraViews.mergeStopLive();
+            }
         },
     },
 
