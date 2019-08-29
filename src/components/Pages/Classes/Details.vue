@@ -22,6 +22,7 @@
                     <thead>
                         <tr>
                             <th>Name</th>
+                            <th>Students</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -31,6 +32,12 @@
                         </tr>
                         <tr v-for="(g, index) in groups.data" :key="index">
                             <td>{{ g.name }}</td>
+                            <td>
+                                <div  v-for="student in findStudentsInGroup(g._id)"
+                                    :key="student._id">
+                                    {{ student.username}}
+                                </div>
+                            </td>
                             <td>
                                 <button class="btn btn-sm btn-primary mr-2"
                                     @click="editGroup(g)">
@@ -101,6 +108,11 @@ export default {
             findGroupsInStore: 'find',
         }),
 
+        ...mapGetters('users', {
+            user: 'current',
+            findStudentInStore: 'find',
+        }),
+
         groups() {
             return this.findGroupsInStore({
                 query: { class: this.code },
@@ -114,6 +126,10 @@ export default {
             create: 'create',
             remove: 'remove',
             patch: 'patch',
+        }),
+
+        ...mapActions('users', {
+            findStudent: 'find',
         }),
 
         editGroup(group) {
@@ -166,10 +182,25 @@ export default {
                 };
             }
         },
+
+        findStudentsInGroup(group) {
+            const students = this.findStudentInStore({
+                query: {
+                    workshops: {
+                        $in: [group],
+                    },
+                    permissions: {
+                        $in: ['student'],
+                    },
+                },
+            });
+            return students.data;
+        },
     },
 
     created() {
         this.findGroups();
+        this.findStudent();
     },
 
     props: {
