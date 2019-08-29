@@ -452,6 +452,7 @@ export default {
             this.$log.debug('Send');
 
             const xml = this.GI.getXML();
+            const xmlNoConstr = this.produceXMLWithoutConstructionInside(xml);
 
             await this.findGroupsInStore({
                 query: {
@@ -467,30 +468,15 @@ export default {
                 },
             });
 
-            let successes = 0;
-            const promises = [];
-
-            this.$log.debug('GroupsObjects', groupsObjects);
-
-            for (let i = 0; i < groupsObjects.length; i += 1) {
-                const g = groupsObjects[i];
-
-                const promise = this.createOrUpdateWorkshopWithElements(g._id, xml);
-                promises.push(promise);
-            }
-
-            await Promise.all(promises).then((r) => {
-                successes = r.reduce((x, y) => x + y);
-            });
-
-            this.showToast(`Successfully send construction to ${successes}
-            groups out of ${groupsObjects.length} selected`, ((successes === groupsObjects.length) ? 'success' : 'warning'));
+            await this.sendConstructionToGroups(groupsObjects, xmlNoConstr);
         },
 
         async sendToAll() {
             this.$log.debug('SendToAll');
 
             const xml = this.GI.getXML();
+            const xmlNoConstr = this.produceXMLWithoutConstructionInside(xml);
+
             await this.findGroupsInStore({ query: { class: this.code } });
 
             const groupsObjects = await this.findGroups({
@@ -499,13 +485,19 @@ export default {
                 },
             });
 
+            await this.sendConstructionToGroups(groupsObjects, xmlNoConstr);
+        },
+
+        async sendConstructionToGroups(groupsObjects, xmlNoConstr) {
             let successes = 0;
             const promises = [];
+
+            this.$log.debug('GroupsObjects', groupsObjects);
 
             for (let i = 0; i < groupsObjects.length; i += 1) {
                 const g = groupsObjects[i];
 
-                const promise = this.createOrUpdateWorkshopWithElements(g._id, xml);
+                const promise = this.createOrUpdateWorkshopWithElementsAndXML(g._id, xmlNoConstr);
                 promises.push(promise);
             }
 
@@ -517,11 +509,11 @@ export default {
             groups out of ${groupsObjects.length} selected`, ((successes === groupsObjects.length) ? 'success' : 'warning'));
         },
 
-        async createOrUpdateWorkshopWithElements(groupId) {
+        async createOrUpdateWorkshopWithElementsAndXML(groupId, xmlNoConstr) {
             this.$log.debug(groupId);
 
             try {
-                await this.createWorkshop({ id: groupId });
+                await this.createWorkshop({ id: groupId, xml: xmlNoConstr });
 
                 await this.addElements(groupId);
 
@@ -532,9 +524,9 @@ export default {
                 if (error.code === 400) {
                     this.$log.debug('error code 400 ', error.message);
 
-                    await this.removeThenAddElements(groupId);
+                    await this.updateWorkshop([groupId, { xml: xmlNoConstr }]);
 
-                    // await this.updateWorkshop([groupId, { xml }]);
+                    await this.removeThenAddElements(groupId);
 
                     correct = 1;
                 } else {
@@ -547,12 +539,11 @@ export default {
         },
 
         async addElements(groupId) {
-            const promises = [];
-
             for (let i = 0; i < this.GI.applet.getObjectNumber(); i += 1) {
                 const label = this.GI.applet.getObjectName(i);
 
-                const promise = this.createElement({
+                /* eslint-disable-next-line no-await-in-loop */
+                await this.createElement({
                     id: `${groupId}-${label}`,
                     name: label,
                     owner: null,
@@ -560,12 +551,9 @@ export default {
                     xml: this.GI.applet.getXML(label),
                     obj_cmd_str: this.GI.applet.getCommandString(label, false),
                 });
-                promises.push(promise);
 
                 this.$log.debug('createdElement', label);
             }
-
-            await Promise.all(promises);
         },
 
         async removeThenAddElements(groupId) {
@@ -578,6 +566,19 @@ export default {
             }]);
             this.$log.debug('groupId', groupId);
             await this.addElements(groupId);
+        },
+
+        produceXMLWithoutConstructionInside(xml) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xml, 'text/xml');
+
+            const construction = xmlDoc.getElementsByTagName('construction')[0];
+
+            xmlDoc.documentElement.removeChild(construction);
+            this.$log.debug(xmlDoc);
+
+            const xmlText = new XMLSerializer().serializeToString(xmlDoc);
+            return xmlText;
         },
     },
 
