@@ -26,7 +26,11 @@ function proceed(permission, next) {
 async function permissionCheck(permission, next) {
     /* Normal case - we're logged in, we just need to check permissions */
     if (store.state.auth.user) {
-        proceed(permission, next);
+        if (permission === null) {
+            next();
+        } else {
+            proceed(permission, next);
+        }
     } else {
         /* We're not logged in, so we're either just after a refresh
          * or not logged in at all. So we set up a watcher first, then
@@ -36,7 +40,11 @@ async function permissionCheck(permission, next) {
             if (!store.getters['auth/isAuthenticatePending']()) {
                 /* We logged in with token */
                 if (store.state.auth.user) {
-                    proceed(permission, next);
+                    if (permission === null) {
+                        next();
+                    } else {
+                        proceed(permission, next);
+                    }
                 } else {
                     /* There's no token, we're actually logged out. */
                     next('Login');
@@ -52,6 +60,10 @@ async function permissionCheck(permission, next) {
             }
         }
     }
+}
+
+function requireAuth(to, from, next) {
+    permissionCheck(null, next);
 }
 
 function requireAuthAdmin(to, from, next) {
@@ -104,6 +116,7 @@ export default new Router({
                     path: 'profile',
                     name: 'Profile',
                     component: Pages.Users.Profile,
+                    beforeEnter: requireAuth,
                     props: true,
                 },
                 { path: '*', redirect: '/404' },
