@@ -471,7 +471,8 @@ export default {
                 },
             });
 
-            await this.sendConstructionToGroups(groupsObjects, xmlNoConstr);
+            const properties = { perspectives };
+            await this.sendConstructionToGroups(groupsObjects, xmlNoConstr, properties);
         },
 
         async sendToAll() {
@@ -491,10 +492,11 @@ export default {
                 },
             });
 
-            await this.sendConstructionToGroups(groupsObjects, xmlNoConstr);
+            const properties = { perspectives };
+            await this.sendConstructionToGroups(groupsObjects, xmlNoConstr, properties);
         },
 
-        async sendConstructionToGroups(groupsObjects, xmlNoConstr) {
+        async sendConstructionToGroups(groupsObjects, xmlNoConstr, properties) {
             let successes = 0;
             const promises = [];
 
@@ -503,7 +505,11 @@ export default {
             for (let i = 0; i < groupsObjects.length; i += 1) {
                 const g = groupsObjects[i];
 
-                const promise = this.createOrUpdateWorkshopWithElementsAndXML(g._id, xmlNoConstr);
+                const promise = this.createOrUpdateWorkshopWithElementsAndXML(
+                    g._id,
+                    xmlNoConstr,
+                    properties,
+                );
                 promises.push(promise);
             }
 
@@ -515,11 +521,11 @@ export default {
             groups out of ${groupsObjects.length} selected`, ((successes === groupsObjects.length) ? 'success' : 'warning'));
         },
 
-        async createOrUpdateWorkshopWithElementsAndXML(groupId, xmlNoConstr) {
+        async createOrUpdateWorkshopWithElementsAndXML(groupId, xmlNoConstr, properties) {
             this.$log.debug(groupId);
 
             try {
-                await this.createWorkshop({ id: groupId, xml: xmlNoConstr });
+                await this.createWorkshop({ id: groupId, xml: xmlNoConstr, properties });
 
                 await this.addElements(groupId);
 
@@ -530,7 +536,7 @@ export default {
                 if (error.code === 400) {
                     this.$log.debug('error code 400 ', error.message);
 
-                    await this.updateWorkshop([groupId, { xml: xmlNoConstr }]);
+                    await this.updateWorkshop([groupId, { xml: xmlNoConstr, properties }]);
 
                     await this.removeThenAddElements(groupId);
 
