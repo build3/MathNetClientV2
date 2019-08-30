@@ -382,6 +382,11 @@ export default {
                 await this.get(this.selectedConstruction).then((res) => {
                     this.GI.setXML(res.xml);
                     this.GI.registerGlobalListeners();
+                    this.$log.debug(res);
+                    if (res.properties && res.properties.perspectives) {
+                        this.$log.debug('Perspective is', res.properties.perspectives);
+                        this.GI.setPerspective(res.properties.perspectives);
+                    }
                 });
             } catch (error) {
                 this.alert = {
@@ -423,10 +428,15 @@ export default {
         async addConstruction() {
             this.dismissAlert();
 
+            const xml = this.GI.getXML();
+
             try {
                 await this.createConstruction({
                     name: this.constructionName,
-                    xml: this.GI.getXML(),
+                    xml,
+                    properties: {
+                        perspectives: this.extractPerspectives(xml),
+                    },
                 });
 
                 this.addMode = false;
@@ -594,14 +604,17 @@ export default {
         extractPerspectives(xml) {
             const parser = new DOMParser();
             const xmlDoc = parser.parseFromString(xml, 'text/xml');
+
             const visibleViews = Array.from(xmlDoc.getElementsByTagName('view'))
                 .filter(el => el.getAttribute('visible') === 'true');
+
             // We sort the views so that we can later send the ordered
             // arrangement of the different view tabs present
             // in the activity designer to the students' views
             const visibleViewsSorted = visibleViews.sort((a, b) => {
                 const aOrder = a.getAttribute('location').replace(/,/g, '');
                 const bOrder = b.getAttribute('location').replace(/,/g, '');
+
                 if (aOrder > bOrder) {
                     return -1;
                 /* eslint-disable-next-line no-else-return */
@@ -615,6 +628,7 @@ export default {
             // values of the different views present in the
             // activity designer (to be sent to the students)
             let perspectivesMapped = '';
+
             for (let i = 0; i < visibleViewsSorted.length; i += 1) {
                 const id = visibleViewsSorted[i].getAttribute('id');
                 if (id === '1') {
@@ -657,6 +671,7 @@ export default {
             container: 'geogebra_designer',
             id: 'applet',
             width: this.$refs.geogebra_container.clientWidth - 30,
+            log: this.$log,
         };
 
         // simple example code to show how to initialize GeoGebra
