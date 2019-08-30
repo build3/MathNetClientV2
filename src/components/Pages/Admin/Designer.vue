@@ -453,6 +453,9 @@ export default {
 
             const xml = this.GI.getXML();
             const xmlNoConstr = this.produceXMLWithoutConstructionInside(xml);
+            const perspectives = this.extractPerspectives(xmlNoConstr);
+
+            this.$log.debug('perspectives', perspectives);
 
             await this.findGroupsInStore({
                 query: {
@@ -476,6 +479,9 @@ export default {
 
             const xml = this.GI.getXML();
             const xmlNoConstr = this.produceXMLWithoutConstructionInside(xml);
+            const perspectives = this.extractPerspectives(xmlNoConstr);
+
+            this.$log.debug('perspectives', perspectives);
 
             await this.findGroupsInStore({ query: { class: this.code } });
 
@@ -579,6 +585,69 @@ export default {
 
             const xmlText = new XMLSerializer().serializeToString(xmlDoc);
             return xmlText;
+        },
+
+        extractPerspectives(xml) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xml, 'text/xml');
+
+            const visibleViews = Array.from(xmlDoc.getElementsByTagName('view'))
+                .filter(el => el.getAttribute('visible') === 'true');
+
+            // We sort the views so that we can later send the ordered
+            // arrangement of the different view tabs present
+            // in the activity designer to the students' views
+            const visibleViewsSorted = visibleViews.sort((a, b) => {
+                const aOrder = a.getAttribute('location').replace(/,/g, '');
+                const bOrder = b.getAttribute('location').replace(/,/g, '');
+                if (aOrder > bOrder) {
+                    return -1;
+                /* eslint-disable-next-line no-else-return */
+                } else if (bOrder > aOrder) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            });
+
+            // The following loop creates a string of the (encoded)
+            // values of the different views present in the
+            // activity designer (to be sent to the students)
+            let perspectivesMapped = '';
+            for (let i = 0; i < visibleViewsSorted.length; i += 1) {
+                const id = visibleViewsSorted[i].getAttribute('id');
+                if (id === '1') {
+                    perspectivesMapped += 'G';
+                } else if (id === '2') {
+                    perspectivesMapped += 'A';
+                } else if (id === '4') {
+                    perspectivesMapped += 'S';
+                } else if (id === '8') {
+                    perspectivesMapped += 'C';
+                } else if (id === '16') {
+                    perspectivesMapped += 'D';
+                } else if (id === '32') {
+                    perspectivesMapped += 'L';
+                } else if (id === '64') {
+                    perspectivesMapped += 'B';
+                } else if (id === '512') {
+                    perspectivesMapped += 'T';
+                }
+                /*
+                else if (id == '128') {
+                }
+                else if (id == '512') {
+                }
+                else if (id == '4097') {
+                }
+                else if (id == '43') {
+                }
+                else if (id == '70') {
+                }
+                */
+            }
+
+            return perspectivesMapped;
         },
     },
 
