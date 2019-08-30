@@ -102,6 +102,8 @@ export default class {
 
     mergeViews(workshopIds, params) {
         this.mergedView = new GeogebraMergedAdminView({
+            container: this.mergedAppletId,
+            id: this.mergedAppletId,
             perspective: 'G',
             showResetIcon: false,
             ...params,
