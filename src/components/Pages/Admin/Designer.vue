@@ -452,6 +452,10 @@ export default {
             this.$log.debug('Send');
 
             const xml = this.GI.getXML();
+            const xmlNoConstr = this.produceXMLWithoutConstructionInside(xml);
+            const perspectives = this.extractPerspectives(xmlNoConstr);
+
+            this.$log.debug('perspectives', perspectives);
 
             await this.findGroupsInStore({
                 query: {
@@ -467,30 +471,19 @@ export default {
                 },
             });
 
-            let successes = 0;
-            const promises = [];
-
-            this.$log.debug('GroupsObjects', groupsObjects);
-
-            for (let i = 0; i < groupsObjects.length; i += 1) {
-                const g = groupsObjects[i];
-
-                const promise = this.createOrUpdateWorkshopWithElements(g._id, xml);
-                promises.push(promise);
-            }
-
-            await Promise.all(promises).then((r) => {
-                successes = r.reduce((x, y) => x + y);
-            });
-
-            this.showToast(`Successfully send construction to ${successes}
-            groups out of ${groupsObjects.length} selected`, ((successes === groupsObjects.length) ? 'success' : 'warning'));
+            const properties = { perspectives };
+            await this.sendConstructionToGroups(groupsObjects, xmlNoConstr, properties);
         },
 
         async sendToAll() {
             this.$log.debug('SendToAll');
 
             const xml = this.GI.getXML();
+            const xmlNoConstr = this.produceXMLWithoutConstructionInside(xml);
+            const perspectives = this.extractPerspectives(xmlNoConstr);
+
+            this.$log.debug('perspectives', perspectives);
+
             await this.findGroupsInStore({ query: { class: this.code } });
 
             const groupsObjects = await this.findGroups({
@@ -499,29 +492,37 @@ export default {
                 },
             });
 
+            const properties = { perspectives };
+            await this.sendConstructionToGroups(groupsObjects, xmlNoConstr, properties);
+        },
+
+        async sendConstructionToGroups(groupsObjects, xmlNoConstr, properties) {
             let successes = 0;
-            const promises = [];
+            const results = [];
+
+            this.$log.debug('GroupsObjects', groupsObjects);
 
             for (let i = 0; i < groupsObjects.length; i += 1) {
                 const g = groupsObjects[i];
-
-                const promise = this.createOrUpdateWorkshopWithElements(g._id, xml);
-                promises.push(promise);
+                const result = await this.createOrUpdateWorkshopWithElementXMLAndProperties(
+                    g._id,
+                    xmlNoConstr,
+                    properties,
+                );
+                results.push(result);
             }
 
-            await Promise.all(promises).then((r) => {
-                successes = r.reduce((x, y) => x + y);
-            });
+            successes = results.reduce((x, y) => x + y);
+
 
             this.showToast(`Successfully send construction to ${successes}
             groups out of ${groupsObjects.length} selected`, ((successes === groupsObjects.length) ? 'success' : 'warning'));
         },
 
-        async createOrUpdateWorkshopWithElements(groupId) {
+        async createOrUpdateWorkshopWithElementXMLAndProperties(groupId, xmlNoConstr, properties) {
             this.$log.debug(groupId);
-
             try {
-                await this.createWorkshop({ id: groupId });
+                await this.createWorkshop({ id: groupId, xml: xmlNoConstr, properties });
 
                 await this.addElements(groupId);
 
@@ -532,34 +533,34 @@ export default {
                 if (error.code === 400) {
                     this.$log.debug('error code 400 ', error.message);
 
+                    await this.updateWorkshop([groupId, { xml: xmlNoConstr, properties }]);
                     await this.removeThenAddElements(groupId);
-
-                    // await this.updateWorkshop([groupId, { xml }]);
 
                     correct = 1;
                 } else {
                     this.showToast('Error while creating/updating workshop', 'warning');
                     console.log(error.message);
                 }
-
                 return correct;
             }
+        },
+
+        getElementIdToSendIt(groupId, label) {
+            return `${groupId}-${label}`;
         },
 
         async addElements(groupId) {
             for (let i = 0; i < this.GI.applet.getObjectNumber(); i += 1) {
                 const label = this.GI.applet.getObjectName(i);
 
-                /* eslint-disable-next-line no-await-in-loop */
                 await this.createElement({
-                    id: `${groupId}-${label}`,
+                    id: this.getElementIdToSendIt(groupId, label),
                     name: label,
                     owner: null,
                     workshop: groupId,
                     xml: this.GI.applet.getXML(label),
                     obj_cmd_str: this.GI.applet.getCommandString(label, false),
                 });
-
                 this.$log.debug('createdElement', label);
             }
         },
@@ -573,8 +574,82 @@ export default {
                 },
             }]);
             this.$log.debug('groupId', groupId);
+
             await this.addElements(groupId);
         },
+
+        produceXMLWithoutConstructionInside(xml) {
+            const parser = new DOMParser();
+
+            const xmlDoc = parser.parseFromString(xml, 'text/xml');
+            const construction = xmlDoc.getElementsByTagName('construction')[0];
+
+            xmlDoc.documentElement.removeChild(construction);
+            this.$log.debug(xmlDoc);
+
+            const xmlText = new XMLSerializer().serializeToString(xmlDoc);
+            return xmlText;
+        },
+
+        extractPerspectives(xml) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xml, 'text/xml');
+            const visibleViews = Array.from(xmlDoc.getElementsByTagName('view'))
+                .filter(el => el.getAttribute('visible') === 'true');
+            // We sort the views so that we can later send the ordered
+            // arrangement of the different view tabs present
+            // in the activity designer to the students' views
+            const visibleViewsSorted = visibleViews.sort((a, b) => {
+                const aOrder = a.getAttribute('location').replace(/,/g, '');
+                const bOrder = b.getAttribute('location').replace(/,/g, '');
+                if (aOrder > bOrder) {
+                    return -1;
+                /* eslint-disable-next-line no-else-return */
+                } else if (bOrder > aOrder) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            });
+            // The following loop creates a string of the (encoded)
+            // values of the different views present in the
+            // activity designer (to be sent to the students)
+            let perspectivesMapped = '';
+            for (let i = 0; i < visibleViewsSorted.length; i += 1) {
+                const id = visibleViewsSorted[i].getAttribute('id');
+                if (id === '1') {
+                    perspectivesMapped += 'G';
+                } else if (id === '2') {
+                    perspectivesMapped += 'A';
+                } else if (id === '4') {
+                    perspectivesMapped += 'S';
+                } else if (id === '8') {
+                    perspectivesMapped += 'C';
+                } else if (id === '16') {
+                    perspectivesMapped += 'D';
+                } else if (id === '32') {
+                    perspectivesMapped += 'L';
+                } else if (id === '64') {
+                    perspectivesMapped += 'B';
+                } else if (id === '512') {
+                    perspectivesMapped += 'T';
+                }
+                /*
+                else if (id == '128') {
+                }
+                else if (id == '512') {
+                }
+                else if (id == '4097') {
+                }
+                else if (id == '43') {
+                }
+                else if (id == '70') {
+                }
+                */
+            }
+            return perspectivesMapped;
+        },
+
     },
 
     mounted() {
