@@ -292,8 +292,7 @@ export default {
         liveMergeSwitch(newVal) {
             if (newVal) {
                 this.GeogebraViews.mergeGoLive();
-            }
-            else {
+            } else {
                 this.GeogebraViews.mergeStopLive();
             }
         },
