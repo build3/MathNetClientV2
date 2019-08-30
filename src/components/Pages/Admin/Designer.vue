@@ -449,6 +449,8 @@ export default {
         },
 
         async send(groups) {
+            this.$log.debug('Send');
+
             const xml = this.GI.getXML();
 
             await this.findGroupsInStore({
@@ -468,9 +470,12 @@ export default {
             let successes = 0;
             const promises = [];
 
+            this.$log.debug('GroupsObjects', groupsObjects);
+
             for (let i = 0; i < groupsObjects.length; i += 1) {
                 const g = groupsObjects[i];
-                const promise = this.createOrUpdateWorkshopWithXML(g._id, xml);
+
+                const promise = this.createOrUpdateWorkshopWithElements(g._id, xml);
                 promises.push(promise);
             }
 
@@ -483,6 +488,8 @@ export default {
         },
 
         async sendToAll() {
+            this.$log.debug('SendToAll');
+
             const xml = this.GI.getXML();
             await this.findGroupsInStore({ query: { class: this.code } });
 
@@ -497,7 +504,8 @@ export default {
 
             for (let i = 0; i < groupsObjects.length; i += 1) {
                 const g = groupsObjects[i];
-                const promise = this.createOrUpdateWorkshopWithXML(g._id, xml);
+
+                const promise = this.createOrUpdateWorkshopWithElements(g._id, xml);
                 promises.push(promise);
             }
 
@@ -509,29 +517,22 @@ export default {
             groups out of ${groupsObjects.length} selected`, ((successes === groupsObjects.length) ? 'success' : 'warning'));
         },
 
-        async createOrUpdateWorkshopWithXML(groupId, xml) {
+        async createOrUpdateWorkshopWithElements(groupId) {
+            this.$log.debug(groupId);
+
             try {
-                await this.createWorkshop({ id: groupId, xml });
+                await this.createWorkshop({ id: groupId });
+
+                await this.addElements(groupId);
+
                 return 1;
             } catch (error) {
                 let correct = 0;
 
                 if (error.code === 400) {
-                    await this.removeElement(null, { workshop: groupId });
+                    this.$log.debug('error code 400 ', error.message);
 
-                    for (let i = 0; i < this.GI.applet.getObjectNumber(); i += 1) {
-                        const label = this.GI.applet.getObjectName(i);
-
-                        /* eslint-disable-next-line no-await-in-loop */
-                        await this.createElement({
-                            id: `${groupId}-${label}`,
-                            name: label,
-                            owner: null,
-                            workshop: groupId,
-                            xml: this.GI.applet.getXML(label),
-                            obj_cmd_str: this.GI.applet.getCommandString(label, false),
-                        });
-                    }
+                    await this.removeThenAddElements(groupId);
 
                     // await this.updateWorkshop([groupId, { xml }]);
 
@@ -543,6 +544,40 @@ export default {
 
                 return correct;
             }
+        },
+
+        async addElements(groupId) {
+            const promises = [];
+
+            for (let i = 0; i < this.GI.applet.getObjectNumber(); i += 1) {
+                const label = this.GI.applet.getObjectName(i);
+
+                const promise = this.createElement({
+                    id: `${groupId}-${label}`,
+                    name: label,
+                    owner: null,
+                    workshop: groupId,
+                    xml: this.GI.applet.getXML(label),
+                    obj_cmd_str: this.GI.applet.getCommandString(label, false),
+                });
+                promises.push(promise);
+
+                this.$log.debug('createdElement', label);
+            }
+
+            await Promise.all(promises);
+        },
+
+        async removeThenAddElements(groupId) {
+            this.$log.debug('groupId', groupId);
+
+            await this.removeElement([null, {
+                query: {
+                    workshop: groupId,
+                },
+            }]);
+            this.$log.debug('groupId', groupId);
+            await this.addElements(groupId);
         },
     },
 

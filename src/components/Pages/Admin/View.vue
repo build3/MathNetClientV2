@@ -213,6 +213,10 @@ export default {
                 this.showToast('Selected class nas no groups', 'warning');
             } else {
                 this.classSelected = true;
+
+                this.groupsInClass.forEach((group, idx) => {
+                    this.groupsInClass[idx].domId = `ggb_applet_${group._id}`;
+                });
             }
 
             this.loadApplets();
@@ -259,9 +263,7 @@ export default {
                 }); */
 
                 this.$log.debug('this.showMenuBar', this.showMenuBar);
-
                 const ggbWidth = this.$refs.ibox_content.clientWidth - 60;
-
                 this.$log.debug('ggbWidth', ggbWidth);
 
                 this.GeogebraViews.mergeViews(
