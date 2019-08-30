@@ -34,6 +34,8 @@ export default class {
             ...params,
         };
 
+        this.log = params.log;
+
         // eslint-disable-next-line no-undef
         this.appletContainer = new GGBApplet(this.params);
         // this.appletContainer.setHTML5Codebase('/5.0/web3d/');
@@ -83,5 +85,10 @@ export default class {
         }
         this.applet.setCaption(objectLabel, caption);
         this.ignoreUpdates = false;
+    }
+
+    setPerspective(perspective) {
+        console.log('Setting perspective:', perspective);
+        this.applet.setPerspective(perspective);
     }
 }
