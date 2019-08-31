@@ -1,4 +1,5 @@
-
+.idea/
+static/
 # Created by https://www.gitignore.io/api/vim,node,linux,macos,windows,sublimetext
 # Edit at https://www.gitignore.io/?templates=vim,node,linux,macos,windows,sublimetext
 
