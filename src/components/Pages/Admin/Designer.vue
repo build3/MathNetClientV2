@@ -532,9 +532,11 @@ export default {
                 if (error.code === 400) {
                     this.$log.debug('error code 400 ', error.message);
 
+                    await this.updateWorkshop([groupId, { updating: true }]);
+
                     await this.removeThenAddElements(groupId);
 
-                    // await this.updateWorkshop([groupId, { xml }]);
+                    await this.updateWorkshop([groupId, { updating: false }]);
 
                     correct = 1;
                 } else {

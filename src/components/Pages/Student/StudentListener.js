@@ -90,6 +90,7 @@ export default class StudentListener {
     }
 
     static isUnassigned(label, caption) {
+        console.log(label, caption, StudentListener.getElementCaption(label, Consts.UNASSIGNED), 'isUnnasigned');
         return caption === StudentListener.getElementCaption(label, Consts.UNASSIGNED);
     }
 
@@ -131,9 +132,13 @@ export default class StudentListener {
             });
 
             // Emitted when teacher sends construction to a workshop.
-            api.service('workshops').on('xml-changed', (workshop) => {
-                this.log.debug('XML has changed', workshop);
-                this.client.setXML(workshop.xml);
+            api.service('workshops').on('updated', (workshop) => {
+                this.log.debug('Workshop has changed', workshop);
+                // Ignore updates if workshop is in the process of updating.
+                // This is important because teacher will be sending unassigned
+                // points. If a false positive on-update callback is issued
+                // for unassigned point it will be automatically claimed.
+                this.ignoreUpdates = workshop.updating;
             });
 
             // Load current state of the workshops.
@@ -157,6 +162,10 @@ export default class StudentListener {
 
                 this.log.debug('Loaded elements:', elements);
 
+                // Ignore on-update callbacks until initialization is complete.
+                // Anything fired before that is considered false-positive.
+                this.ignoreUpdates = true;
+
                 /* eslint-disable-next-line no-restricted-syntax */
                 for (const el of elements) {
                     this.initialElements.add(el.name);
@@ -164,6 +173,9 @@ export default class StudentListener {
 
                 this.client.setElements(elements);
 
+                setTimeout(() => {
+                    this.ignoreUpdates = false;
+                });
             // Workshops was not created yet, create it.
             } else {
                 // Create new workshop with the same id as the related group.
@@ -180,6 +192,10 @@ export default class StudentListener {
      * @param {String} label Geogebra element name.
      */
     onUpdateElement(label) {
+        if (this.ignoreUpdates) {
+            return;
+        }
+
         if (!this.shouldUpdate[label]) {
             this.shouldUpdate[label] = true;
             return;
