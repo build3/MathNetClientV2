@@ -384,7 +384,6 @@ export default {
                     this.GI.registerGlobalListeners();
                     this.$log.debug(res);
                     if (res.properties && res.properties.perspectives) {
-                        this.$log.debug('Perspective is', res.properties.perspectives);
                         this.GI.setPerspective(res.properties.perspectives);
                     }
                 });

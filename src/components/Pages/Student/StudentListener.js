@@ -134,6 +134,10 @@ export default class StudentListener {
             api.service('workshops').on('xml-changed', (workshop) => {
                 this.log.debug('XML has changed', workshop);
                 this.client.setXML(workshop.xml);
+
+                if (workshop.properties && workshop.properties.perspectives) {
+                    this.client.setPerspective(workshop.properties.perspectives);
+                }
             });
 
             // Load current state of the workshops.
@@ -149,6 +153,10 @@ export default class StudentListener {
             if (workshop) {
                 // Set initial construction based on the `xml` field.
                 this.client.setConstruction(workshop.xml);
+
+                if (workshop.properties && workshop.properties.perspectives) {
+                    this.client.setPerspective(workshop.properties.perspectives);
+                }
 
                 // Load any existing elements in the workshop.
                 const elements = await api.service('elements').find({

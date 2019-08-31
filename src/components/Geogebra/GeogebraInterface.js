@@ -88,7 +88,7 @@ export default class {
     }
 
     setPerspective(perspective) {
-        console.log('Setting perspective:', perspective);
+        this.log.debug('Setting perspective', perspective);
         this.applet.setPerspective(perspective);
     }
 }
