@@ -13,6 +13,7 @@ module.exports = {
     'indent': ['error', 4],
     'no-underscore-dangle': ['error', { 'allow': ['_id'] }],
     'no-await-in-loop': 'off',
+    'no-else-return': 'off',
   },
   parserOptions: {
     parser: 'babel-eslint',
