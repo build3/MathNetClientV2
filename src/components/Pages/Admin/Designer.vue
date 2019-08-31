@@ -379,12 +379,13 @@ export default {
 
         async useConstruction() {
             try {
-                await this.get(this.selectedConstruction).then((res) => {
-                    this.GI.setXML(res.xml);
+                await this.get(this.selectedConstruction).then((construction) => {
+                    this.GI.setXML(construction.xml);
                     this.GI.registerGlobalListeners();
-                    this.$log.debug(res);
-                    if (res.properties && res.properties.perspectives) {
-                        this.GI.setPerspective(res.properties.perspectives);
+                    this.$log.debug('Got construction', construction);
+
+                    if (construction.properties && construction.properties.perspectives) {
+                        this.GI.setPerspective(construction.properties.perspectives);
                     }
                 });
             } catch (error) {
@@ -438,6 +439,8 @@ export default {
                     },
                 });
 
+                this.$log.debug('Saving XML:', xml);
+
                 this.addMode = false;
 
                 this.alert = {
@@ -461,8 +464,8 @@ export default {
             this.$log.debug('Send');
 
             const xml = this.GI.getXML();
-            const xmlNoConstr = this.produceXMLWithoutConstructionInside(xml);
-            const perspectives = this.extractPerspectives(xmlNoConstr);
+            const metaInformation = this.produceXMLWithoutConstructionInside(xml);
+            const perspectives = this.extractPerspectives(metaInformation);
 
             this.$log.debug('perspectives', perspectives);
 
@@ -481,15 +484,15 @@ export default {
             });
 
             const properties = { perspectives };
-            await this.sendConstructionToGroups(groupsObjects, xmlNoConstr, properties);
+            await this.sendConstructionToGroups(groupsObjects, metaInformation, properties);
         },
 
         async sendToAll() {
             this.$log.debug('SendToAll');
 
             const xml = this.GI.getXML();
-            const xmlNoConstr = this.produceXMLWithoutConstructionInside(xml);
-            const perspectives = this.extractPerspectives(xmlNoConstr);
+            const metaInformation = this.produceXMLWithoutConstructionInside(xml);
+            const perspectives = this.extractPerspectives(metaInformation);
 
             this.$log.debug('perspectives', perspectives);
 
@@ -502,10 +505,10 @@ export default {
             });
 
             const properties = { perspectives };
-            await this.sendConstructionToGroups(groupsObjects, xmlNoConstr, properties);
+            await this.sendConstructionToGroups(groupsObjects, metaInformation, properties);
         },
 
-        async sendConstructionToGroups(groupsObjects, xmlNoConstr, properties) {
+        async sendConstructionToGroups(groupsObjects, metaInformation, properties) {
             let successes = 0;
             const results = [];
 
@@ -513,9 +516,9 @@ export default {
 
             for (let i = 0; i < groupsObjects.length; i += 1) {
                 const g = groupsObjects[i];
-                const result = await this.createOrUpdateWorkshopWithElementXMLAndProperties(
+                const result = await this.createOrUpdateWorkshopWithElementsXMLAndProperties(
                     g._id,
-                    xmlNoConstr,
+                    metaInformation,
                     properties,
                 );
                 results.push(result);
@@ -528,10 +531,14 @@ export default {
             groups out of ${groupsObjects.length} selected`, ((successes === groupsObjects.length) ? 'success' : 'warning'));
         },
 
-        async createOrUpdateWorkshopWithElementXMLAndProperties(groupId, xmlNoConstr, properties) {
+        async createOrUpdateWorkshopWithElementsXMLAndProperties(
+            groupId,
+            metaInformation,
+            properties,
+        ) {
             this.$log.debug(groupId);
             try {
-                await this.createWorkshop({ id: groupId, xml: xmlNoConstr, properties });
+                await this.createWorkshop({ id: groupId, xml: metaInformation, properties });
 
                 await this.addElements(groupId);
 
@@ -542,7 +549,7 @@ export default {
                 if (error.code === 400) {
                     this.$log.debug('error code 400 ', error.message);
 
-                    await this.updateWorkshop([groupId, { xml: xmlNoConstr, properties }]);
+                    await this.updateWorkshop([groupId, { xml: metaInformation, properties }]);
                     await this.removeThenAddElements(groupId);
 
                     correct = 1;
@@ -554,7 +561,7 @@ export default {
             }
         },
 
-        getElementIdToSendIt(groupId, label) {
+        getElementId(groupId, label) {
             return `${groupId}-${label}`;
         },
 
@@ -563,7 +570,7 @@ export default {
                 const label = this.GI.applet.getObjectName(i);
 
                 await this.createElement({
-                    id: this.getElementIdToSendIt(groupId, label),
+                    id: this.getElementId(groupId, label),
                     name: label,
                     owner: null,
                     workshop: groupId,
@@ -587,6 +594,11 @@ export default {
             await this.addElements(groupId);
         },
 
+        /*
+            This function takes xml with construction and removes construction
+            inside so that there are no elements present in the XML.
+            Elements are loaded to workshops through service('elements').
+        */
         produceXMLWithoutConstructionInside(xml) {
             const parser = new DOMParser();
 
@@ -596,8 +608,7 @@ export default {
             xmlDoc.documentElement.removeChild(construction);
             this.$log.debug(xmlDoc);
 
-            const xmlText = new XMLSerializer().serializeToString(xmlDoc);
-            return xmlText;
+            return new XMLSerializer().serializeToString(xmlDoc);
         },
 
         extractPerspectives(xml) {
@@ -616,12 +627,12 @@ export default {
 
                 if (aOrder > bOrder) {
                     return -1;
-                /* eslint-disable-next-line no-else-return */
-                } else if (bOrder > aOrder) {
-                    return 1;
-                } else {
-                    return 0;
                 }
+                if (bOrder > aOrder) {
+                    return 1;
+                }
+
+                return 0;
             });
             // The following loop creates a string of the (encoded)
             // values of the different views present in the
@@ -630,6 +641,11 @@ export default {
 
             for (let i = 0; i < visibleViewsSorted.length; i += 1) {
                 const id = visibleViewsSorted[i].getAttribute('id');
+
+
+                /* This mapping between integers and letters is taken from
+                 * old Mathnet project. Integers are coded inside XML in <view> elements
+                 */
                 if (id === '1') {
                     perspectivesMapped += 'G';
                 } else if (id === '2') {
