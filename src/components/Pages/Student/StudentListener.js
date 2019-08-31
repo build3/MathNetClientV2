@@ -61,6 +61,7 @@ export default class StudentListener {
         // we should ignore the update (it doesn't contain any change in
         // information).
         this.shouldUpdate = {};
+        this.shouldSkip = {};
     }
 
     /**
@@ -123,6 +124,7 @@ export default class StudentListener {
             api.service('elements').on('patched', (element) => {
                 this.log.debug('Patched: ', element.name);
                 this.claimed.add(element.name);
+                this.shouldSkip[element.name] = true;
                 this.client.updateElementXML(element.name, element.xml);
             });
 
@@ -193,6 +195,10 @@ export default class StudentListener {
      */
     onUpdateElement(label) {
         if (this.ignoreUpdates) {
+            return;
+        }
+
+        if (this.shouldSkip[label]) {
             return;
         }
 
