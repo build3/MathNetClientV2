@@ -450,6 +450,11 @@ class StudentClient {
     setFixed(label, isFixed, isSelectable) {
         this.applet.setFixed(label, isFixed, isSelectable);
     }
+
+    setPerspective(perspective) {
+        this.log.debug('Setting perspective', perspective);
+        this.applet.setPerspective(perspective);
+    }
 }
 
 module.exports = {
