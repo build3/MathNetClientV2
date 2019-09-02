@@ -476,6 +476,11 @@ class StudentClient {
     newConstruction() {
         this.client.newConstruction();
     }
+
+    setPerspective(perspective) {
+        this.log.debug('Setting perspective', perspective);
+        this.applet.setPerspective(perspective);
+    }
 }
 
 module.exports = {

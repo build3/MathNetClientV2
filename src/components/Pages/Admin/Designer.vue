@@ -379,9 +379,14 @@ export default {
 
         async useConstruction() {
             try {
-                await this.get(this.selectedConstruction).then((res) => {
-                    this.GI.setXML(res.xml);
+                await this.get(this.selectedConstruction).then((construction) => {
+                    this.GI.setXML(construction.xml);
                     this.GI.registerGlobalListeners();
+                    this.$log.debug('Got construction', construction);
+
+                    if (construction.properties && construction.properties.perspectives) {
+                        this.GI.setPerspective(construction.properties.perspectives);
+                    }
                 });
             } catch (error) {
                 this.alert = {
@@ -423,11 +428,18 @@ export default {
         async addConstruction() {
             this.dismissAlert();
 
+            const xml = this.GI.getXML();
+
             try {
                 await this.createConstruction({
                     name: this.constructionName,
-                    xml: this.GI.getXML(),
+                    xml,
+                    properties: {
+                        perspectives: this.extractPerspectives(xml),
+                    },
                 });
+
+                this.$log.debug('Saving XML:', xml);
 
                 this.addMode = false;
 
@@ -452,6 +464,10 @@ export default {
             this.$log.debug('Send');
 
             const xml = this.GI.getXML();
+            const metaInformation = this.produceXMLWithoutConstructionInside(xml);
+            const perspectives = this.extractPerspectives(metaInformation);
+
+            this.$log.debug('perspectives', perspectives);
 
             await this.findGroupsInStore({
                 query: {
@@ -467,30 +483,19 @@ export default {
                 },
             });
 
-            let successes = 0;
-            const promises = [];
-
-            this.$log.debug('GroupsObjects', groupsObjects);
-
-            for (let i = 0; i < groupsObjects.length; i += 1) {
-                const g = groupsObjects[i];
-
-                const promise = this.createOrUpdateWorkshopWithElements(g._id, xml);
-                promises.push(promise);
-            }
-
-            await Promise.all(promises).then((r) => {
-                successes = r.reduce((x, y) => x + y);
-            });
-
-            this.showToast(`Successfully send construction to ${successes}
-            groups out of ${groupsObjects.length} selected`, ((successes === groupsObjects.length) ? 'success' : 'warning'));
+            const properties = { perspectives };
+            await this.sendConstructionToGroups(groupsObjects, metaInformation, properties);
         },
 
         async sendToAll() {
             this.$log.debug('SendToAll');
 
             const xml = this.GI.getXML();
+            const metaInformation = this.produceXMLWithoutConstructionInside(xml);
+            const perspectives = this.extractPerspectives(metaInformation);
+
+            this.$log.debug('perspectives', perspectives);
+
             await this.findGroupsInStore({ query: { class: this.code } });
 
             const groupsObjects = await this.findGroups({
@@ -499,29 +504,41 @@ export default {
                 },
             });
 
+            const properties = { perspectives };
+            await this.sendConstructionToGroups(groupsObjects, metaInformation, properties);
+        },
+
+        async sendConstructionToGroups(groupsObjects, metaInformation, properties) {
             let successes = 0;
-            const promises = [];
+            const results = [];
+
+            this.$log.debug('GroupsObjects', groupsObjects);
 
             for (let i = 0; i < groupsObjects.length; i += 1) {
                 const g = groupsObjects[i];
-
-                const promise = this.createOrUpdateWorkshopWithElements(g._id, xml);
-                promises.push(promise);
+                const result = await this.createOrUpdateWorkshopWithElementsXMLAndProperties(
+                    g._id,
+                    metaInformation,
+                    properties,
+                );
+                results.push(result);
             }
 
-            await Promise.all(promises).then((r) => {
-                successes = r.reduce((x, y) => x + y);
-            });
+            successes = results.reduce((x, y) => x + y);
+
 
             this.showToast(`Successfully send construction to ${successes}
             groups out of ${groupsObjects.length} selected`, ((successes === groupsObjects.length) ? 'success' : 'warning'));
         },
 
-        async createOrUpdateWorkshopWithElements(groupId) {
+        async createOrUpdateWorkshopWithElementsXMLAndProperties(
+            groupId,
+            metaInformation,
+            properties,
+        ) {
             this.$log.debug(groupId);
-
             try {
-                await this.createWorkshop({ id: groupId });
+                await this.createWorkshop({ id: groupId, xml: metaInformation, properties });
 
                 await this.addElements(groupId);
 
@@ -533,35 +550,35 @@ export default {
                     this.$log.debug('error code 400 ', error.message);
 
                     await this.updateWorkshop([groupId, { updating: true }]);
-
                     await this.removeThenAddElements(groupId);
-
-                    await this.updateWorkshop([groupId, { updating: false }]);
-
+                    await this.updateWorkshop([groupId, { updating: false, xml: metaInformation, properties }]);
+                    await this.removeThenAddElements(groupId);
+                    
                     correct = 1;
                 } else {
                     this.showToast('Error while creating/updating workshop', 'warning');
                     console.log(error.message);
                 }
-
                 return correct;
             }
+        },
+
+        getElementId(groupId, label) {
+            return `${groupId}-${label}`;
         },
 
         async addElements(groupId) {
             for (let i = 0; i < this.GI.applet.getObjectNumber(); i += 1) {
                 const label = this.GI.applet.getObjectName(i);
 
-                /* eslint-disable-next-line no-await-in-loop */
                 await this.createElement({
-                    id: `${groupId}-${label}`,
+                    id: this.getElementId(groupId, label),
                     name: label,
                     owner: null,
                     workshop: groupId,
                     xml: this.GI.applet.getXML(label),
                     obj_cmd_str: this.GI.applet.getCommandString(label, false),
                 });
-
                 this.$log.debug('createdElement', label);
             }
         },
@@ -575,8 +592,95 @@ export default {
                 },
             }]);
             this.$log.debug('groupId', groupId);
+
             await this.addElements(groupId);
         },
+
+        /*
+            This function takes xml with construction and removes construction
+            inside so that there are no elements present in the XML.
+            Elements are loaded to workshops through service('elements').
+        */
+        produceXMLWithoutConstructionInside(xml) {
+            const parser = new DOMParser();
+
+            const xmlDoc = parser.parseFromString(xml, 'text/xml');
+            const construction = xmlDoc.getElementsByTagName('construction')[0];
+
+            xmlDoc.documentElement.removeChild(construction);
+            this.$log.debug(xmlDoc);
+
+            return new XMLSerializer().serializeToString(xmlDoc);
+        },
+
+        extractPerspectives(xml) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xml, 'text/xml');
+
+            const visibleViews = Array.from(xmlDoc.getElementsByTagName('view'))
+                .filter(el => el.getAttribute('visible') === 'true');
+
+            // We sort the views so that we can later send the ordered
+            // arrangement of the different view tabs present
+            // in the activity designer to the students' views
+            const visibleViewsSorted = visibleViews.sort((a, b) => {
+                const aOrder = a.getAttribute('location').replace(/,/g, '');
+                const bOrder = b.getAttribute('location').replace(/,/g, '');
+
+                if (aOrder > bOrder) {
+                    return -1;
+                }
+                if (bOrder > aOrder) {
+                    return 1;
+                }
+
+                return 0;
+            });
+            // The following loop creates a string of the (encoded)
+            // values of the different views present in the
+            // activity designer (to be sent to the students)
+            let perspectivesMapped = '';
+
+            for (let i = 0; i < visibleViewsSorted.length; i += 1) {
+                const id = visibleViewsSorted[i].getAttribute('id');
+
+
+                /* This mapping between integers and letters is taken from
+                 * old Mathnet project. Integers are coded inside XML in <view> elements
+                 */
+                if (id === '1') {
+                    perspectivesMapped += 'G';
+                } else if (id === '2') {
+                    perspectivesMapped += 'A';
+                } else if (id === '4') {
+                    perspectivesMapped += 'S';
+                } else if (id === '8') {
+                    perspectivesMapped += 'C';
+                } else if (id === '16') {
+                    perspectivesMapped += 'D';
+                } else if (id === '32') {
+                    perspectivesMapped += 'L';
+                } else if (id === '64') {
+                    perspectivesMapped += 'B';
+                } else if (id === '512') {
+                    perspectivesMapped += 'T';
+                }
+                /*
+                else if (id == '128') {
+                }
+                else if (id == '512') {
+                }
+                else if (id == '4097') {
+                }
+                else if (id == '43') {
+                }
+                else if (id == '70') {
+                }
+                */
+            }
+            return perspectivesMapped;
+        },
+
     },
 
     mounted() {
@@ -584,6 +688,7 @@ export default {
             container: 'geogebra_designer',
             id: 'applet',
             width: this.$refs.geogebra_container.clientWidth - 30,
+            log: this.$log,
         };
 
         // simple example code to show how to initialize GeoGebra

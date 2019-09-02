@@ -213,10 +213,6 @@ export default {
                 this.showToast('Selected class nas no groups', 'warning');
             } else {
                 this.classSelected = true;
-
-                this.groupsInClass.forEach((group, idx) => {
-                    this.groupsInClass[idx].domId = `ggb_applet_${group._id}`;
-                });
             }
 
             this.loadApplets();
@@ -254,7 +250,7 @@ export default {
 
             this.selectedGroups = await this.findGroups({ query: { _id: checkedGroupIds } });
 
-            this.$log.debug('checkedGroups', checkedGroupIds);
+            this.$log.debug('checkedGroupIds', checkedGroupIds);
             this.$log.debug('this.selectedGroups', this.selectedGroups);
 
             if (this.selectedGroups && this.selectedGroups.length) {
