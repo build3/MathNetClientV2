@@ -166,7 +166,7 @@ export default class StudentListener {
 
             api.service('workshops').on('xml-changed', (workshop) => {
                 this.log.debug('XML has changed', workshop);
-                this.client.setXML(workshop.xml);
+                // this.client.setXML(workshop.xml);
 
                 if (workshop.properties && workshop.properties.perspectives) {
                     this.client.setPerspective(workshop.properties.perspectives);
@@ -337,10 +337,12 @@ export default class StudentListener {
     }
 
     onRemoveElement(label) {
-        this.log.debug(label);
+        if (!this.ignoreUpdates) {
+            this.log.debug(label);
 
-        api.service('elements').remove(
-            StudentListener.getElementId(this.workshopId, label),
-        );
+            api.service('elements').remove(
+                StudentListener.getElementId(this.workshopId, label),
+            );
+        }
     }
 }

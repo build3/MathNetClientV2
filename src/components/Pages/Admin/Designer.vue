@@ -550,6 +550,7 @@ export default {
                     this.$log.debug('error code 400 ', error.message);
 
                     await this.updateWorkshop([groupId, { updating: true }]);
+
                     await this.removeThenAddElements(groupId);
 
                     await this.updateWorkshop([groupId, {
@@ -557,8 +558,6 @@ export default {
                         xml: metaInformation,
                         properties,
                     }]);
-
-                    await this.removeThenAddElements(groupId);
 
                     correct = 1;
                 } else {

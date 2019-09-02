@@ -183,10 +183,7 @@ class StudentClient {
 
         window[`updateListener${this.appletId}`] = label => this.onUpdateElement(label);
 
-        window[`removeListener${this.appletId}`] = throttle(
-            label => this.onRemoveElement(label),
-            THROTTLE_PERIOD,
-        );
+        window[`removeListener${this.appletId}`] = label => this.onRemoveElement(label);
 
         window[`renameListener${this.appletId}`] = throttle(
             (oldLabel, newLabel) => this.onRenameElement(oldLabel, newLabel),
@@ -474,7 +471,9 @@ class StudentClient {
     }
 
     newConstruction() {
-        this.client.newConstruction();
+        if (this.client) {
+            this.client.newConstruction();
+        }
     }
 
     setPerspective(perspective) {
