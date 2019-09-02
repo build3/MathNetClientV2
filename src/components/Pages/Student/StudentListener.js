@@ -40,12 +40,13 @@ export default class StudentListener {
      * https://www.npmjs.com/package/vuejs-logger.
      */
     constructor(ggbClient, studentUsername, workshopId, studentColor, log) {
+        this.log = log;
         this.client = ggbClient;
         this.studentUsername = studentUsername;
         this.workshopId = workshopId;
         this.initializeServerCallbacks();
         this.studentColor = studentColor;
-        this.log = log;
+
 
         // Elements loaded from the server. [onAddElement] should not
         // be processed for those elements. Therefore, we need to keep
@@ -62,6 +63,8 @@ export default class StudentListener {
         // information).
         this.shouldUpdate = {};
         this.shouldSkip = {};
+
+        this.coords = {};
     }
 
     /**
@@ -91,7 +94,6 @@ export default class StudentListener {
     }
 
     static isUnassigned(label, caption) {
-        console.log(label, caption, StudentListener.getElementCaption(label, Consts.UNASSIGNED), 'isUnnasigned');
         return caption === StudentListener.getElementCaption(label, Consts.UNASSIGNED);
     }
 
@@ -118,6 +120,12 @@ export default class StudentListener {
             api.service('elements').on('created', (element) => {
                 this.log.debug('Created: ', element.name);
                 this.claimed.add(element.name);
+
+                if (element.owner !== null) {
+                    this.log.debug('Adding element: ', element.name, ' to skipped');
+                    this.shouldSkip[element.name] = true;
+                }
+
                 this.client.setElement(element);
             });
 
@@ -125,12 +133,21 @@ export default class StudentListener {
                 this.log.debug('Patched: ', element.name);
                 this.claimed.add(element.name);
                 this.shouldSkip[element.name] = true;
+                this.ignoreUpdates = true;
                 this.client.updateElementXML(element.name, element.xml);
+
+                setTimeout(() => {
+                    this.ignoreUpdates = false;
+                });
             });
 
             api.service('elements').on('removed', (element) => {
                 this.log.debug('Removed: ', element.name);
                 this.client.deleteObject(element.name);
+                this.shouldSkip[element.name] = false;
+                this.claimed.delete(element.name);
+                this.coords[element.name] = undefined;
+                this.initialElements.delete(element.name);
             });
 
             // Emitted when teacher sends construction to a workshop.
@@ -141,6 +158,10 @@ export default class StudentListener {
                 // points. If a false positive on-update callback is issued
                 // for unassigned point it will be automatically claimed.
                 this.ignoreUpdates = workshop.updating;
+
+                if (workshop.updating) {
+                    this.client.newConstruction();
+                }
             });
 
             // Load current state of the workshops.
@@ -190,37 +211,62 @@ export default class StudentListener {
         };
     }
 
+    getCoords(label) {
+        return [
+            this.client.getXcoord(label),
+            this.client.getYcoord(label),
+            this.client.getZcoord(label),
+        ];
+    }
+
     /**
      * @param {String} label Geogebra element name.
      */
     onUpdateElement(label) {
+        this.log.debug(label);
+
+        try {
+            const newCoords = this.getCoords(label);
+            const coords = this.coords[label] || [];
+
+            if (coords[0] === newCoords[0]
+                    && coords[1] === newCoords[1]
+                    && coords[2] === newCoords[2]) {
+                this.log.debug(`False-positive update detected, skipping for ${label}`);
+                return;
+            }
+
+            this.coords[label] = newCoords;
+        } catch (error) {
+            this.log.error(`getCoords failed for ${label} (is compound?)`);
+        }
+
         if (this.ignoreUpdates) {
+            this.log.debug(`Ignore updates (${label})`);
             return;
         }
 
         if (this.shouldSkip[label]) {
+            this.log.debug(`Should skip (${label})`);
             return;
         }
 
-        if (!this.shouldUpdate[label]) {
-            this.shouldUpdate[label] = true;
-            return;
-        }
-
-        this.log.debug(label);
+        // if (!this.shouldUpdate[label]) {
+        //     this.shouldUpdate[label] = true;
+        //     this.log.debug(`Should not update (${label})`);
+        //     return;
+        // }
 
         const id = StudentListener.getElementId(this.workshopId, label);
         const caption = this.client.getCaption(label);
 
         if (StudentListener.isUnassigned(label, caption)) {
-            this.log.debug(`${label} is unassigned, claiming`);
+            this.log.debug(`Claim ${label}, c: ${caption}`);
             this.claimed.delete(label);
             this.adjustForDisplay(label);
         }
 
         if (!this.claimed.has(label)) {
-            this.log.debug(label, id);
-
             setTimeout(() => {
                 api.service('elements')
                     .patch(id, {

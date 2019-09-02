@@ -150,6 +150,11 @@ class StudentClient {
         // Save reference to the applet itself. This is the main line
         // of communication between Geogebra and the rest of the code.
         this.applet = this.appletContainer.getAppletObject();
+        this.appletId = Math.floor(Math.random() * 10000);
+
+        // In case Geogebra is caching, clear everything.
+        this.applet.reset();
+        this.applet.newConstruction();
 
         // Geogebra uses global listeners on `window` to notify of its
         // internal events (such as when element is added/modified/deleted).
@@ -243,7 +248,12 @@ class StudentClient {
         this.ignoreUpdates = true;
         this.evalXML(xml);
         this.evalCommand('UpdateConstruction()');
-        this.ignoreUpdates = false;
+        // XXX: Not sure if we need it here.
+        this.checkLock(label);
+
+        setTimeout(() => {
+            this.ignoreUpdates = false;
+        });
     }
 
     /**
@@ -449,6 +459,22 @@ class StudentClient {
 
     setFixed(label, isFixed, isSelectable) {
         this.applet.setFixed(label, isFixed, isSelectable);
+    }
+
+    getXcoord(label) {
+        return this.applet.getXcoord(label);
+    }
+
+    getYcoord(label) {
+        return this.applet.getYcoord(label);
+    }
+
+    getZcoord(label) {
+        return this.applet.getZcoord(label);
+    }
+
+    newConstruction() {
+        this.client.newConstruction();
     }
 }
 
