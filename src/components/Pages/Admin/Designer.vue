@@ -551,9 +551,15 @@ export default {
 
                     await this.updateWorkshop([groupId, { updating: true }]);
                     await this.removeThenAddElements(groupId);
-                    await this.updateWorkshop([groupId, { updating: false, xml: metaInformation, properties }]);
+
+                    await this.updateWorkshop([groupId, {
+                        updating: false,
+                        xml: metaInformation,
+                        properties,
+                    }]);
+
                     await this.removeThenAddElements(groupId);
-                    
+
                     correct = 1;
                 } else {
                     this.showToast('Error while creating/updating workshop', 'warning');
