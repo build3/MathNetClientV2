@@ -47,6 +47,10 @@
                                         </div>
                                       </draggable>
                                 </div>
+
+                                <button @click="transformArrayToolbarToString">
+                                    Test
+                                </button>
                               </div>
                         </div>
                     </div>
@@ -189,7 +193,7 @@ export default {
     props: {
         value: {
             type: String,
-            default: null,
+            default: '',
         },
     },
 
@@ -236,6 +240,24 @@ export default {
                 array[i] = { id: i, name: i };
             }
             return array;
+        },
+
+        transformArrayToolbarToString() {
+            let string = '';
+
+            for (let i = 0; i < this.lists.length; i += 1) {
+                if (this.lists[i].length === 0 && (i !== (this.lists.length - 1))) string += '| ';
+                for (let j = 0; j < this.lists[i].length; j += 1) {
+                    if (this.lists[i][j].id) string += `${this.lists[i][j].id} `;
+
+                    if (j === (this.lists[i].length - 1)) {
+                        if (i !== (this.lists.length - 1)) string += '| ';
+                    }
+                }
+            }
+
+            console.log('Toolbar string is', string);
+            return string;
         },
     },
 };
