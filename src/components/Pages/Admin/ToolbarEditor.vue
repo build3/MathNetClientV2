@@ -9,47 +9,45 @@
                 <div class="col-12">
                     <h2>Toolbars</h2>
                     <div class="geogebra-tools mt-3">
-                        <div class="col-8">
-                            Toolbars here
-                            <draggable
-                                class="dragArea list-group"
-                                :list="availableTools"
-                                :group="{ name: 'people', pull: 'clone', put: false }"
-                                @change="log"
-                              >
-                                <div
-                                  class="list-group-item"
-                                  v-for="element in availableTools"
-                                  :key="element.name"
-                                >
-                                  {{ element.name }}
-                                </div>
-                             </draggable>
+                        <div class="col-12">
+                            <div class="col-12">
+                                <draggable
+                                    class="dragArea list-of-draggable-tools"
+                                    :list="availableTools"
+                                    :group="{ name: 'people', pull: 'clone', put: false }"
+                                    @change="log"
+                                  >
+                                    <div
+                                      class="list-group-item available-tool-icon"
+                                      v-for="element in availableTools"
+                                      :key="element.name"
+                                    >
+                                      {{ element.name }}
+                                    </div>
+                                 </draggable>
 
-                             <draggable v-for="(list, index) in lists"
-                                class="dragArea list-group draggable-list"
-                                :list="list"
-                                group="people"
-                                draggable=".item"
-                                @change="log"
-                                :key="index"
-                              >
-                                <div
-                                  class="list-group-item item"
-                                  v-for="element in list"
-                                  :key="element.name"
-                                >
-                                  {{ element.name }}
-                                </div>
 
-                                <div
-                                  slot="header"
-                                  class="btn-group list-group-item"
-                                  role="group"
-                                  aria-label="Basic example"
-                                >
+                                 <div class="draggable-lists-container">
+                                     <draggable v-for="(list, index) in lists"
+                                        class="dragArea draggable-list"
+                                        :list="list"
+                                        group="people"
+                                        draggable=".item"
+                                        @change="log"
+                                        :key="index"
+                                      >
+                                        <div
+                                          class="item tool-icon"
+                                          v-for="(element, index2) in list"
+                                          :key="element.id"
+                                        >
+                                          {{ element.name }}
+                                          <button class="tool-delete-button"
+                                          @click="deleteTool(index,index2)">-</button>
+                                        </div>
+                                      </draggable>
                                 </div>
-                              </draggable>
+                              </div>
                         </div>
                     </div>
                 </div>
@@ -82,7 +80,7 @@
                         </div>
                     </div>
                     <div class="position-options">
-                        <div class="checkbox form-inline mt-4">
+                        <!-- <div class="checkbox form-inline mt-4">
                             <label class="checkbox-container">
                                 Axis display
                                  <input type="checkbox">
@@ -98,7 +96,7 @@
                                  <input type="checkbox">
                                 <span class="checkmark"></span>
                             </label>
-                        </div>
+                        </div> -->
                         <div class="row">
                             <div class="col-6 mt-2">
                                 <select class="form-control select-extender">
@@ -184,32 +182,30 @@
 import draggable from 'vuedraggable';
 
 export default {
-    name: 'clone',
-    display: 'Clone',
-    order: 2,
-
     components: {
         draggable,
     },
 
+    props: {
+        value: {
+            type: String,
+            default: null,
+        },
+    },
+
     data() {
         return {
-            availableTools: [
-                { name: 'John', id: 1 },
-                { name: 'Joao', id: 2 },
-                { name: 'Jean', id: 3 },
-                { name: 'Gerard', id: 4 },
-            ],
+            availableTools: this.generateDummyToolbarOptions(),
             lists: [
                 [
-                    { name: 'Juan', id: 5 },
-                    { name: 'Edgard', id: 6 },
-                    { name: 'Johnson', id: 7 },
+                    { name: 0, id: 0 },
+                    { name: 1, id: 1 },
+                    { name: 2, id: 2 },
                 ],
                 [
-                    { name: 'Juan', id: 5 },
-                    { name: 'Edgard', id: 6 },
-                    { name: 'Johnson', id: 7 },
+                    { name: 3, id: 3 },
+                    { name: 4, id: 4 },
+                    { name: 5, id: 5 },
                 ],
                 [],
                 [],
@@ -228,6 +224,18 @@ export default {
     methods: {
         log(evt) {
             window.console.log(evt);
+        },
+
+        deleteTool(x, y) {
+            this.lists[x].splice(y, 1);
+        },
+
+        generateDummyToolbarOptions() {
+            const array = [];
+            for (let i = 0; i < 60; i += 1) {
+                array[i] = { id: i, name: i };
+            }
+            return array;
         },
     },
 };
