@@ -9,7 +9,48 @@
                 <div class="col-12">
                     <h2>Toolbars</h2>
                     <div class="geogebra-tools mt-3">
-                        <!---<1!--toolbar from geogebra--1>--->
+                        <div class="col-8">
+                            Toolbars here
+                            <draggable
+                                class="dragArea list-group"
+                                :list="availableTools"
+                                :group="{ name: 'people', pull: 'clone', put: false }"
+                                @change="log"
+                              >
+                                <div
+                                  class="list-group-item"
+                                  v-for="element in availableTools"
+                                  :key="element.name"
+                                >
+                                  {{ element.name }}
+                                </div>
+                             </draggable>
+
+                             <draggable v-for="(list, index) in lists"
+                                class="dragArea list-group draggable-list"
+                                :list="list"
+                                group="people"
+                                draggable=".item"
+                                @change="log"
+                                :key="index"
+                              >
+                                <div
+                                  class="list-group-item item"
+                                  v-for="element in list"
+                                  :key="element.name"
+                                >
+                                  {{ element.name }}
+                                </div>
+
+                                <div
+                                  slot="header"
+                                  class="btn-group list-group-item"
+                                  role="group"
+                                  aria-label="Basic example"
+                                >
+                                </div>
+                              </draggable>
+                        </div>
                     </div>
                 </div>
                 <div class="col-6">
@@ -140,7 +181,54 @@
 </template>
 
 <script>
-export default {
+import draggable from 'vuedraggable';
 
+export default {
+    name: 'clone',
+    display: 'Clone',
+    order: 2,
+
+    components: {
+        draggable,
+    },
+
+    data() {
+        return {
+            availableTools: [
+                { name: 'John', id: 1 },
+                { name: 'Joao', id: 2 },
+                { name: 'Jean', id: 3 },
+                { name: 'Gerard', id: 4 },
+            ],
+            lists: [
+                [
+                    { name: 'Juan', id: 5 },
+                    { name: 'Edgard', id: 6 },
+                    { name: 'Johnson', id: 7 },
+                ],
+                [
+                    { name: 'Juan', id: 5 },
+                    { name: 'Edgard', id: 6 },
+                    { name: 'Johnson', id: 7 },
+                ],
+                [],
+                [],
+                [],
+                [],
+                [],
+                [],
+                [],
+                [],
+                [],
+                [],
+            ],
+        };
+    },
+
+    methods: {
+        log(evt) {
+            window.console.log(evt);
+        },
+    },
 };
 </script>
