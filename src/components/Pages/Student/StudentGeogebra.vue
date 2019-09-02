@@ -77,6 +77,14 @@ export default {
             this.student.workshops = [this.id];
         },
 
+        async leaveWorkshop() {
+            await api.service('users').patch(this.student.username, {
+                workshops: [],
+            });
+
+            this.student.workshops = [];
+        },
+
         studentNumber() {
             const numberOfStudentsInGroup = this.findStudentInStore({
                 query: {
@@ -149,7 +157,8 @@ export default {
         client.initApplet(listener);
     },
 
-    beforeDestroy() {
+    async beforeDestroy() {
+        await this.leaveWorkshop();
         this.$store.commit('setStudentGroup', undefined);
     },
 };
