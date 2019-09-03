@@ -250,6 +250,13 @@ table.designer-class-table tr {
     border: 0.5px solid gray;
     border-radius: 3px;
     margin: 2px;
+
+    padding: 0px;
+}
+
+.available-tool-icon img, .tool-icon img {
+    width: 46px;
+    height: 46px;
 }
 
 .tool-icon {
@@ -262,6 +269,7 @@ table.designer-class-table tr {
     background-color: white;
 
     position: relative;
+    padding: 0px;
 }
 
 .tool-delete-button {

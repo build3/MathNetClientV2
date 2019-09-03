@@ -574,7 +574,6 @@ export default {
             || perspectives.includes('L') || perspectives.includes('B')
             || perspectives.includes('T'));
         },
-
     },
 
     mounted() {
