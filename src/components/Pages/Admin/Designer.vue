@@ -340,8 +340,11 @@ export default {
             const perspectives = this.extractPerspectives(metaInformation);
             let toolbar = null;
 
+            this.$log.debug('this.perspectivesThatHaveToolbar(perspectives)', this.perspectivesThatHaveToolbar(perspectives));
+
             if (this.sendToolbar && this.perspectivesThatHaveToolbar(perspectives)) {
                 toolbar = this.toolbar;
+                this.$log.debug('Sending toolbar', toolbar);
             }
 
             this.$log.debug('perspectives', perspectives);
@@ -373,8 +376,11 @@ export default {
             const perspectives = this.extractPerspectives(metaInformation);
             let toolbar = null;
 
+            this.$log.debug('this.perspectivesThatHaveToolbar(perspectives)', this.perspectivesThatHaveToolbar(perspectives));
+
             if (this.sendToolbar && this.perspectivesThatHaveToolbar(perspectives)) {
                 toolbar = this.toolbar;
+                this.log.debug('Sending toolbar', toolbar);
             }
 
             this.$log.debug('perspectives', perspectives);
@@ -564,7 +570,7 @@ export default {
         },
 
         perspectivesThatHaveToolbar(perspectives) {
-            return (perspectives.includes('S') || perspectives.includes('C')
+            return !(perspectives.includes('S') || perspectives.includes('C')
             || perspectives.includes('L') || perspectives.includes('B')
             || perspectives.includes('T'));
         },
@@ -599,9 +605,6 @@ export default {
                 this.constructionName = undefined;
                 this.xml = undefined;
             }
-        },
-        toolbar(newValue) {
-            this.GI.applet.setCustomToolBar(newValue);
         },
     },
 };
