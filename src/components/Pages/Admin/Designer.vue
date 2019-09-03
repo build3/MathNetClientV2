@@ -68,7 +68,7 @@
                                         </label>
                                         <label class="checkbox-container">
                                             Send toolbar
-                                            <input type="checkbox">
+                                            <input type="checkbox" v-model="sendToolbar">
                                             <span class="checkmark"></span>
                                         </label>
                                     </div>
@@ -163,6 +163,7 @@ export default {
             code: undefined,
             groupsInClass: undefined,
             toolbar: '',
+            sendToolbar: false,
         };
     },
 
@@ -337,8 +338,14 @@ export default {
             const xml = this.GI.getXML();
             const metaInformation = this.produceXMLWithoutConstructionInside(xml);
             const perspectives = this.extractPerspectives(metaInformation);
+            let toolbar = null;
+
+            if (this.sendToolbar && this.perspectivesThatHaveToolbar(perspectives)) {
+                toolbar = this.toolbar;
+            }
 
             this.$log.debug('perspectives', perspectives);
+            this.$log.debug('toolbar', toolbar);
 
             await this.findGroupsInStore({
                 query: {
@@ -354,7 +361,7 @@ export default {
                 },
             });
 
-            const properties = { perspectives };
+            const properties = { perspectives, toolbar };
             await this.sendConstructionToGroups(groupsObjects, metaInformation, properties);
         },
 
@@ -364,8 +371,14 @@ export default {
             const xml = this.GI.getXML();
             const metaInformation = this.produceXMLWithoutConstructionInside(xml);
             const perspectives = this.extractPerspectives(metaInformation);
+            let toolbar = null;
+
+            if (this.sendToolbar && this.perspectivesThatHaveToolbar(perspectives)) {
+                toolbar = this.toolbar;
+            }
 
             this.$log.debug('perspectives', perspectives);
+            this.$log.debug('toolbar', toolbar);
 
             await this.findGroupsInStore({ query: { class: this.code } });
 
@@ -375,7 +388,7 @@ export default {
                 },
             });
 
-            const properties = { perspectives };
+            const properties = { perspectives, toolbar };
             await this.sendConstructionToGroups(groupsObjects, metaInformation, properties);
         },
 
@@ -550,6 +563,12 @@ export default {
             return perspectivesMapped;
         },
 
+        perspectivesThatHaveToolbar(perspectives) {
+            return (perspectives.includes('S') || perspectives.includes('C')
+            || perspectives.includes('L') || perspectives.includes('B')
+            || perspectives.includes('T'));
+        },
+
     },
 
     mounted() {
@@ -580,6 +599,9 @@ export default {
                 this.constructionName = undefined;
                 this.xml = undefined;
             }
+        },
+        toolbar(newValue) {
+            this.GI.applet.setCustomToolBar(newValue);
         },
     },
 };

@@ -135,8 +135,13 @@ export default class StudentListener {
                 this.log.debug('XML has changed', workshop);
                 this.client.setXML(workshop.xml);
 
-                if (workshop.properties && workshop.properties.perspectives) {
-                    this.client.setPerspective(workshop.properties.perspectives);
+                if (workshop.properties) {
+                    if (workshop.properties.perspectives) {
+                        this.client.setPerspective(workshop.properties.perspectives);
+                    }
+                    if (workshop.properties.toolbar) {
+                        this.client.setCustomToolBar(workshop.properties.toolbar);
+                    }
                 }
             });
 
@@ -154,8 +159,13 @@ export default class StudentListener {
                 // Set initial construction based on the `xml` field.
                 this.client.setConstruction(workshop.xml);
 
-                if (workshop.properties && workshop.properties.perspectives) {
-                    this.client.setPerspective(workshop.properties.perspectives);
+                if (workshop.properties) {
+                    if (workshop.properties.perspectives) {
+                        this.client.setPerspective(workshop.properties.perspectives);
+                    }
+                    if (workshop.properties.toolbar) {
+                        this.client.setCustomToolBar(workshop.properties.toolbar);
+                    }
                 }
 
                 // Load any existing elements in the workshop.
