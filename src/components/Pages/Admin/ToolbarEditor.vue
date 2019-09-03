@@ -1,6 +1,5 @@
 <template>
-    <div class="ibox border-bottom offset-md-1 col-md-10
-            offset-lg-2 col-lg-8">
+    <div class="ibox border-bottom col-md-12 col-lg-12">
         <div class="ibox-title">
             <h5>Customize Toolbars</h5>
         </div>
@@ -10,7 +9,29 @@
                     <h2>Toolbars</h2>
                     <div class="geogebra-tools mt-3">
                         <div class="col-12">
-                            <div class="col-12">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <select multiple="multiple"
+                        class="form-control select-extender">
+                        <option value="option1">option1</option>
+                        <option value="option2">option2</option>
+                    </select>
+                    <div class="form-inline mt-3">
+                        <button class="btn btn-primary p-2 mr-1 mt-2">
+                            Use Toolbar</button>
+                        <button class="btn btn-danger p-2 mr-1 mt-2">
+                            Delete Toolbar</button>
+                    </div>
+                </div>
+                <div class="col-12 mt-2">
+                    <div class="toolbar-options">
+                        <h2 class="mt-3">Toolbar</h2>
+                        <div class="toolbar-show">
+
+                            <div class="col-10">
                                 <draggable
                                     class="dragArea list-of-draggable-tools"
                                     :list="availableTools"
@@ -47,43 +68,18 @@
                                         </div>
                                       </draggable>
                                 </div>
-
-                                <button @click="transformArrayToolbarToString">
-                                    Test
-                                </button>
                               </div>
                         </div>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <select multiple="multiple"
-                        class="form-control select-extender">
-                        <option value="option1">option1</option>
-                        <option value="option2">option2</option>
-                    </select>
-                    <div class="form-inline mt-3">
-                        <button class="btn btn-primary p-2 mr-1 mt-2">
-                            Use Toolbar</button>
-                        <button class="btn btn-danger p-2 mr-1 mt-2">
-                            Delete Toolbar</button>
-                    </div>
-                </div>
-                <div class="col-12 mt-2">
-                    <div class="toolbar-options">
-                        <h2 class="mt-3">Toolbar</h2>
-                        <div class="toolbar-show">
-                            <!-- <1!--Toolbar show bar--1> -->
-                            <div class="toolbar-show-options">
-                                <button class="btn btn-primary">
-                                    <i class="fa fa-download text-light"></i>
-                                </button>
-                                <button class="btn btn-danger">
-                                    <i class="fa fa-trash text-light"></i>
-                                </button>
-                            </div>
+                        <div class="toolbar-show-options">
+                            <button class="btn btn-primary">
+                                <i class="fa fa-download text-light"></i>
+                            </button>
+                            <button class="btn btn-danger">
+                                <i class="fa fa-trash text-light"></i>
+                            </button>
                         </div>
                     </div>
-                    <div class="position-options">
+                    <!-- <div class="position-options"> -->
                         <!-- <div class="checkbox form-inline mt-4">
                             <label class="checkbox-container">
                                 Axis display
@@ -101,14 +97,14 @@
                                 <span class="checkmark"></span>
                             </label>
                         </div> -->
-                        <div class="row">
+                        <!-- <div class="row">
                             <div class="col-6 mt-2">
                                 <select class="form-control select-extender">
                                     <option value="option1">option1</option>
                                     <option value="option2">option2</option>
                                 </select>
                             </div>
-                        </div>
+                        </div> -->
                         <!-- <div class="row mt-4">
                             <div class="col-12">
                                 <h2>Window Dimensions</h2>
@@ -166,7 +162,7 @@
                                 </div>
                             </div>
                         </div> -->
-                    </div>
+                    <!-- </div> -->
                     <!-- <div class="row">
                         <div class="col-5">
                             <h2>Class users</h2>
