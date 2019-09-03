@@ -15,14 +15,21 @@
                 </div>
                 <div class="col-6">
                     <select multiple="multiple"
-                        class="form-control select-extender">
-                        <option value="option1">option1</option>
-                        <option value="option2">option2</option>
+                        class="form-control select-extender"
+                        v-model="selectedToolbar">
+                        <option v-for="t in toolbars" :value="t.name" :key="t.name">
+                            {{ t.name }}
+                        </option>
                     </select>
                     <div class="form-inline mt-3">
-                        <button class="btn btn-primary p-2 mr-1 mt-2">
+                        <button class="btn btn-primary p-2 mr-1 mt-2"
+                            @click="useToolbar(selectedToolbar)">
                             Use Toolbar</button>
-                        <button class="btn btn-danger p-2 mr-1 mt-2">
+                        <button class="btn btn-primary p-2 mr-1 mt-2"
+                            @click="addToolbar()">
+                            Add Toolbar</button>
+                        <button class="btn btn-danger p-2 mr-1 mt-2"
+                            @click="deleteToolbar(selectedToolbar)">
                             Delete Toolbar</button>
                     </div>
                 </div>
@@ -34,16 +41,16 @@
                             <div class="col-10">
                                 <draggable
                                     class="dragArea list-of-draggable-tools"
-                                    :list="availableTools"
+                                    :list="icons"
                                     :group="{ name: 'icons', pull: 'clone', put: false }"
                                     @change="handleChange"
                                   >
                                     <div
                                       class="list-group-item available-tool-icon"
-                                      v-for="element in availableTools"
+                                      v-for="element in icons"
                                       :key="element.mode"
                                     >
-                                      <img :src="element.src"/>
+                                      <img :src="element.src" :title="element.name"/>
                                     </div>
                                  </draggable>
 
@@ -62,7 +69,7 @@
                                           v-for="(element, index2) in list"
                                           :key="element.mode"
                                         >
-                                            <img :src="element.src"/>
+                                            <img :src="element.src" :title="element.name"/>
                                             <button class="tool-delete-button"
                                                 @click="deleteTool(index,index2)">-</button>
                                         </div>
@@ -71,10 +78,10 @@
                               </div>
                         </div>
                         <div class="toolbar-show-options">
-                            <button class="btn btn-primary">
+                            <button class="btn btn-primary" @click="saveToolbar(selectedToolbar)">
                                 <i class="fa fa-download text-light"></i>
                             </button>
-                            <button class="btn btn-danger">
+                            <button class="btn btn-danger" @click="clearToolbar">
                                 <i class="fa fa-trash text-light"></i>
                             </button>
                         </div>
@@ -179,6 +186,7 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex';
 import draggable from 'vuedraggable';
 
 export default {
@@ -195,44 +203,10 @@ export default {
 
     data() {
         return {
-            availableTools: this.generateToolbarOptions(),
-            lists: [
-                [],
-                [],
-                [],
-                [],
-                [],
-                [],
-                [],
-                [],
-                [],
-                [],
-                [],
-                [],
-            ],
+            lists: [[], [], [], [], [], [], [], [], [], [], [], []],
             content: this.value,
-        };
-    },
-
-    methods: {
-        handleChange() {
-            this.content = this.transformArrayToolbarToString();
-            this.$emit('input', this.content);
-
-            this.$log.debug('this.content', this.content);
-        },
-
-        deleteTool(x, y) {
-            this.lists[x].splice(y, 1);
-
-            this.content = this.transformArrayToolbarToString();
-            this.$emit('input', this.content);
-
-            this.$log.debug('this.content', this.content);
-        },
-
-        generateToolbarOptions() {
-            const icons = [
+            selectedToolbar: [],
+            icons: [
                 { name: 'Move', mode: 0, src: '/vendor/img/tool_icons/Mode_move.svg' },
                 { name: 'Point', mode: 1, src: '/vendor/img/tool_icons/Mode_point.svg' },
                 { name: 'Join', mode: 2, src: '/vendor/img/tool_icons/Mode_join.svg' },
@@ -293,20 +267,47 @@ export default {
                 { name: 'Fitline', mode: 58, src: '/vendor/img/tool_icons/Mode_fitline.svg' },
                 { name: 'Record_To_Spreadsheet', mode: 59, src: '/vendor/img/tool_icons/Mode_recordtospreadsheet.svg' },
                 { name: 'Attach_Detach_Point', mode: 67, src: '/vendor/img/tool_icons/Mode_attachdetachpoint.svg' },
-            ];
-            return icons;
+            ],
+        };
+    },
+
+    computed: {
+        ...mapGetters('users', {
+            teacher: 'current',
+        }),
+
+        toolbars() {
+            return this.teacher.toolbars;
+        },
+    },
+
+    methods: {
+        ...mapActions('users', {
+            patch: 'patch',
+        }),
+
+        handleChange() {
+            this.content = this.transformArrayToolbarToString();
+            this.$emit('input', this.content);
+
+            this.$log.debug('this.content', this.content);
+        },
+
+        deleteTool(x, y) {
+            this.lists[x].splice(y, 1);
+            this.handleChange();
         },
 
         transformArrayToolbarToString() {
             let string = '';
 
             for (let i = 0; i < this.lists.length; i += 1) {
-                if (this.lists[i].length === 0 && (i !== (this.lists.length - 1))) string += '| ';
+                if (this.lists[i].length === 0 && (i !== (this.lists.length - 1))) string += '|';
                 for (let j = 0; j < this.lists[i].length; j += 1) {
                     if (this.lists[i][j].mode !== undefined) string += `${this.lists[i][j].mode} `;
 
                     if (j === (this.lists[i].length - 1)) {
-                        if (i !== (this.lists.length - 1)) string += '| ';
+                        if (i !== (this.lists.length - 1)) string += '|';
                     }
                 }
             }
@@ -314,6 +315,147 @@ export default {
             this.$log.debug('Toolbar string is', string);
             return string;
         },
+
+        transformStringToArrayToolbar(string) {
+            const array = string.split('|');
+
+            for (let i = 0; i < array.length; i += 1) {
+                array[i] = Array.from(array[i].split(' '));
+                if (array[i].length > 0) {
+                    for (let j = array[i].length - 1; j >= 0; j -= 1) {
+                        const a = array[i][j];
+                        this.$log.debug(`Before a(${i},${j}) = ${a}`);
+                        if (a === '') array[i].splice(j, 1);
+                        else {
+                            array[i][j] = parseInt(a, 10);
+                            array[i][j] = this.icons.find(tool => tool.mode === array[i][j]);
+                        }
+                        this.$log.debug(`After a(${i},${j}) = ${array[i][j]}`);
+                    }
+                }
+            }
+
+            this.$log.debug('Array is', array);
+
+            return array;
+        },
+
+        saveToolbar(selectedToolbar) {
+            this.handleChange();
+
+            this.$log.debug(this.teacher);
+
+            const toolbars = this.teacher.toolbars;
+            let name;
+            let overwrite = false;
+
+            if (selectedToolbar.length > 0) {
+                // eslint-disable-next-line no-restricted-globals
+                if (confirm(`Overwrite selected toolbar? (${selectedToolbar[0]})`)) {
+                    name = selectedToolbar[0];
+                    overwrite = true;
+                }
+            // eslint-disable-next-line no-restricted-globals
+            } else name = prompt('Enter toolbar name');
+
+            const toolbar = { name, tools: this.content };
+            if (overwrite === true) {
+                // eslint-disable-next-line no-unused-vars
+                const idx = toolbars.findIndex(t => t.name === name);
+                toolbars[idx] = toolbar;
+
+                this.patch(
+                    [this.teacher.username, {
+                        toolbars,
+                    },
+                    ],
+                );
+            } else if (name) {
+                this.patch(
+                    [this.teacher.username, {
+                        toolbars: [...toolbars, toolbar],
+                    },
+                    ],
+                );
+            }
+
+            this.$log.debug('Teacher after', this.teacher);
+        },
+
+        addToolbar() {
+            this.handleChange();
+            this.$log.debug(this.teacher);
+
+            const toolbars = this.teacher.toolbars;
+
+            // eslint-disable-next-line no-restricted-globals
+            const name = prompt('Enter toolbar name');
+            if (name) {
+                const idx = toolbars.findIndex(t => t.name === name);
+
+                if (idx !== -1) {
+                    alert('Toolbar with such name exists. Cancelling overwrite.');
+                    return;
+                }
+
+                const toolbar = { name, tools: this.content };
+
+                this.patch(
+                    [this.teacher.username, {
+                        toolbars: [...toolbars, toolbar],
+                    },
+                    ],
+                );
+            }
+
+            this.$log.debug('Teacher after', this.teacher);
+        },
+
+        clearToolbar() {
+            this.lists = [[], [], [], [], [], [], [], [], [], [], [], []];
+            this.handleChange();
+        },
+
+        useToolbar(selectedToolbar) {
+            if (selectedToolbar.length > 0) {
+                this.$log.debug(selectedToolbar);
+
+                let toolbars = this.teacher.toolbars;
+
+                toolbars = toolbars.filter(
+                    t => selectedToolbar.includes(t.name),
+                );
+
+                const toolbar = toolbars[0];
+                this.$log.debug('The toolbar is', toolbar);
+
+                this.lists = this.transformStringToArrayToolbar(toolbar.tools);
+                this.handleChange();
+            }
+        },
+
+        deleteToolbar(selectedToolbar) {
+            if (selectedToolbar.length > 0) {
+                this.$log.debug(selectedToolbar);
+
+                let toolbars = this.teacher.toolbars;
+
+                this.selectedToolbar.forEach((selected) => {
+                    toolbars = toolbars.filter(
+                        t => t.name !== selected,
+                    );
+                });
+
+                this.selectedToolbar = [];
+
+                this.$log.debug('toolbars after filter', toolbars);
+
+                this.patch([this.teacher.username, { toolbars }]);
+            }
+        },
+    },
+
+    created() {
     },
 };
 </script>
