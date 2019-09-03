@@ -15,7 +15,7 @@
                                     class="dragArea list-of-draggable-tools"
                                     :list="availableTools"
                                     :group="{ name: 'people', pull: 'clone', put: false }"
-                                    @change="log"
+                                    @change="handleChange"
                                   >
                                     <div
                                       class="list-group-item available-tool-icon"
@@ -33,7 +33,7 @@
                                         :list="list"
                                         group="people"
                                         draggable=".item"
-                                        @change="log"
+                                        @change="handleChange"
                                         :key="index"
                                       >
                                         <div
@@ -222,16 +222,25 @@ export default {
                 [],
                 [],
             ],
+            content: this.value,
         };
     },
 
     methods: {
-        log(evt) {
-            window.console.log(evt);
+        handleChange() {
+            this.content = this.transformArrayToolbarToString();
+            this.$emit('input', this.content);
+
+            this.$log.debug('this.content', this.content);
         },
 
         deleteTool(x, y) {
             this.lists[x].splice(y, 1);
+
+            this.content = this.transformArrayToolbarToString();
+            this.$emit('input', this.content);
+
+            this.$log.debug('this.content', this.content);
         },
 
         generateDummyToolbarOptions() {
@@ -256,7 +265,7 @@ export default {
                 }
             }
 
-            console.log('Toolbar string is', string);
+            this.$log.debug('Toolbar string is', string);
             return string;
         },
     },

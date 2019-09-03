@@ -131,7 +131,7 @@
             </div>
         </div>
 
-        <ToolbarEditor/>
+        <ToolbarEditor v-model="toolbar"/>
 
     </div>
 </template>
@@ -162,6 +162,7 @@ export default {
             classname: undefined,
             code: undefined,
             groupsInClass: undefined,
+            toolbar: '',
         };
     },
 
