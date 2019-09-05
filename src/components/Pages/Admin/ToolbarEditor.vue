@@ -205,26 +205,37 @@ export default {
 
             // eslint-disable-next-line no-restricted-globals
             if (this.toolbarName) {
-                const idx = this.toolbars.findIndex(t => t.name === this.toolbarName);
+                if (this.toolbars !== undefined) {
+                    const idx = this.toolbars.findIndex(t => t.name === this.toolbarName);
 
-                if (idx !== -1) {
-                    // eslint-disable-next-line no-undef
-                    this.alert_add = {
-                        type: 'danger',
-                        message: 'Toolbar with such name exists. Cancelling overwrite.',
-                    };
-                    return;
+                    if (idx !== -1) {
+                        // eslint-disable-next-line no-undef
+                        this.alert_add = {
+                            type: 'danger',
+                            message: 'Toolbar with such name exists. Cancelling overwrite.',
+                        };
+                        return;
+                    }
                 }
 
                 const toolbar = { name: this.toolbarName, tools: this.content };
 
                 try {
-                    await this.patchUser(
-                        [this.teacher.username, {
-                            toolbars: [...this.toolbars, toolbar],
-                        },
-                        ],
-                    );
+                    if (this.toolbars !== undefined) {
+                        await this.patchUser(
+                            [this.teacher.username, {
+                                toolbars: [...this.toolbars, toolbar],
+                            },
+                            ],
+                        );
+                    } else {
+                        await this.patchUser(
+                            [this.teacher.username, {
+                                toolbars: [toolbar],
+                            },
+                            ],
+                        );
+                    }
 
                     this.addMode = false;
 
