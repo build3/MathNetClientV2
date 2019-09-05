@@ -14,7 +14,6 @@ module.exports = {
     'no-underscore-dangle': ['error', { 'allow': ['_id'] }],
     'no-await-in-loop': 'off',
     'no-else-return': 'off',
-    'prefer-destructuring': 'off',
   },
   parserOptions: {
     parser: 'babel-eslint',

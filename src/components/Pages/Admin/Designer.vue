@@ -343,6 +343,7 @@ export default {
             this.$log.debug('this.perspectivesThatHaveToolbar(perspectives)', this.perspectivesThatHaveToolbar(perspectives));
 
             if (this.sendToolbar && this.perspectivesThatHaveToolbar(perspectives)) {
+                // eslint-disable-next-line prefer-destructuring
                 toolbar = this.toolbar;
                 this.$log.debug('Sending toolbar', toolbar);
             }
@@ -379,6 +380,7 @@ export default {
             this.$log.debug('this.perspectivesThatHaveToolbar(perspectives)', this.perspectivesThatHaveToolbar(perspectives));
 
             if (this.sendToolbar && this.perspectivesThatHaveToolbar(perspectives)) {
+                // eslint-disable-next-line prefer-destructuring
                 toolbar = this.toolbar;
                 this.log.debug('Sending toolbar', toolbar);
             }
