@@ -203,11 +203,9 @@ export default {
 
             this.$log.debug(this.teacher);
 
-            const { toolbars } = this.teacher;
-
             // eslint-disable-next-line no-restricted-globals
             if (this.toolbarName) {
-                const idx = toolbars.findIndex(t => t.name === this.toolbarName);
+                const idx = this.toolbars.findIndex(t => t.name === this.toolbarName);
 
                 if (idx !== -1) {
                     // eslint-disable-next-line no-undef
@@ -223,7 +221,7 @@ export default {
                 try {
                     await this.patchUser(
                         [this.teacher.username, {
-                            toolbars: [...toolbars, toolbar],
+                            toolbars: [...this.toolbars, toolbar],
                         },
                         ],
                     );
