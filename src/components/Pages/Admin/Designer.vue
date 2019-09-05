@@ -382,7 +382,7 @@ export default {
             if (this.sendToolbar && this.perspectivesThatHaveToolbar(perspectives)) {
                 // eslint-disable-next-line prefer-destructuring
                 toolbar = this.toolbar;
-                this.log.debug('Sending toolbar', toolbar);
+                this.$log.debug('Sending toolbar', toolbar);
             }
 
             this.$log.debug('perspectives', perspectives);
