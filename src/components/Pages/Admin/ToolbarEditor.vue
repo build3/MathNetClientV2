@@ -63,7 +63,8 @@
                                     <draggable
                                         class="dragArea list-of-draggable-tools"
                                         :list="icons"
-                                        :group="{ name: 'icons', pull: 'clone', put: false }"
+                                        :group="{ name: 'icons', pull: 'clone',
+                                            put: false, sort: false }"
                                       >
                                         <div
                                           class="list-group-item available-tool-icon"
@@ -113,31 +114,25 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
+import { mapState, mapGetters, mapActions } from 'vuex';
 import draggable from 'vuedraggable';
 import AlertMixin from '@/mixins/AlertMixin.vue';
-import icons from '../../../helpers/icons';
 
+// function parseTools(list) {
+//     return list.split(' ').filter(s => s).map(s => icons.find(({ mode }) => s === mode));
+// }
 
-function emptyToolbar() {
-    return Array.from(new Array(12), () => []);
-}
+// function parseToolbar(toolbarString) {
+//     return toolbarString.split('|').map(parseTools);
+// }
 
-function parseTools(list) {
-    return list.split(' ').filter(s => s).map(s => icons.find(({ mode }) => s === mode));
-}
-
-function parseToolbar(toolbarString) {
-    return toolbarString.split('|').map(parseTools);
-}
-
-function stringifyTools(list) {
-    return list.map(({ mode }) => mode).join(' ');
-}
-
-function stringifyToolbar(toolbar) {
-    return toolbar.map(stringifyTools).join('|');
-}
+// function stringifyTools(list) {
+//     return list.map(({ mode }) => mode).join(' ');
+// }
+//
+// function stringifyToolbar(toolbar) {
+//     return toolbar.map(stringifyTools).join('|');
+// }
 
 export default {
     components: {
@@ -146,10 +141,18 @@ export default {
 
     data() {
         return {
-            selectedToolbars: [],
-            currentToolbar: emptyToolbar(),
-            addMode: false,
-            addToolbarName: null,
+            ...mapState('toolbarEditor', [
+                'selectedToolbars',
+                'currentToolbar',
+                'addMode',
+                'addToolbarName',
+                // 'alert',
+                'toolbars',
+            ]),
+
+            ...mapState('toolbarEditor', {
+                alertVuex: 'alert',
+            }),
         };
     },
 
@@ -160,118 +163,34 @@ export default {
             teacher: 'current',
         }),
 
-        toolbars() {
-            return this.teacher.toolbars;
-        },
-
-        icons() {
-            return icons;
-        },
-
-        canDelete() {
-            return this.selectedToolbars.length > 0;
-        },
-
-        toolbarString() {
-            return stringifyToolbar(this.currentToolbar);
-        },
+        ...mapGetters('toolbarEditor', [
+            'icons',
+        ]),
     },
 
     methods: {
-        ...mapActions('users', {
-            patchUser: 'patch',
-        }),
-
-        useToolbar() {
-            if (this.selectedToolbars.length > 0) {
-                const selectedName = this.selectedToolbars[0];
-
-                const toolbar = this.toolbars.find(({ name }) => name === selectedName);
-
-                if (toolbar) {
-                    this.currentToolbar = parseToolbar(toolbar.tools);
-                }
-            }
-        },
-
-        clearToolbar() {
-            this.currentToolbar = emptyToolbar();
-        },
-
-        deleteTool(listNumber, elementNumber) {
-            const toolbar = [...this.currentToolbar];
-            const list = toolbar[listNumber];
-            list.splice(elementNumber, 1);
-            toolbar[listNumber] = list;
-            this.currentToolbar = toolbar;
-        },
-
-        addToolbar() {
-            this.addMode = true;
-        },
-
-        async saveToolbar() {
-            this.alert = null;
-
-            if (this.toolbars.find(({ name }) => name === this.addToolbarName)) {
-                this.alert = {
-                    type: 'danger',
-                    message: 'Toolbar with this name already exists. Cancelling overwrite.',
-                };
-                return;
-            }
-
-            const toolbar = {
-                name: this.addToolbarName,
-                tools: this.toolbarString,
-            };
-
-            try {
-                await this.sendToolbars([...(this.toolbars || []), toolbar]);
-            } catch ({ message }) {
-                this.showError(message);
-            }
-
-            this.closeToolbar();
-        },
-
-        async deleteToolbar() {
-            const list = this.toolbars.filter(
-                ({ name }) => !this.selectedToolbars.includes(name),
-            );
-
-            try {
-                await this.sendToolbars(list);
-            } catch ({ message }) {
-                this.showError(message);
-            }
-        },
-
-        closeToolbar() {
-            this.addMode = false;
-        },
-
-        async sendToolbars(toolbars) {
-            await this.patchUser([
-                this.teacher.username, {
-                    toolbars,
-                },
-            ]);
-        },
-
-        showError(message) {
-            this.alert = { type: 'danger', message };
-        },
+        ...mapActions('toolbarEditor', [
+            'useToolbar',
+            'saveToolbar',
+            'sendToolbars',
+            'deleteToolbar',
+            'deleteTool',
+            'closeToolbar',
+            'clearToolbar',
+        ]),
     },
 
     watch: {
-        addMode(newValue) {
-            if (newValue) this.addToolbarName = null;
-        },
+        // addMode(newValue) {
+        //     if (newValue) this.addToolbarName = null;
+        // },
+        //
+        // toolbarString(newValue) {
+        //     this.$emit('input', newValue);
+        // },
+    },
 
-        toolbarString(newValue) {
-            this.$emit('input', newValue);
-        },
+    created() {
     },
 };
 </script>
