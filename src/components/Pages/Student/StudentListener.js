@@ -39,13 +39,14 @@ export default class StudentListener {
      * @param {Object} log Logger, for documentation see:
      * https://www.npmjs.com/package/vuejs-logger.
      */
-    constructor(ggbClient, studentUsername, workshopId, studentColor, log) {
+    constructor(ggbClient, studentUsername, workshopId, studentColor, log, studentNumber) {
         this.log = log;
         this.client = ggbClient;
         this.studentUsername = studentUsername;
         this.workshopId = workshopId;
         this.initializeServerCallbacks();
         this.studentColor = studentColor;
+        this.studentNumber = studentNumber;
 
 
         // Elements loaded from the server. [onAddElement] should not
@@ -168,13 +169,37 @@ export default class StudentListener {
                 this.log.debug('XML has changed', workshop);
                 // this.client.setXML(workshop.xml);
 
-                if (workshop.properties) {
+                // Properties should change when:
+                // 1. `workshop.properties` exist and `workshop.propertiesFirst` does not exist.
+                // 2. `workshop.properties` exist and `workshop.propertiesFirst` exist
+                // but student can't be first in workshop.
+                //
+                // This is needed in order to keep specific properties for first student.
+                const shouldChangeProperties = (
+                    workshop.properties
+                    && (!workshop.propertiesFirst
+                        || (workshop.propertiesFirst && this.studentNumber !== 1))
+                );
+
+                if (shouldChangeProperties) {
                     if (workshop.properties.perspectives) {
                         this.client.setPerspective(workshop.properties.perspectives);
                     }
                     if (workshop.properties.toolbar) {
                         this.client.setCustomToolBar(workshop.properties.toolbar);
                     }
+                }
+            });
+
+            api.service('workshops').on('properties-first-user-changed', ({ propertiesFirst }) => {
+                const { perspectives, toolbar } = propertiesFirst;
+
+                if (perspectives) {
+                    this.client.setPerspective(perspective);
+                }
+
+                if (toolbar) {
+                    this.client.setCustomToolBar(toolbar);
                 }
             });
 
