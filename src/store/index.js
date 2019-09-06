@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import feathersVuex from 'feathers-vuex';
 import feathersClient from '../feathers-client';
+import toolbarEditor from './toolbarEditor';
 
 const { service, auth, FeathersVuex } = feathersVuex(feathersClient, { idField: '_id' });
 
@@ -45,4 +46,8 @@ export default new Vuex.Store({
             },
         }),
     ],
+
+    modules: {
+        toolbarEditor,
+    },
 });

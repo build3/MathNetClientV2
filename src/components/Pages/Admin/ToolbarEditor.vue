@@ -10,7 +10,7 @@
                         <div class="col-12">
                             <h2>Toolbars</h2>
                         </div>
-                        <alert :alert="alert" />
+                        <alert :alert="alertVuex" />
                         <div class="col-6">
                             <select multiple="multiple"
                                 class="form-control select-extender"
@@ -24,7 +24,7 @@
                                     @click="useToolbar">
                                     Use Toolbar</button>
                                 <button class="btn btn-primary p-2 mr-1 mt-2"
-                                    @click="addMode = true">
+                                    @click="addToolbar">
                                     Add Toolbar</button>
                                 <button class="btn btn-danger p-2 mr-1 mt-2"
                                     @click="deleteToolbar"
@@ -35,7 +35,7 @@
                     </div>
                     <div class="col-12" v-else>
                         <form>
-                            <alert :alert="alert" />
+                            <alert :alert="alertVuex" />
                             <h3>Add Toolbar</h3>
                             <div class="form-group">
                                 <input
@@ -63,7 +63,8 @@
                                     <draggable
                                         class="dragArea list-of-draggable-tools"
                                         :list="icons"
-                                        :group="{ name: 'icons', pull: 'clone', put: false }"
+                                        :group="{ name: 'icons', pull: 'clone',
+                                            put: false, sort: false }"
                                       >
                                         <div
                                           class="list-group-item available-tool-icon"
@@ -113,44 +114,29 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
+import { mapState, mapGetters, mapActions } from 'vuex';
 import draggable from 'vuedraggable';
 import AlertMixin from '@/mixins/AlertMixin.vue';
-import icons from '../../../helpers/icons';
 
+// function parseTools(list) {
+//     return list.split(' ').filter(s => s).map(s => icons.find(({ mode }) => s === mode));
+// }
 
-function emptyToolbar() {
-    return Array.from(new Array(12), () => []);
-}
+// function parseToolbar(toolbarString) {
+//     return toolbarString.split('|').map(parseTools);
+// }
 
-function parseTools(list) {
-    return list.split(' ').filter(s => s).map(s => icons.find(({ mode }) => s === mode));
-}
-
-function parseToolbar(toolbarString) {
-    return toolbarString.split('|').map(parseTools);
-}
-
-function stringifyTools(list) {
-    return list.map(({ mode }) => mode).join(' ');
-}
-
-function stringifyToolbar(toolbar) {
-    return toolbar.map(stringifyTools).join('|');
-}
+// function stringifyTools(list) {
+//     return list.map(({ mode }) => mode).join(' ');
+// }
+//
+// function stringifyToolbar(toolbar) {
+//     return toolbar.map(stringifyTools).join('|');
+// }
 
 export default {
     components: {
         draggable,
-    },
-
-    data() {
-        return {
-            selectedToolbars: [],
-            currentToolbar: emptyToolbar(),
-            addMode: false,
-            addToolbarName: null,
-        };
     },
 
     mixins: [AlertMixin],
@@ -160,118 +146,73 @@ export default {
             teacher: 'current',
         }),
 
-        toolbars() {
-            return this.teacher.toolbars;
+        ...mapGetters('toolbarEditor', [
+            'icons',
+            'canDelete',
+            'addMode',
+            'toolbars',
+            'selectedToolbars',
+        ]),
+
+        ...mapGetters('toolbarEditor', {
+            getToolbarName: 'addToolbarName',
+            getSelectedToolbars: 'selectedToolbars',
+        }),
+
+        ...mapState('toolbarEditor', [
+            'currentToolbar',
+            // 'alert',
+        ]),
+
+        ...mapState('toolbarEditor', {
+            alertVuex: 'alert',
+        }),
+
+        addToolbarName: {
+            set(value) {
+                this.setToolbarName(value);
+            },
+            get() {
+                return this.getToolbarName;
+            },
         },
 
-        icons() {
-            return icons;
-        },
-
-        canDelete() {
-            return this.selectedToolbars.length > 0;
-        },
-
-        toolbarString() {
-            return stringifyToolbar(this.currentToolbar);
+        selectedToolbars: {
+            set(value) {
+                this.setSelectedToolbars(value);
+            },
+            get() {
+                return this.getSelectedToolbars;
+            },
         },
     },
 
     methods: {
-        ...mapActions('users', {
-            patchUser: 'patch',
-        }),
-
-        useToolbar() {
-            if (this.selectedToolbars.length > 0) {
-                const selectedName = this.selectedToolbars[0];
-
-                const toolbar = this.toolbars.find(({ name }) => name === selectedName);
-
-                if (toolbar) {
-                    this.currentToolbar = parseToolbar(toolbar.tools);
-                }
-            }
-        },
-
-        clearToolbar() {
-            this.currentToolbar = emptyToolbar();
-        },
-
-        deleteTool(listNumber, elementNumber) {
-            const toolbar = [...this.currentToolbar];
-            const list = toolbar[listNumber];
-            list.splice(elementNumber, 1);
-            toolbar[listNumber] = list;
-            this.currentToolbar = toolbar;
-        },
-
-        addToolbar() {
-            this.addMode = true;
-        },
-
-        async saveToolbar() {
-            this.alert = null;
-
-            if (this.toolbars.find(({ name }) => name === this.addToolbarName)) {
-                this.alert = {
-                    type: 'danger',
-                    message: 'Toolbar with this name already exists. Cancelling overwrite.',
-                };
-                return;
-            }
-
-            const toolbar = {
-                name: this.addToolbarName,
-                tools: this.toolbarString,
-            };
-
-            try {
-                await this.sendToolbars([...(this.toolbars || []), toolbar]);
-            } catch ({ message }) {
-                this.showError(message);
-            }
-
-            this.closeToolbar();
-        },
-
-        async deleteToolbar() {
-            const list = this.toolbars.filter(
-                ({ name }) => !this.selectedToolbars.includes(name),
-            );
-
-            try {
-                await this.sendToolbars(list);
-            } catch ({ message }) {
-                this.showError(message);
-            }
-        },
-
-        closeToolbar() {
-            this.addMode = false;
-        },
-
-        async sendToolbars(toolbars) {
-            await this.patchUser([
-                this.teacher.username, {
-                    toolbars,
-                },
-            ]);
-        },
-
-        showError(message) {
-            this.alert = { type: 'danger', message };
-        },
+        ...mapActions('toolbarEditor', [
+            'useToolbar',
+            'addToolbar',
+            'saveToolbar',
+            'sendToolbars',
+            'deleteToolbar',
+            'deleteTool',
+            'closeToolbar',
+            'clearToolbar',
+            'setToolbarName',
+            'setSelectedToolbars',
+        ]),
     },
 
     watch: {
-        addMode(newValue) {
-            if (newValue) this.addToolbarName = null;
-        },
+        // addMode(newValue) {
+        //     if (newValue) this.addToolbarName = null;
+        // },
+        //
+        // toolbarString(newValue) {
+        //     this.$emit('input', newValue);
+        // },
+    },
 
-        toolbarString(newValue) {
-            this.$emit('input', newValue);
-        },
+    created() {
     },
 };
 </script>
