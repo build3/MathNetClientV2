@@ -34,7 +34,7 @@
                     </div>
                     <div class="col-12" v-else>
                         <form @submit.prevent="addToolbar()">
-                            <alert :alert="alert_add" />
+                            <alert :alert="alertAdd" />
                             <h3>Add Toolbar</h3>
                             <div class="form-group">
                                 <input
@@ -140,7 +140,7 @@ export default {
             icons,
             addMode: false,
             generalAlert: undefined,
-            alert_add: undefined,
+            alertAdd: undefined,
             toolbarName: undefined,
         };
     },
@@ -175,7 +175,7 @@ export default {
 
         dismissAlert() {
             this.generalAlert = undefined;
-            this.alert_add = undefined;
+            this.alertAdd = undefined;
         },
 
         transformArrayToolbarToString() {
@@ -210,7 +210,7 @@ export default {
 
                     if (idx !== -1) {
                         // eslint-disable-next-line no-undef
-                        this.alert_add = {
+                        this.alertAdd = {
                             type: 'danger',
                             message: 'Toolbar with such name exists. Cancelling overwrite.',
                         };
@@ -244,7 +244,7 @@ export default {
                         message: 'Construction saved',
                     };
                 } catch (error) {
-                    this.alert_add = {
+                    this.alertAdd = {
                         type: 'danger',
                         message: error.message,
                     };

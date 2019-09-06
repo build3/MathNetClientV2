@@ -335,21 +335,7 @@ export default {
         async send(groups) {
             this.$log.debug('Send');
 
-            const xml = this.GI.getXML();
-            const metaInformation = this.produceXMLWithoutConstructionInside(xml);
-            const perspectives = this.extractPerspectives(metaInformation);
-            let toolbar = null;
-
-            this.$log.debug('this.perspectivesThatHaveToolbar(perspectives)', this.perspectivesThatHaveToolbar(perspectives));
-
-            if (this.sendToolbar && this.perspectivesThatHaveToolbar(perspectives)) {
-                // eslint-disable-next-line prefer-destructuring
-                toolbar = this.toolbar;
-                this.$log.debug('Sending toolbar', toolbar);
-            }
-
-            this.$log.debug('perspectives', perspectives);
-            this.$log.debug('toolbar', toolbar);
+            const information = this.prepareMetaInformationPerspectivesAndToolbars();
 
             await this.findGroupsInStore({
                 query: {
@@ -365,13 +351,42 @@ export default {
                 },
             });
 
-            const properties = { perspectives, toolbar };
-            await this.sendConstructionToGroups(groupsObjects, metaInformation, properties);
+            const properties = {
+                perspectives: information.perspectives,
+                toolbar: information.toolbar,
+            };
+            await this.sendConstructionToGroups(
+                groupsObjects,
+                information.metaInformation,
+                properties,
+            );
         },
 
         async sendToAll() {
             this.$log.debug('SendToAll');
 
+            const information = this.prepareMetaInformationPerspectivesAndToolbars();
+
+            await this.findGroupsInStore({ query: { class: this.code } });
+
+            const groupsObjects = await this.findGroups({
+                query: {
+                    class: this.code,
+                },
+            });
+
+            const properties = {
+                perspectives: information.perspectives,
+                toolbar: information.toolbar,
+            };
+            await this.sendConstructionToGroups(
+                groupsObjects,
+                information.metaInformation,
+                properties,
+            );
+        },
+
+        prepareMetaInformationPerspectivesAndToolbars() {
             const xml = this.GI.getXML();
             const metaInformation = this.produceXMLWithoutConstructionInside(xml);
             const perspectives = this.extractPerspectives(metaInformation);
@@ -388,16 +403,7 @@ export default {
             this.$log.debug('perspectives', perspectives);
             this.$log.debug('toolbar', toolbar);
 
-            await this.findGroupsInStore({ query: { class: this.code } });
-
-            const groupsObjects = await this.findGroups({
-                query: {
-                    class: this.code,
-                },
-            });
-
-            const properties = { perspectives, toolbar };
-            await this.sendConstructionToGroups(groupsObjects, metaInformation, properties);
+            return { metaInformation, perspectives, toolbar };
         },
 
         async sendConstructionToGroups(groupsObjects, metaInformation, properties) {
