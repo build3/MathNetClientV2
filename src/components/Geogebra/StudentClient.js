@@ -480,6 +480,11 @@ class StudentClient {
         this.log.debug('Setting perspective', perspective);
         this.applet.setPerspective(perspective);
     }
+
+    setCustomToolBar(toolbar) {
+        this.log.debug('Setting toolbar', toolbar);
+        this.applet.setCustomToolBar(toolbar);
+    }
 }
 
 module.exports = {
