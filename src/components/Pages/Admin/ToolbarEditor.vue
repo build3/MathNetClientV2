@@ -10,44 +10,46 @@
                         <div class="col-12">
                             <h2>Toolbars</h2>
                         </div>
-                        <alert :alert="generalAlert" />
+                        <alert :alert="alert" />
                         <div class="col-6">
                             <select multiple="multiple"
                                 class="form-control select-extender"
-                                v-model="selectedToolbar">
+                                v-model="selectedToolbars">
                                 <option v-for="t in toolbars" :value="t.name" :key="t.name">
                                     {{ t.name }}
                                 </option>
                             </select>
                             <div class="form-inline mt-3">
                                 <button class="btn btn-primary p-2 mr-1 mt-2"
-                                    @click="useToolbar(selectedToolbar)">
+                                    @click="useToolbar">
                                     Use Toolbar</button>
                                 <button class="btn btn-primary p-2 mr-1 mt-2"
                                     @click="addMode = true">
                                     Add Toolbar</button>
                                 <button class="btn btn-danger p-2 mr-1 mt-2"
-                                    @click="deleteToolbar(selectedToolbar)">
+                                    @click="deleteToolbar"
+                                    :disabled="!canDelete">
                                     Delete Toolbar</button>
                             </div>
                         </div>
                     </div>
                     <div class="col-12" v-else>
-                        <form @submit.prevent="addToolbar()">
-                            <alert :alert="alertAdd" />
+                        <form>
+                            <alert :alert="alert" />
                             <h3>Add Toolbar</h3>
                             <div class="form-group">
                                 <input
-                                    v-model="toolbarName"
+                                    v-model="addToolbarName"
                                     class="form-control"
                                     type="text"
                                     placeholder="Toolbar Name"
                                     required>
                             </div>
-                            <button type="submit" class="btn btn-primary">
+                            <button class="btn btn-primary"
+                                @click.prevent="saveToolbar">
                                 Save Toolbar</button>
                             <button class="btn btn-secondary"
-                                @click.prevent="addMode = false">
+                                @click.prevent="closeToolbar">
                                 Cancel
                             </button>
                         </form>
@@ -74,21 +76,22 @@
 
 
                                      <div class="draggable-lists-container">
-                                         <draggable v-for="(list, index) in lists"
+                                         <draggable v-for="(list, listNumber) in currentToolbar"
                                             class="dragArea draggable-list"
                                             :list="list"
                                             group="icons"
                                             draggable=".item"
-                                            :key="index"
+                                            :key="listNumber"
                                           >
                                             <div
                                               class="item tool-icon"
-                                              v-for="(element, index2) in list"
-                                              :key="element.mode"
+                                              v-for="(element, elementNumber) in list"
+                                              :key="elementNumber"
                                             >
                                                 <img :src="element.src" :title="element.name"/>
                                                 <button class="tool-delete-button"
-                                                    @click="deleteTool(index,index2)">-</button>
+                                                    @click="deleteTool(listNumber, elementNumber)">
+                                                    -</button>
                                             </div>
                                           </draggable>
                                     </div>
@@ -116,8 +119,24 @@ import AlertMixin from '@/mixins/AlertMixin.vue';
 import icons from '../../../helpers/icons';
 
 
-function generateClearedArrays() {
+function emptyToolbar() {
     return Array.from(new Array(12), () => []);
+}
+
+function parseTools(list) {
+    return list.split(' ').filter(s => s).map(s => icons.find(({ mode }) => s === mode));
+}
+
+function parseToolbar(toolbarString) {
+    return toolbarString.split('|').map(parseTools);
+}
+
+function stringifyTools(list) {
+    return list.map(({ mode }) => mode).join(' ');
+}
+
+function stringifyToolbar(toolbar) {
+    return toolbar.map(stringifyTools).join('|');
 }
 
 export default {
@@ -125,23 +144,12 @@ export default {
         draggable,
     },
 
-    props: {
-        value: {
-            type: String,
-            default: '',
-        },
-    },
-
     data() {
         return {
-            lists: generateClearedArrays(),
-            content: this.value,
-            selectedToolbar: [],
-            icons,
+            selectedToolbars: [],
+            currentToolbar: emptyToolbar(),
             addMode: false,
-            generalAlert: undefined,
-            alertAdd: undefined,
-            toolbarName: undefined,
+            addToolbarName: null,
         };
     },
 
@@ -155,6 +163,18 @@ export default {
         toolbars() {
             return this.teacher.toolbars;
         },
+
+        icons() {
+            return icons;
+        },
+
+        canDelete() {
+            return this.selectedToolbars.length > 0;
+        },
+
+        toolbarString() {
+            return stringifyToolbar(this.currentToolbar);
+        },
     },
 
     methods: {
@@ -162,150 +182,95 @@ export default {
             patchUser: 'patch',
         }),
 
-        handleChange() {
-            this.content = this.transformArrayToolbarToString();
-            this.$emit('input', this.content);
+        useToolbar() {
+            if (this.selectedToolbars.length > 0) {
+                const selectedName = this.selectedToolbars[0];
 
-            this.$log.debug('this.content', this.content);
-        },
+                const toolbar = this.toolbars.find(({ name }) => name === selectedName);
 
-        deleteTool(x, y) {
-            this.lists[x].splice(y, 1);
-        },
-
-        dismissAlert() {
-            this.generalAlert = undefined;
-            this.alertAdd = undefined;
-        },
-
-        transformArrayToolbarToString() {
-            let string = '';
-
-            const strings = this.lists.map(list => list.map(item => item.mode).join(' '));
-            string = strings.join('|');
-
-            return string;
-        },
-
-        transformStringToArrayToolbar(string) {
-            let lists = string.split('|');
-
-            lists = lists.map(list => list.split(' '));
-
-            lists = lists.map(list => list.filter(item => (item !== '' && item !== undefined && item !== null))
-                .map(toolNum => this.icons.find(ticon => ticon.mode === parseInt(toolNum, 10))));
-
-            return lists;
-        },
-
-        async addToolbar() {
-            this.dismissAlert();
-
-            this.$log.debug(this.teacher);
-
-            // eslint-disable-next-line no-restricted-globals
-            if (this.toolbarName) {
-                if (this.toolbars !== undefined) {
-                    const idx = this.toolbars.findIndex(t => t.name === this.toolbarName);
-
-                    if (idx !== -1) {
-                        // eslint-disable-next-line no-undef
-                        this.alertAdd = {
-                            type: 'danger',
-                            message: 'Toolbar with such name exists. Cancelling overwrite.',
-                        };
-                        return;
-                    }
-                }
-
-                const toolbar = { name: this.toolbarName, tools: this.content };
-
-                try {
-                    if (this.toolbars !== undefined) {
-                        await this.patchUser(
-                            [this.teacher.username, {
-                                toolbars: [...this.toolbars, toolbar],
-                            },
-                            ],
-                        );
-                    } else {
-                        await this.patchUser(
-                            [this.teacher.username, {
-                                toolbars: [toolbar],
-                            },
-                            ],
-                        );
-                    }
-
-                    this.addMode = false;
-
-                    this.generalAlert = {
-                        type: 'success',
-                        message: 'Construction saved',
-                    };
-                } catch (error) {
-                    this.alertAdd = {
-                        type: 'danger',
-                        message: error.message,
-                    };
+                if (toolbar) {
+                    this.currentToolbar = parseToolbar(toolbar.tools);
                 }
             }
-
-            this.$log.debug('Teacher after', this.teacher);
         },
 
         clearToolbar() {
-            this.lists = generateClearedArrays();
+            this.currentToolbar = emptyToolbar();
         },
 
-        useToolbar(selectedToolbar) {
-            if (selectedToolbar.length > 0) {
-                this.$log.debug(selectedToolbar);
+        deleteTool(listNumber, elementNumber) {
+            const toolbar = [...this.currentToolbar];
+            const list = toolbar[listNumber];
+            list.splice(elementNumber, 1);
+            toolbar[listNumber] = list;
+            this.currentToolbar = toolbar;
+        },
 
-                let { toolbars } = this.teacher;
+        addToolbar() {
+            this.addMode = true;
+        },
 
-                toolbars = toolbars.filter(
-                    t => selectedToolbar.includes(t.name),
-                );
+        async saveToolbar() {
+            this.alert = null;
 
-                const toolbar = toolbars[0];
-                this.$log.debug('The toolbar is', toolbar);
+            if (this.toolbars.find(({ name }) => name === this.addToolbarName)) {
+                this.alert = {
+                    type: 'danger',
+                    message: 'Toolbar with this name already exists. Cancelling overwrite.',
+                };
+                return;
+            }
 
-                this.lists = this.transformStringToArrayToolbar(toolbar.tools);
+            const toolbar = {
+                name: this.addToolbarName,
+                tools: this.toolbarString,
+            };
+
+            try {
+                await this.sendToolbars([...(this.toolbars || []), toolbar]);
+            } catch ({ message }) {
+                this.showError(message);
+            }
+
+            this.closeToolbar();
+        },
+
+        async deleteToolbar() {
+            const list = this.toolbars.filter(
+                ({ name }) => !this.selectedToolbars.includes(name),
+            );
+
+            try {
+                await this.sendToolbars(list);
+            } catch ({ message }) {
+                this.showError(message);
             }
         },
 
-        async deleteToolbar(selectedToolbar) {
-            if (selectedToolbar.length > 0) {
-                this.$log.debug(selectedToolbar);
+        closeToolbar() {
+            this.addMode = false;
+        },
 
-                let { toolbars } = this.teacher;
+        async sendToolbars(toolbars) {
+            await this.patchUser([
+                this.teacher.username, {
+                    toolbars,
+                },
+            ]);
+        },
 
-                this.selectedToolbar.forEach((selected) => {
-                    toolbars = toolbars.filter(
-                        t => t.name !== selected,
-                    );
-                });
-
-                this.selectedToolbar = [];
-
-                this.$log.debug('toolbars after filter', toolbars);
-
-                await this.patchUser([this.teacher.username, { toolbars }]);
-            }
+        showError(message) {
+            this.alert = { type: 'danger', message };
         },
     },
 
     watch: {
-        editMode(addValue) {
-            if (!addValue) {
-                this.toolbarName = undefined;
-                this.toolbarToSave = undefined;
-            }
+        addMode(newValue) {
+            if (newValue) this.addToolbarName = null;
         },
 
-        lists() {
-            this.handleChange();
+        toolbarString(newValue) {
+            this.$emit('input', newValue);
         },
     },
 };
