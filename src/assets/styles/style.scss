@@ -224,6 +224,7 @@ table.designer-class-table tr {
 
 .list-of-draggable-tools {
     width: 100%;
+    margin-left: -15px;
 }
 
 .draggable-list {
@@ -240,7 +241,9 @@ table.designer-class-table tr {
 .draggable-lists-container {
     float: left;
     clear: both;
-    margin: 2em;
+    margin-top: 2em;
+    margin-right: 2em;
+    margin-left: -15px;
 }
 
 .available-tool-icon {

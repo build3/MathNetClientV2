@@ -175,8 +175,10 @@ export default class StudentListener {
                 // but student can't be first in workshop.
                 //
                 // This is needed in order to keep specific properties for first student.
+                const { properties } = workshop.properties;
+
                 const shouldChangeProperties = (
-                    workshop.properties
+                    properties
                     && (!workshop.propertiesFirst
                         || (workshop.propertiesFirst && this.studentNumber !== 1))
                 );
@@ -195,7 +197,7 @@ export default class StudentListener {
                 const { perspectives, toolbar } = propertiesFirst;
 
                 if (perspectives) {
-                    this.client.setPerspective(perspective);
+                    this.client.setPerspective(perspectives);
                 }
 
                 if (toolbar) {
