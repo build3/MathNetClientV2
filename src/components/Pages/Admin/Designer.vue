@@ -166,7 +166,7 @@ export default {
             classname: undefined,
             code: undefined,
             groupsInClass: undefined,
-            toolbar: '',
+            toolbar: this.emptyToolbarString(),
             sendToolbar: false,
         };
     },
@@ -262,7 +262,6 @@ export default {
             try {
                 await this.get(this.selectedConstruction).then((construction) => {
                     this.GI.setXML(construction.xml);
-                    this.GI.registerGlobalListeners();
                     this.$log.debug('Got construction', construction);
 
                     if (construction.properties && construction.properties.perspectives) {
@@ -338,7 +337,6 @@ export default {
 
         resetView() {
             this.GI.setXML(freshGeogebraState);
-            this.GI.registerGlobalListeners();
         },
 
         async send(groups) {
@@ -641,6 +639,25 @@ export default {
             || perspectives.includes('L') || perspectives.includes('B')
             || perspectives.includes('T'));
         },
+
+        getXMLItemName(username) {
+            this.$log.debug('XML for username', username);
+            return `xml-${username}`;
+        },
+
+        getToolbarItemName(username) {
+            this.$log.debug('Toolbar for username', username);
+            return `toolbar-${username}`;
+        },
+
+        getPerspectivesItemName(username) {
+            this.$log.debug('Perspectives for username', username);
+            return `perspectives-${username}`;
+        },
+
+        emptyToolbarString() {
+            return '|||||||||||';
+        },
     },
 
     mounted() {
@@ -652,11 +669,32 @@ export default {
         };
 
         // simple example code to show how to initialize GeoGebra
-        this.GI = new GeogebraInterface(params); // constructor
+        this.GI = new GeogebraInterface(params, this.teacher.username); // constructor
 
         this.GI.inject(() => { // passing callback
             // const xml = this.GI.getXML(); // getting Geogebra state
             // this.GI.setXML(xml); // setting Geogebra state from xml
+
+            const xml = window.localStorage.getItem(this.getXMLItemName(this.teacher.username));
+            const toolbar = window.localStorage.getItem(
+                this.getToolbarItemName(this.teacher.username),
+            );
+            let perspectives = null;
+
+            if (xml) {
+                this.$log.debug('Loading XML from localStorage');
+                this.GI.setXML(xml);
+
+                perspectives = this.extractPerspectives(xml);
+            }
+            if (toolbar) {
+                this.$log.debug('Loading toolbar from localStorage');
+                this.toolbar = toolbar;
+            }
+            if (perspectives) {
+                this.$log.debug('Loading perspectives from localStorage');
+                this.GI.setPerspective(perspectives);
+            }
         });
     },
 
