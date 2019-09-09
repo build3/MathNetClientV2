@@ -59,6 +59,10 @@
                                         <button class="btn btn-primary p-2 mr-1 mt-2"
                                             @click="sendToAll()">
                                                 Send view to all</button>
+                                        <button class="btn btn-primary p-2 mr-1 mt-2"
+                                            @click="sendToFirstInGroup(selectedGroup)"
+                                            :disabled="canDelete">
+                                                Send to first Student</button>
                                     </div>
                                     <div class="form-inline checkbox mt-3">
                                         <label class="checkbox-container">
@@ -204,6 +208,10 @@ export default {
                 query: { $sort: { code: 1 } },
             });
         },
+
+        canDelete() {
+            return !this.selectedGroup.length || !this.sendToolbar;
+        },
     },
 
     methods: {
@@ -230,6 +238,7 @@ export default {
             getWorkshopToStore: 'get',
             createWorkshop: 'create',
             updateWorkshop: 'update',
+            patchWorkshop: 'patch',
         }),
 
         ...mapActions('elements', {
@@ -360,6 +369,49 @@ export default {
                 information.metaInformation,
                 properties,
             );
+        },
+
+        // Send selected toolbar and perspectives to first student in selected group/ groups.
+        async sendToFirstInGroup(groups) {
+            if (!groups.length) {
+                this.showToast('Please select group to send toolbar for first student', 'warning');
+            } else {
+                const {
+                    perspectives,
+                    toolbar,
+                } = this.prepareMetaInformationPerspectivesAndToolbars();
+
+                const { class: code } = this;
+
+                await this.findGroupsInStore({
+                    query: {
+                        name: groups,
+                        class: this.code,
+                    },
+                });
+
+                const groupsObjects = await this.findGroups({
+                    query: {
+                        name: groups,
+                        class: code,
+                    },
+                });
+
+                const properties = { perspectives, toolbar };
+
+                groupsObjects.forEach(async (obj, i) => {
+                    const { _id } = groupsObjects[i];
+
+                    try {
+                        await this.patchWorkshop([_id, {
+                            propertiesFirst: properties,
+                        }]);
+                        this.showToast('Successfully send toolbar to first', 'success');
+                    } catch (error) {
+                        this.showToast('Error while sending toolbar', 'danger');
+                    }
+                });
+            }
         },
 
         async sendToAll() {

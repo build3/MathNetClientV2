@@ -152,6 +152,7 @@ export default {
             this.id,
             this.student.color,
             this.$log,
+            this.student.numberInGroup,
         );
 
         client.initApplet(listener);
