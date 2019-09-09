@@ -46,7 +46,8 @@ export default [
     { name: 'Segment_Fixed', mode: '45', src: '/vendor/img/tool_icons/Mode_segmentfixed.svg' },
     { name: 'Angle_Fixed', mode: '46', src: '/vendor/img/tool_icons/Mode_anglefixed.svg' },
     { name: 'Locus', mode: '47', src: '/vendor/img/tool_icons/Mode_locus.svg' },
-    { name: 'Macro', mode: '48', src: '/vendor/img/tool_icons/Mode_tool.svg' },
+    // There are 2 tools removed from the array. They seem not to work when sent to students.
+    // { name: 'Macro', mode: '48', src: '/vendor/img/tool_icons/Mode_tool.svg' },
     { name: 'Area', mode: '49', src: '/vendor/img/tool_icons/Mode_area.svg' },
     { name: 'Slope', mode: '50', src: '/vendor/img/tool_icons/Mode_slope.svg' },
     { name: 'Regular_Polygon', mode: '51', src: '/vendor/img/tool_icons/Mode_regularpolygon.svg' },
@@ -57,6 +58,8 @@ export default [
     { name: 'Hyperbola_Three_Points', mode: '56', src: '/vendor/img/tool_icons/Mode_hyperbola3.svg' },
     { name: 'Parabola', mode: '57', src: '/vendor/img/tool_icons/Mode_parabola.svg' },
     { name: 'Fitline', mode: '58', src: '/vendor/img/tool_icons/Mode_fitline.svg' },
-    { name: 'Record_To_Spreadsheet', mode: '59', src: '/vendor/img/tool_icons/Mode_recordtospreadsheet.svg' },
+    // There are 2 tools removed from the array. They seem not to work when sent to students.
+    // { name: 'Record_To_Spreadsheet', mode: '59',
+    // src: '/vendor/img/tool_icons/Mode_recordtospreadsheet.svg' },
     { name: 'Attach_Detach_Point', mode: '67', src: '/vendor/img/tool_icons/Mode_attachdetachpoint.svg' },
 ];
