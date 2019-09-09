@@ -169,21 +169,7 @@ export default class StudentListener {
                 this.log.debug('XML has changed', workshop);
                 // this.client.setXML(workshop.xml);
 
-                // Properties should change when:
-                // 1. `workshop.properties` exist and `workshop.propertiesFirst` does not exist.
-                // 2. `workshop.properties` exist and `workshop.propertiesFirst` exist
-                // but student can't be first in workshop.
-                //
-                // This is needed in order to keep specific properties for first student.
-                const { properties } = workshop.properties;
-
-                const shouldChangeProperties = (
-                    properties
-                    && (!workshop.propertiesFirst
-                        || (workshop.propertiesFirst && this.studentNumber !== 1))
-                );
-
-                if (shouldChangeProperties) {
+                if (workshop.properties) {
                     if (workshop.properties.perspectives) {
                         this.client.setPerspective(workshop.properties.perspectives);
                     }
