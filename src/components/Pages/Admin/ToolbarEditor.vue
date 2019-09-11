@@ -117,6 +117,7 @@ import { mapGetters, mapActions } from 'vuex';
 import draggable from 'vuedraggable';
 import AlertMixin from '@/mixins/AlertMixin.vue';
 import icons from '../../../helpers/icons';
+import emptyToolbarString from '../../../helpers/emptyToolbarString';
 
 
 function emptyToolbar() {
@@ -284,10 +285,6 @@ export default {
                 this.toolbarString,
             );
         },
-
-        emptyToolbarString() {
-            return '|||||||||||';
-        },
     },
 
     watch: {
@@ -302,7 +299,7 @@ export default {
         },
 
         value(newValue, oldValue) {
-            if (newValue !== oldValue && newValue !== this.emptyToolbarString()) {
+            if (newValue !== oldValue && newValue !== emptyToolbarString()) {
                 this.currentToolbar = parseToolbar(newValue);
             }
         },

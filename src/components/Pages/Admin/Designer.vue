@@ -147,7 +147,9 @@ import ToastrMixin from '@/mixins/ToastrMixin.vue';
 import AlertMixin from '@/mixins/AlertMixin.vue';
 import GeogebraInterface from '../../Geogebra/GeogebraInterface';
 import freshGeogebraState from '../../../helpers/fresh_geogebra_state';
+import emptyToolbarString from '../../../helpers/emptyToolbarString';
 import ToolbarEditor from './ToolbarEditor.vue';
+
 
 export default {
     name: 'Designer',
@@ -166,7 +168,7 @@ export default {
             classname: undefined,
             code: undefined,
             groupsInClass: undefined,
-            toolbar: this.emptyToolbarString(),
+            toolbar: emptyToolbarString(),
             sendToolbar: false,
         };
     },
@@ -653,10 +655,6 @@ export default {
         getPerspectivesItemName(username) {
             this.$log.debug('Perspectives for username', username);
             return `perspectives-${username}`;
-        },
-
-        emptyToolbarString() {
-            return '|||||||||||';
         },
     },
 
