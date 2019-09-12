@@ -63,17 +63,14 @@
                                     <draggable
                                         class="dragArea list-of-draggable-tools"
                                         :list="icons"
-                                        :group="{ name: 'icons', pull: 'clone', put: false }"
-                                      >
+                                        :group="{ name: 'icons', pull: 'clone', put: false }">
                                         <div
-                                          class="list-group-item available-tool-icon"
-                                          v-for="element in icons"
-                                          :key="element.mode"
-                                        >
+                                            class="list-group-item available-tool-icon"
+                                            v-for="element in icons"
+                                            :key="element.mode">
                                           <img :src="element.src" :title="element.name"/>
                                         </div>
                                      </draggable>
-
 
                                      <div class="draggable-lists-container">
                                          <draggable v-for="(list, listNumber) in currentToolbar"
@@ -81,17 +78,17 @@
                                             :list="list"
                                             group="icons"
                                             draggable=".item"
-                                            :key="listNumber"
-                                          >
+                                            :key="listNumber">
                                             <div
-                                              class="item tool-icon"
-                                              v-for="(element, elementNumber) in list"
-                                              :key="elementNumber"
-                                            >
+                                                class="item tool-icon"
+                                                v-for="(element, elementNumber) in list"
+                                                :key="elementNumber">
                                                 <img :src="element.src" :title="element.name"/>
-                                                <button class="tool-delete-button"
+                                                <button
+                                                    class="tool-delete-button"
                                                     @click="deleteTool(listNumber, elementNumber)">
-                                                    -</button>
+                                                    -
+                                                </button>
                                             </div>
                                           </draggable>
                                     </div>
