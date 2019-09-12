@@ -6,7 +6,7 @@
 const THROTTLE_PERIOD = 50; // (ms)
 
 // Initial state of the Geogebra applet encoded in Base64
-const initialState = require('../../helpers/ggbbase64');
+const initialState = require('../../helpers/ggbbase64').default;
 
 const Consts = {
     // Geogebra specific options
@@ -103,7 +103,7 @@ class StudentClient {
             scaleContainerClass: 'appletContainer',
             resizeFactor: 1.0,
             // Initial Geogebra state encoded in Base64
-            initialState,
+            ggbBase64: initialState,
             ...params,
         };
 
@@ -167,6 +167,9 @@ class StudentClient {
 
         // Notify listener.
         this.listener.onAppletReady();
+
+        // Remove Geogebra's undo history.
+        window.sessionStorage.clear();
     }
 
     /**
