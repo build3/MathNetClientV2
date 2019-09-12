@@ -114,6 +114,7 @@ import { mapGetters, mapActions } from 'vuex';
 import draggable from 'vuedraggable';
 import AlertMixin from '@/mixins/AlertMixin.vue';
 import icons from '../../../helpers/icons';
+import emptyToolbarString from '../../../helpers/emptyToolbarString';
 
 
 function emptyToolbar() {
@@ -125,11 +126,13 @@ function parseTools(list) {
 }
 
 function parseToolbar(toolbarString) {
-    return toolbarString.split('|').map(parseTools);
+    if (toolbarString) return toolbarString.split('|').map(parseTools);
+    else return emptyToolbar();
 }
 
 function stringifyTools(list) {
-    return list.map(({ mode }) => mode).join(' ');
+    if (list) return list.filter(t => t).map(({ mode }) => mode).join(' ');
+    else return '';
 }
 
 function stringifyToolbar(toolbar) {
@@ -139,6 +142,13 @@ function stringifyToolbar(toolbar) {
 export default {
     components: {
         draggable,
+    },
+
+    props: {
+        value: {
+            type: String,
+            default: null,
+        },
     },
 
     data() {
@@ -210,7 +220,7 @@ export default {
         async saveToolbar() {
             this.alert = null;
 
-            if (this.toolbars.find(({ name }) => name === this.addToolbarName)) {
+            if (this.toolbars && this.toolbars.find(({ name }) => name === this.addToolbarName)) {
                 this.alert = {
                     type: 'danger',
                     message: 'Toolbar with this name already exists. Cancelling overwrite.',
@@ -259,6 +269,19 @@ export default {
         showError(message) {
             this.alert = { type: 'danger', message };
         },
+
+        getToolbarItemName(username) {
+            this.$log.debug('Toolbar for username', username);
+            return `toolbar-${username}`;
+        },
+
+        saveToolbarStateToLocalStorage() {
+            this.$log.debug('Saving Toolbar');
+            window.localStorage.setItem(
+                this.getToolbarItemName(this.teacher.username),
+                this.toolbarString,
+            );
+        },
     },
 
     watch: {
@@ -268,6 +291,14 @@ export default {
 
         toolbarString(newValue) {
             this.$emit('input', newValue);
+
+            this.saveToolbarStateToLocalStorage();
+        },
+
+        value(newValue, oldValue) {
+            if (newValue !== oldValue && newValue !== emptyToolbarString()) {
+                this.currentToolbar = parseToolbar(newValue);
+            }
         },
     },
 };
