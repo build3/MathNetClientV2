@@ -149,7 +149,8 @@ import GeogebraInterface from '../../Geogebra/GeogebraInterface';
 import freshGeogebraState from '../../../helpers/fresh_geogebra_state';
 import emptyToolbarString from '../../../helpers/emptyToolbarString';
 import ToolbarEditor from './ToolbarEditor.vue';
-
+// Initial state of the Geogebra applet encoded in Base64
+const initialState = require('../../../helpers/ggbbase64').default;
 
 export default {
     name: 'Designer',
@@ -664,6 +665,7 @@ export default {
             id: 'applet',
             width: this.$refs.geogebra_container.clientWidth - 30,
             log: this.$log,
+            ggbBase64: initialState,
         };
 
         // simple example code to show how to initialize GeoGebra
