@@ -320,9 +320,11 @@ export default class StudentListener {
      * elements of different students.
      */
     adjustForDisplay(label) {
-        const caption = StudentListener.getElementCaption(label, this.studentUsername);
-        this.client.setCaption(label, caption);
-        this.client.setColor(label, this.studentColor);
+        if (this.client.getObjectType(label) === 'point') {
+            const caption = StudentListener.getElementCaption(label, this.studentUsername);
+            this.client.setCaption(label, caption);
+            this.client.setColor(label, this.studentColor);
+        }
     }
 
     /**
