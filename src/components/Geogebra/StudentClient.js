@@ -150,6 +150,11 @@ class StudentClient {
         // Save reference to the applet itself. This is the main line
         // of communication between Geogebra and the rest of the code.
         this.applet = this.appletContainer.getAppletObject();
+
+        if (this.appletId !== undefined) {
+            return;
+        }
+
         this.appletId = Math.floor(Math.random() * 10000);
 
         // In case Geogebra is caching, clear everything.
