@@ -3,6 +3,7 @@
         <nav class="navbar navbar-static-top bg-white">
             <div class="navbar-header">
                 <div class="ping-section">
+                    <p>[Demo build]</p>
                     <p>Ping:</p><p v-if="!ping">waiting</p><p>{{ ping }}</p>
                 </div>
             </div>
