@@ -120,8 +120,8 @@ export default {
         },
     },
 
-    created() {
-        this.getGroup(this.id);
+    async reated() {
+        await this.getGroup(this.id);
         this.$store.commit('setStudentGroup', this.group);
         this.saveUserNumber();
     },
