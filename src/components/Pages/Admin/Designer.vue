@@ -345,31 +345,35 @@ export default {
         async send(groups) {
             this.$log.debug('Send');
 
-            const information = this.prepareMetaInformationPerspectivesAndToolbars();
+            if (!groups.length) {
+                this.showToast('Please select groups to send construction', 'warning');
+            } else {
+                const information = this.prepareMetaInformationPerspectivesAndToolbars();
 
-            await this.findGroupsInStore({
-                query: {
-                    name: groups,
-                    class: this.code,
-                },
-            });
+                await this.findGroupsInStore({
+                    query: {
+                        name: groups,
+                        class: this.code,
+                    },
+                });
 
-            const groupsObjects = await this.findGroups({
-                query: {
-                    name: groups,
-                    class: this.code,
-                },
-            });
+                const groupsObjects = await this.findGroups({
+                    query: {
+                        name: groups,
+                        class: this.code,
+                    },
+                });
 
-            const properties = {
-                perspectives: information.perspectives,
-                toolbar: information.toolbar,
-            };
-            await this.sendConstructionToGroups(
-                groupsObjects,
-                information.metaInformation,
-                properties,
-            );
+                const properties = {
+                    perspectives: information.perspectives,
+                    toolbar: information.toolbar,
+                };
+                await this.sendConstructionToGroups(
+                    groupsObjects,
+                    information.metaInformation,
+                    properties,
+                );
+            }
         },
 
         // Send selected toolbar and perspectives to first student in selected group/ groups.
@@ -418,25 +422,29 @@ export default {
         async sendToAll() {
             this.$log.debug('SendToAll');
 
-            const information = this.prepareMetaInformationPerspectivesAndToolbars();
+            if (!this.code) {
+                this.showToast('Select class to send construction', 'warning');
+            } else {
+                const information = this.prepareMetaInformationPerspectivesAndToolbars();
 
-            await this.findGroupsInStore({ query: { class: this.code } });
+                await this.findGroupsInStore({ query: { class: this.code } });
 
-            const groupsObjects = await this.findGroups({
-                query: {
-                    class: this.code,
-                },
-            });
+                const groupsObjects = await this.findGroups({
+                    query: {
+                        class: this.code,
+                    },
+                });
 
-            const properties = {
-                perspectives: information.perspectives,
-                toolbar: information.toolbar,
-            };
-            await this.sendConstructionToGroups(
-                groupsObjects,
-                information.metaInformation,
-                properties,
-            );
+                const properties = {
+                    perspectives: information.perspectives,
+                    toolbar: information.toolbar,
+                };
+                await this.sendConstructionToGroups(
+                    groupsObjects,
+                    information.metaInformation,
+                    properties,
+                );
+            }
         },
 
         prepareMetaInformationPerspectivesAndToolbars() {
@@ -448,8 +456,11 @@ export default {
             this.$log.debug('this.perspectivesThatHaveToolbar(perspectives)', this.perspectivesThatHaveToolbar(perspectives));
 
             if (this.sendToolbar && this.perspectivesThatHaveToolbar(perspectives)) {
-                // eslint-disable-next-line prefer-destructuring
-                toolbar = this.toolbar;
+                if (this.toolbar !== emptyToolbarString()) {
+                    // eslint-disable-next-line prefer-destructuring
+                    toolbar = this.toolbar;
+                }
+
                 this.$log.debug('Sending toolbar', toolbar);
             }
 
