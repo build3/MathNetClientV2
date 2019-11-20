@@ -88,7 +88,9 @@ export default class StudentListener {
         // look like: A, A_1, A_2, A_3 and so on.
         const [name, sub] = label.split('_');
         // Turn subscript numbering into Unicode for superscript.
-        const sup = (sub || '').split('').map(c => numberToSuper[c]).join('');
+        const sup = (sub || '').split('')
+            .map(c => numberToSuper[c])
+            .join('');
 
         // Final caption has numbering in superscript and owner in subscript.
         return `${name}${sup}_{${owner}}`;
@@ -118,84 +120,91 @@ export default class StudentListener {
         // [onAppletReady] is called by [StudentClient] when applet finished
         // initializing.
         this.onAppletReady = async () => {
-            api.service('elements').on('created', (element) => {
-                this.log.debug('Created: ', element.name);
-                this.claimed.add(element.name);
+            api.service('elements')
+                .on('created', (element) => {
+                    this.log.debug('Created: ', element.name);
+                    this.claimed.add(element.name);
 
-                if (element.owner !== null) {
-                    this.log.debug('Adding element: ', element.name, ' to skipped');
-                    this.shouldSkip[element.name] = true;
-                }
+                    if (element.owner !== null) {
+                        this.log.debug('Adding element: ', element.name, ' to skipped');
+                        this.shouldSkip[element.name] = true;
+                    }
 
-                this.client.setElement(element);
-            });
-
-            api.service('elements').on('patched', (element) => {
-                this.log.debug('Patched: ', element.name);
-                this.claimed.add(element.name);
-                this.shouldSkip[element.name] = true;
-                this.ignoreUpdates = true;
-                this.client.updateElementXML(element.name, element.xml);
-
-                setTimeout(() => {
-                    this.ignoreUpdates = false;
+                    this.client.setElement(element);
                 });
-            });
 
-            api.service('elements').on('removed', (element) => {
-                this.log.debug('Removed: ', element.name);
-                this.client.deleteObject(element.name);
-                this.shouldSkip[element.name] = false;
-                this.claimed.delete(element.name);
-                this.coords[element.name] = undefined;
-                this.initialElements.delete(element.name);
-            });
+            api.service('elements')
+                .on('patched', (element) => {
+                    this.log.debug('Patched: ', element.name);
+                    this.claimed.add(element.name);
+                    this.shouldSkip[element.name] = true;
+                    this.ignoreUpdates = true;
+                    this.client.updateElementXML(element.name, element.xml);
+
+                    setTimeout(() => {
+                        this.ignoreUpdates = false;
+                    });
+                });
+
+            api.service('elements')
+                .on('removed', (element) => {
+                    this.log.debug('Removed: ', element.name);
+                    this.client.deleteObject(element.name);
+                    this.shouldSkip[element.name] = false;
+                    this.claimed.delete(element.name);
+                    this.coords[element.name] = undefined;
+                    this.initialElements.delete(element.name);
+                });
 
             // Emitted when teacher sends construction to a workshop.
-            api.service('workshops').on('updated', (workshop) => {
-                this.log.debug('Workshop has changed', workshop);
-                // Ignore updates if workshop is in the process of updating.
-                // This is important because teacher will be sending unassigned
-                // points. If a false positive on-update callback is issued
-                // for unassigned point it will be automatically claimed.
-                this.ignoreUpdates = workshop.updating;
+            api.service('workshops')
+                .on('updated', (workshop) => {
+                    this.log.debug('Workshop has changed', workshop);
+                    // Ignore updates if workshop is in the process of updating.
+                    // This is important because teacher will be sending unassigned
+                    // points. If a false positive on-update callback is issued
+                    // for unassigned point it will be automatically claimed.
+                    this.ignoreUpdates = workshop.updating;
 
-                if (workshop.updating) {
-                    this.client.newConstruction();
-                }
-            });
-
-            api.service('workshops').on('xml-changed', (workshop) => {
-                this.log.debug('XML has changed', workshop);
-                // this.client.setXML(workshop.xml);
-
-                if (workshop.properties) {
-                    if (workshop.properties.perspectives) {
-                        this.client.setPerspective(workshop.properties.perspectives);
+                    if (workshop.updating) {
+                        this.client.newConstruction();
                     }
-                    if (workshop.properties.toolbar) {
-                        this.client.setCustomToolBar(workshop.properties.toolbar);
+                });
+
+            api.service('workshops')
+                .on('xml-changed', (workshop) => {
+                    this.log.debug('XML has changed', workshop);
+                    // this.client.setXML(workshop.xml);
+
+                    if (workshop.properties) {
+                        if (workshop.properties.perspectives) {
+                            this.client.setPerspective(workshop.properties.perspectives);
+                        }
+                        if (workshop.properties.toolbar) {
+                            this.client.setCustomToolBar(workshop.properties.toolbar);
+                        }
                     }
-                }
-            });
+                });
 
-            api.service('workshops').on('properties-first-user-changed', ({ propertiesFirst }) => {
-                const { perspectives, toolbar } = propertiesFirst;
+            api.service('workshops')
+                .on('properties-first-user-changed', ({ propertiesFirst }) => {
+                    const { perspectives, toolbar } = propertiesFirst;
 
-                if (perspectives) {
-                    this.client.setPerspective(perspectives);
-                }
+                    if (perspectives) {
+                        this.client.setPerspective(perspectives);
+                    }
 
-                if (toolbar) {
-                    this.client.setCustomToolBar(toolbar);
-                }
-            });
+                    if (toolbar) {
+                        this.client.setCustomToolBar(toolbar);
+                    }
+                });
 
             // Load current state of the workshops.
 
-            const workshops = await api.service('workshops').find({
-                query: { id: this.workshopId },
-            });
+            const workshops = await api.service('workshops')
+                .find({
+                    query: { id: this.workshopId },
+                });
 
             const workshop = workshops[0];
 
@@ -215,9 +224,10 @@ export default class StudentListener {
                 }
 
                 // Load any existing elements in the workshop.
-                const elements = await api.service('elements').find({
-                    query: { workshop: workshop.id },
-                }) || [];
+                const elements = await api.service('elements')
+                    .find({
+                        query: { workshop: workshop.id },
+                    }) || [];
 
                 this.log.debug('Loaded elements:', elements);
 
@@ -235,12 +245,13 @@ export default class StudentListener {
                 setTimeout(() => {
                     this.ignoreUpdates = false;
                 });
-            // Workshops was not created yet, create it.
+                // Workshops was not created yet, create it.
             } else {
                 // Create new workshop with the same id as the related group.
-                const newWorkshop = await api.service('workshops').create({
-                    id: this.workshopId,
-                });
+                const newWorkshop = await api.service('workshops')
+                    .create({
+                        id: this.workshopId,
+                    });
 
                 this.log.debug('Created workshop: ', newWorkshop);
             }
@@ -266,8 +277,8 @@ export default class StudentListener {
             const coords = this.coords[label] || [];
 
             if (coords[0] === newCoords[0]
-                    && coords[1] === newCoords[1]
-                    && coords[2] === newCoords[2]) {
+                && coords[1] === newCoords[1]
+                && coords[2] === newCoords[2]) {
                 this.log.debug(`False-positive update detected, skipping for ${label}`);
                 return;
             }
@@ -339,23 +350,35 @@ export default class StudentListener {
         }
     }
 
+
     /**
      * @param {String} label
      */
     async sendElement(label) {
+        const commandStr = this.client.getCommandString(label, false);
+        const additionalPoints = this.client.getAllObjectNames()
+            .map(l => ({
+                label: l,
+                commandStr: this.client.getCommandString(l, false),
+                caption: this.client.getCaption(l) || l,
+            }))
+            .filter(c => c.commandStr === commandStr);
+
         const element = {
             id: StudentListener.getElementId(this.workshopId, label),
             name: label,
             owner: this.studentUsername,
             workshop: this.workshopId,
             xml: this.client.getXML(label),
-            obj_cmd_str: this.client.getCommandString(label, false),
+            additional_points: additionalPoints,
+            obj_cmd_str: commandStr,
         };
 
         this.log.debug(element);
 
         try {
-            await api.service('elements').create(element);
+            await api.service('elements')
+                .create(element);
         } catch (error) {
             this.log.error(error);
         }
@@ -365,9 +388,10 @@ export default class StudentListener {
         if (!this.ignoreUpdates) {
             this.log.debug(label);
 
-            api.service('elements').remove(
-                StudentListener.getElementId(this.workshopId, label),
-            );
+            api.service('elements')
+                .remove(
+                    StudentListener.getElementId(this.workshopId, label),
+                );
         }
     }
 }

@@ -434,6 +434,10 @@ class StudentClient {
         return this.applet.getCaption(label);
     }
 
+    getAllObjectNames() {
+        return this.applet.getAllObjectNames();
+    }
+
     getCommandString(label) {
         return this.applet.getCommandString(label, false);
     }
