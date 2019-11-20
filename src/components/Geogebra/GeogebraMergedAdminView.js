@@ -33,6 +33,16 @@ const Consts = {
     },
 };
 
+class PendingRenames {
+    constructor(groupId) {
+        this.groupId = groupId;
+        this.expectedAddCallbacks = 0;
+        this.expectedNetworkPoints = 0;
+        this.receivedAdds = [];
+        this.receivedNetworkPoints = [];
+    }
+}
+
 class GeogebraMergedAdminView {
     constructor(params, workshopIds) {
         this.params = {
@@ -61,6 +71,8 @@ class GeogebraMergedAdminView {
         this.initializeReactionsToServerEvents();
         // eslint-disable-next-line no-undef
         this.appletContainer = new GGBApplet(this.params);
+        this.activePending = undefined;
+        this.pendingRenames = [];
     }
 
     inject(callback) {
@@ -74,10 +86,34 @@ class GeogebraMergedAdminView {
 
     ggbOnInit() {
         this.applet = this.appletContainer.getAppletObject();
+        this.applet.setOnTheFlyPointCreationActive(false);
+        window[`addListener${this.params.id}`] = label => this.onAddElement(label);
         this.isInitialized = true;
         this.loadWorkshops();
 
         this.centerView();
+    }
+
+    onAddElement(label) {
+        if (this.applet.getObjectType(label) === 'point'
+            && this.activePending && this.activePending.expectedAddCallbacks > 0) {
+            this.activePending.receivedAdds = [...this.activePending.receivedAdds, label];
+            this.maybeRenamePoints(this.activePending.groupId);
+        }
+    }
+
+    maybeRenamePoints(groupId) {
+        // const pending = this.pendingRenames.find(r => r.groupId === groupId);
+        // if (pending.receivedAdds.length > 0 && pending.receivedNetworkPoints.length > 0) {
+        //     // do the rename
+        //     this.applet.setCaption(pending.receivedAdds[0], pending.receivedNetworkPoints[0]);
+        //     pending.receivedAdds = pending.receivedAdds.slice(1);
+        //     pending.receivedNetworkPoints = pending.receivedNetworkPoints.slice(1);
+        //     this.maybeRenamePoints(groupId);
+        // } else {
+        //     console.log(`Points generated length ${pending.receivedAdds.length} and `
+        //     + `points renamed length ${pending.receivedNetworkPoints.length} for group ${groupId}`);
+        // }
     }
 
     getXML() {
@@ -94,6 +130,17 @@ class GeogebraMergedAdminView {
 
     evalCommand(command) {
         this.applet.evalCommand(command);
+    }
+
+    evalCommandGetLabels(command) {
+        // Despite what the docs say, this doesn't return a String[], it returns a
+        // comma-separated string.
+        const result = this.applet.evalCommandGetLabels(command);
+        if (result) {
+            return result.split(',');
+        } else {
+            return [];
+        }
     }
 
     getObjectNumber() {
@@ -151,16 +198,22 @@ class GeogebraMergedAdminView {
                 }
             }; */
 
-            api.service('elements').on('created', this.createdListener);
-            api.service('elements').on('patched', this.patchedListener);
-            api.service('elements').on('removed', this.removedListener);
+            api.service('elements')
+                .on('created', this.createdListener);
+            api.service('elements')
+                .on('patched', this.patchedListener);
+            api.service('elements')
+                .on('removed', this.removedListener);
             // api.service('workshops').on('xml-changed', this.xmlChangedListener);
         };
 
         this.clearListeners = () => {
-            api.service('elements').removeListener('created', this.createdListener);
-            api.service('elements').removeListener('patched', this.patchedListener);
-            api.service('elements').removeListener('removed', this.removedListener);
+            api.service('elements')
+                .removeListener('created', this.createdListener);
+            api.service('elements')
+                .removeListener('patched', this.patchedListener);
+            api.service('elements')
+                .removeListener('removed', this.removedListener);
             // api.service('workshops').removeListener('xml-changed', this.xmlChangedListener);
         };
     }
@@ -168,9 +221,10 @@ class GeogebraMergedAdminView {
     // Load current state of the workshops.
     async loadWorkshopState(workshopId, iter) {
         // eslint-disable-next-line prefer-const
-        let [workshop, ...rest] = await api.service('workshops').find({
-            query: { id: workshopId },
-        });
+        let [workshop, ...rest] = await api.service('workshops')
+            .find({
+                query: { id: workshopId },
+            });
 
         this.log.debug('Loaded workshop: ', workshop);
         this.log.debug('Rest is: ', rest);
@@ -181,9 +235,10 @@ class GeogebraMergedAdminView {
             // this.setConstruction(workshop.xml, workshop.id);
 
             // Load any existing elements in the workshop.
-            const elements = await api.service('elements').find({
-                query: { workshop: workshop.id },
-            }) || [];
+            const elements = await api.service('elements')
+                .find({
+                    query: { workshop: workshop.id },
+                }) || [];
 
             this.log.debug(`Loaded elements for workshop[${iter}]:`, elements);
 
@@ -191,11 +246,12 @@ class GeogebraMergedAdminView {
                 elements,
                 iter,
             );
-        // Workshops was not created yet, create it.
+            // Workshops was not created yet, create it.
         } else {
-            workshop = await api.service('workshops').create({
-                id: workshopId,
-            });
+            workshop = await api.service('workshops')
+                .create({
+                    id: workshopId,
+                });
 
             this.log.debug(`Created workshop[${iter}]: `, workshop);
         }
@@ -210,16 +266,34 @@ class GeogebraMergedAdminView {
 
     /**
      * @param {Object} element
+     * @param {array} additionalElements
      */
-    setElement(element) {
+    setElement(element, additionalElements = []) {
         this.log.debug(element);
 
         this.ignoreUpdates = true;
 
-        if (element.obj_cmd_str !== '') {
+        if (element.obj_cmd_str && element.obj_cmd_str !== '') {
             // TODO: Explain this
-            const command = Consts.getCommand(element.name, element.obj_cmd_str);
-            this.evalCommand(command);
+            const command = element.obj_cmd_str;
+            // Consts.getCommand(element.name, element.obj_cmd_str);
+            let labels = this.evalCommandGetLabels(command);
+            labels = labels.filter(l => this.applet.getCommandString(l) === element.obj_cmd_str.replace('[', '(')
+                .replace(']', ')'));
+            // eslint-disable-next-line no-param-reassign
+            if (additionalElements.length > 0 && labels.length > 0) {
+                // right now assume they're the same length, could cause problems though
+                // eslint-disable-next-line no-plusplus
+                for (let i = 0; i < additionalElements.length; ++i) {
+                    if (labels[i].indexOf('grp') === -1) {
+                        const generatedObject = labels[i];
+                        const newLabel = additionalElements[i].label;
+                        const newCaption = additionalElements[i].caption;
+                        this.applet.renameObject(generatedObject, newLabel);
+                        this.applet.setCaption(newLabel, newCaption);
+                    }
+                }
+            }
         }
 
         this.evalXML(element.xml);
@@ -300,46 +374,77 @@ class GeogebraMergedAdminView {
         this.applet.setColor(label, red, green, blue);
     }
 
+    static getRequiredPoints(commandStr) {
+        // Don't know what the official allowed characters are
+        // but this seems to match (if not be overly broad)
+        const regex = /^([^[]+)\[(.+), ([0-9]+)]$/;
+        const match = commandStr.match(regex);
+        if (match && match) {
+            // e.g. Polygon[F_1,G_1,4] will create two additional points plus the polygon, so
+            // waiting for three total elements to be created
+            return parseInt(match[3], 0) - match[2].split(',').length + 1;
+        } else {
+            return 0;
+        }
+    }
+
     addElementAfterRenameToMergedGroupNotation(element, groupNum) {
         const objLabel = element.name;
         const objXML = element.xml;
         const objCmdStr = element.obj_cmd_str;
+        let additionalPoints = element.additional_points;
 
+        const requiredPoints = GeogebraMergedAdminView.getRequiredPoints(objCmdStr);
+        if (requiredPoints === 0 || additionalPoints.length === requiredPoints) {
+            // we have all of the points
+            if (additionalPoints.length > 0) {
+                additionalPoints = additionalPoints.map(p => ({
+                    ...p,
+                    label: `${p.label}grp${groupNum + 1}`,
+                }));
+            }
 
-        let objLabels = this.applet.getAllObjectNames();
-        // filtering by labels that have this specific group suffix `grp${groupNum + 1}`
-        objLabels = objLabels.filter((label) => {
-            const regex = RegExp(`grp${groupNum + 1}$`, 'g');
-            const matches = (regex.exec(label) !== null);
-            // this.log.debug('Label ', label,
-            // `(groupNum + 1) ${groupNum + 1}`, ' matches?', matches);
-            return matches;
-        });
+            let objLabels = this.applet.getAllObjectNames();
+            // filtering by labels that have this specific group suffix `grp${groupNum + 1}`
+            objLabels = objLabels.filter((label) => {
+                const regex = RegExp(`grp${groupNum + 1}$`, 'g');
+                const matches = (regex.exec(label) !== null);
+                // this.log.debug('Label ', label,
+                // `(groupNum + 1) ${groupNum + 1}`, ' matches?', matches);
+                return matches;
+            });
 
-        this.log.debug('matched objLabels', objLabels);
+            this.log.debug('matched objLabels', objLabels);
 
-        // new label
-        const newLabel = `${objLabel}grp${groupNum + 1}`;
-        // production of newXML (with changed label inside its code)
-        const newXML = GeogebraMergedAdminView.produceXMLWithNewLabel(
-            objLabel,
-            objXML,
-            groupNum,
-        );
-        // new command string, with all variables renamed to `grp${groupNum + 1}` suffix
-        const newObjCmdStr = GeogebraMergedAdminView.produceNewCmdStr(
-            objCmdStr,
-            objLabels,
-            groupNum,
-        );
+            // new label
+            const newLabel = `${objLabel}grp${groupNum + 1}`;
+            // production of newXML (with changed label inside its code)
+            const newXML = GeogebraMergedAdminView.produceXMLWithNewLabel(
+                objLabel,
+                objXML,
+                groupNum,
+            );
+            // new command string, with all variables renamed to `grp${groupNum + 1}` suffix
+            const newObjCmdStr = GeogebraMergedAdminView.produceNewCmdStr(
+                objCmdStr,
+                objLabels,
+                groupNum,
+            );
 
-        this.setElement(
-            {
-                name: newLabel,
-                xml: newXML,
-                obj_cmd_str: newObjCmdStr,
-            },
-        );
+            // // TODO, generalize this if it works
+            // if (newObjCmdStr.indexOf('Polygon') !== -1) {
+            //     newObjCmdStr = '';
+            // }
+            this.setElement(
+                {
+                    name: newLabel,
+                    xml: newXML,
+                    obj_cmd_str: newObjCmdStr,
+                }, additionalPoints,
+            );
+        } else {
+            this.log.debug(`Not sending create for ${objLabel} ${objCmdStr} `);
+        }
     }
 
     updateElementAfterRenameToMergedGroupNotation(element, groupNum) {
@@ -411,7 +516,10 @@ class GeogebraMergedAdminView {
         // eslint-disable-next-line no-cond-assign
         while (result = regex.exec(objCmdStr)) {
             // this.log.debug('Result is', result);
-            indices.push({ index: result.index + result[0].length, variable: result[0] });
+            indices.push({
+                index: result.index + result[0].length,
+                variable: result[0],
+            });
         }
 
         // taking these possible-to-be variables
@@ -439,9 +547,10 @@ class GeogebraMergedAdminView {
      * [onRemoveElement] is called for each object).
      */
     clear() {
-        this.applet.getAllObjectNames().forEach((obj) => {
-            this.applet.deleteObject(obj);
-        });
+        this.applet.getAllObjectNames()
+            .forEach((obj) => {
+                this.applet.deleteObject(obj);
+            });
     }
 
     centerView() {

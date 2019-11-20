@@ -14,6 +14,9 @@ module.exports = {
     'no-underscore-dangle': ['error', { 'allow': ['_id'] }],
     'no-await-in-loop': 'off',
     'no-else-return': 'off',
+    'no-unused-vars': 'warn',
+    'class-methods-use-this': 'warn',
+    'max-len': 'warn',
   },
   parserOptions: {
     parser: 'babel-eslint',
