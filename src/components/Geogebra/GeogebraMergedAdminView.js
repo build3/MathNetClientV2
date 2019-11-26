@@ -392,7 +392,7 @@ class GeogebraMergedAdminView {
         const objLabel = element.name;
         const objXML = element.xml;
         const objCmdStr = element.obj_cmd_str;
-        let additionalPoints = element.additional_points;
+        let additionalPoints = element.additional_points || [];
 
         const requiredPoints = GeogebraMergedAdminView.getRequiredPoints(objCmdStr);
         if (requiredPoints === 0 || additionalPoints.length === requiredPoints) {
