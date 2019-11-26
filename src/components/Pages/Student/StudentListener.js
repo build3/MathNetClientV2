@@ -68,6 +68,22 @@ export default class StudentListener {
         this.coords = {};
     }
 
+    shouldSkipElement(label) {
+        const commandStr = this.client.getCommandString(label);
+        const pointsRegex = /.*\[(.*)\]/;
+        if (commandStr && commandStr.match(pointsRegex)) {
+            const pointsArr = commandStr.match(pointsRegex)[1].split(',');
+            // eslint-disable-next-line no-plusplus
+            for (let i = 0; i < pointsArr.length; ++i) {
+                if (!this.shouldSkip[pointsArr[i].trim()]) {
+                    return false;
+                }
+            }
+        }
+
+        return this.shouldSkip[label];
+    }
+
     /**
      * @param {String} workshopId ID of the workshop, corresponds in a 1:1
      * fashion with some group.
@@ -293,7 +309,7 @@ export default class StudentListener {
             return;
         }
 
-        if (this.shouldSkip[label]) {
+        if (this.shouldSkipElement(label)) {
             this.log.debug(`Should skip (${label})`);
             return;
         }
