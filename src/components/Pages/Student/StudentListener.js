@@ -373,28 +373,15 @@ export default class StudentListener {
     async sendElement(label) {
         const commandStr = this.client.getCommandString(label, false);
         /*
-        We need to do two things here.
          1. look for elements within the same command as this point
-         2. find elements using this point within their command.
          */
         const allObjects = this.client.getAllObjectNames().map(l => ({
             label: l,
             commandStr: this.client.getCommandString(l, false),
             caption: this.client.getCaption(l) || l,
         }));
-        const commandRegex = /.*\[(.*)\]/;
         // These are the points that share the same command (e.g. for polygons)
         const additionalPoints = allObjects.filter(c => c.commandStr === commandStr);
-        // These are the points that have commands that depend on this point
-        const dependentPoints = allObjects.filter((c) => {
-            const match = c.commandStr.match(commandRegex);
-            return match && match.indexOf(c.label !== -1);
-        });
-
-        // TODO: Consider this:
-        // In order to support infinite combinations of dependencies, we may need to
-        // maintain a graph of the dependencies when updates are received. That would
-        // eliminate the need to query the applet on each change.
 
         const element = {
             id: StudentListener.getElementId(this.workshopId, label),
@@ -403,7 +390,6 @@ export default class StudentListener {
             workshop: this.workshopId,
             xml: this.client.getXML(label),
             additional_points: additionalPoints,
-            dependent_points: dependentPoints,
             obj_cmd_str: commandStr,
         };
 
