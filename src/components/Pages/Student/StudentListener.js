@@ -309,10 +309,10 @@ export default class StudentListener {
             return;
         }
 
-        if (this.shouldSkipElement(label)) {
-            this.log.debug(`Should skip (${label})`);
-            return;
-        }
+        // if (this.shouldSkipElement(label)) {
+        //     this.log.debug(`Should skip (${label})`);
+        //     return;
+        // }
 
         // if (!this.shouldUpdate[label]) {
         //     this.shouldUpdate[label] = true;
