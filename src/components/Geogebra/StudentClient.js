@@ -150,6 +150,8 @@ class StudentClient {
         // Save reference to the applet itself. This is the main line
         // of communication between Geogebra and the rest of the code.
         this.applet = this.appletContainer.getAppletObject();
+        this.applet.setPerspective('G');
+
 
         if (this.appletId !== undefined) {
             return;

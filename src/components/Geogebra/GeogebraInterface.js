@@ -74,6 +74,7 @@ export default class {
         this.applet.setXML(xml);
         // this.checkLocks();
         this.registerGlobalListeners();
+        this.saveStateToLocalStorage();
 
         this.ignoreUpdates = false;
     }

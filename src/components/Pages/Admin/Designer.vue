@@ -1,147 +1,168 @@
 <template>
-    <div class="designer">
-        <div class="wrapper wrapper-content">
-            <alert :alert="alert" />
-            <div class="ibox border-bottom">
-                <div class="ibox-content table-responsive ibox-style-extender">
-                    <div class="row mt-2">
-                        <div class="col-12" ref="geogebra_container">
-                            <div class="geogebra_designer">
-                                <div id="geogebra_designer"></div>
-                            </div>
-                            <button class="btn btn-warning reset-btn p-2 mt-4 mb-3"
-                                    @click="resetView">
-                                Reset view
-                            </button>
-                        </div>
-                    </div>
-                    <div class="row" v-if="!addMode">
-                        <div class="col-6">
-                                <h2>Constructions</h2>
-                                <select
-                                    multiple="multiple"
-                                    class="form-control select-extender"
-                                    v-model="selectedConstruction">
-                                    <option
-                                        v-for="
-                                        construction in this.teacher.constructions"
-                                        :key="construction.id">
-                                        {{ construction }}
-                                    </option>
-                                </select>
-                                <div class="mt-2">
-                                    <button class="btn btn-primary p-2 mr-1 mt-2"
-                                        @click="useConstruction()">
-                                        Use construction</button>
-                                    <button
-                                        v-if="!addMode"
-                                        class="btn btn-primary p-2 mr-1 mt-2"
-                                        @click="addMode = true">
-                                        Add Construction
-                                    </button>
-                                    <button class="btn btn-danger p-2 mr-1 mt-2"
-                                        @click="deleteConstruction(selectedConstruction)">
-                                        Delete construction</button>
-                                </div>
-                                <h2 class="mt-4">Groups</h2>
-                                <select multiple="multiple"
-                                    class="form-control select-style-extender"
-                                    v-model="selectedGroup">
-                                    <option v-for="(g, index) in groupsInClass" :key="index">
-                                        {{ g.name }}
-                                    </option>
-                                </select>
-                                <div class="mt-2">
-                                    <div class="form-inline">
-                                        <button class="btn btn-primary p-2 mr-1 mt-2"
-                                            @click="send(selectedGroup)">
-                                                Send view to one</button>
-                                        <button class="btn btn-primary p-2 mr-1 mt-2"
-                                            @click="sendToAll()">
-                                                Send view to all</button>
-                                        <button class="btn btn-primary p-2 mr-1 mt-2"
-                                            @click="sendToFirstInGroup(selectedGroup)"
-                                            :disabled="canDelete">
-                                                Send to first Student</button>
-                                    </div>
-                                    <div class="form-inline checkbox mt-3">
-                                        <label class="checkbox-container">
-                                            Show menu bars
-                                            <input type="checkbox">
-                                            <span class="checkmark"></span>
-                                        </label>
-                                        <label class="checkbox-container">
-                                            Send toolbar
-                                            <input type="checkbox" v-model="sendToolbar">
-                                            <span class="checkmark"></span>
-                                        </label>
-                                    </div>
-                                </div>
-                        </div>
-                        <div class="offset-1 col-5">
-                            <div class="col-10 class-table">
-                                <h2>Select class</h2>
-                                <table class="table designer-class-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Code</th>
-                                            <th></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                    <tr v-if="!classes.total > 0">
-                                        <td></td>
-                                        <td>
-                                            No class
-                                        </td>
-                                        <td></td>
-                                    </tr>
-                                        <tr v-for="cl in classes.data" :key="cl.id">
-                                            <td>{{ cl.name }}</td>
-                                            <td>{{ cl.code }}</td>
-                                            <td class="text-center">
-                                                <button
-                                                    v-if="code !== cl.code"
-                                                    @click="selectGroupsInClass(cl.code)"
-                                                    class="btn btn-sm btn-primary mr-2">
-                                                    Select
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <form v-else @submit.prevent="addConstruction()">
-                        <alert :alert="alert_add" />
-                        <h3>Add Constructions</h3>
-                        <div class="form-group">
-                            <input
-                                v-model="constructionName"
-                                class="form-control"
-                                type="text"
-                                placeholder="Construction Name"
-                                required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Save</button>
-                        <button class="btn btn-secondary"
-                            @click.prevent="addMode = false">
-                            Cancel
-                        </button>
-                    </form>
-                </div>
+  <div class="designer">
+    <div class="wrapper wrapper-content">
+      <alert :alert="alert" />
+      <div class="ibox border-bottom">
+        <div class="ibox-content table-responsive ibox-style-extender">
+          <div class="row mt-2">
+            <div class="col-12" ref="geogebra_container">
+              <div class="geogebra_designer">
+                <div id="geogebra_designer"></div>
+              </div>
+              <button
+                class="btn btn-warning reset-btn p-2 mt-4 mb-3"
+                @click="resetView"
+              >
+                Reset view
+              </button>
             </div>
+          </div>
+          <div class="row" v-if="!addMode">
+            <div class="col-6">
+              <h2>Constructions</h2>
+              <select
+                multiple="multiple"
+                class="form-control select-extender"
+                v-model="selectedConstruction"
+              >
+                <option
+                  v-for="construction in this.teacher.constructions"
+                  :key="construction.id"
+                >
+                  {{ construction }}
+                </option>
+              </select>
+              <div class="mt-2">
+                <button
+                  class="btn btn-primary p-2 mr-1 mt-2"
+                  @click="useConstruction()"
+                >
+                  Use construction
+                </button>
+                <button
+                  v-if="!addMode"
+                  class="btn btn-primary p-2 mr-1 mt-2"
+                  @click="addMode = true"
+                >
+                  Add Construction
+                </button>
+                <button
+                  class="btn btn-danger p-2 mr-1 mt-2"
+                  @click="deleteConstruction(selectedConstruction)"
+                >
+                  Delete construction
+                </button>
+              </div>
+              <h2 class="mt-4">Groups</h2>
+              <select
+                multiple="multiple"
+                class="form-control select-style-extender"
+                v-model="selectedGroup"
+              >
+                <option v-for="(g, index) in groupsInClass" :key="index">
+                  {{ g.name }}
+                </option>
+              </select>
+              <div class="mt-2">
+                <div class="form-inline">
+                  <button
+                    class="btn btn-primary p-2 mr-1 mt-2"
+                    @click="send(selectedGroup)"
+                  >
+                    Send view to one
+                  </button>
+                  <button
+                    class="btn btn-primary p-2 mr-1 mt-2"
+                    @click="sendToAll()"
+                  >
+                    Send view to all
+                  </button>
+                  <button
+                    class="btn btn-primary p-2 mr-1 mt-2"
+                    @click="sendToFirstInGroup(selectedGroup)"
+                    :disabled="canDelete"
+                  >
+                    Send to first Student
+                  </button>
+                </div>
+                <div class="form-inline checkbox mt-3">
+                  <label class="checkbox-container">
+                    Show menu bars
+                    <input type="checkbox" />
+                    <span class="checkmark"></span>
+                  </label>
+                  <label class="checkbox-container">
+                    Send toolbar
+                    <input type="checkbox" v-model="sendToolbar" />
+                    <span class="checkmark"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="offset-1 col-5">
+              <div class="col-10 class-table">
+                <h2>Select class</h2>
+                <table class="table designer-class-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Code</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-if="!classes.total > 0">
+                      <td></td>
+                      <td>
+                        No class
+                      </td>
+                      <td></td>
+                    </tr>
+                    <tr v-for="cl in classes.data" :key="cl.id">
+                      <td>{{ cl.name }}</td>
+                      <td>{{ cl.code }}</td>
+                      <td class="text-center">
+                        <button
+                          v-if="code !== cl.code"
+                          @click="selectGroupsInClass(cl.code)"
+                          class="btn btn-sm btn-primary mr-2"
+                        >
+                          Select
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <form v-else @submit.prevent="addConstruction()">
+            <alert :alert="alert_add" />
+            <h3>Add Constructions</h3>
+            <div class="form-group">
+              <input
+                v-model="constructionName"
+                class="form-control"
+                type="text"
+                placeholder="Construction Name"
+                required
+              />
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+            <button class="btn btn-secondary" @click.prevent="addMode = false">
+              Cancel
+            </button>
+          </form>
         </div>
-
-        <ToolbarEditor v-model="toolbar"/>
-
+      </div>
     </div>
+
+    <ToolbarEditor v-model="toolbar" />
+  </div>
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 
 import ToastrMixin from '@/mixins/ToastrMixin.vue';
 import AlertMixin from '@/mixins/AlertMixin.vue';
@@ -190,7 +211,9 @@ export default {
         }),
 
         chosenConstruction() {
-            return this.findConstruction({ query: { name: this.selectedConstruction[0] } });
+            return this.findConstruction({
+                query: { name: this.selectedConstruction[0] },
+            });
         },
 
         ...mapGetters('groups', {
@@ -253,6 +276,7 @@ export default {
             this.clearToast();
 
             this.code = code;
+            window.localStorage.setItem('code', code);
 
             this.groupsInClass = await this.findGroups({ query: { class: code } });
 
@@ -340,6 +364,7 @@ export default {
 
         resetView() {
             this.GI.setXML(freshGeogebraState);
+            this.GI.setPerspective('G');
         },
 
         async send(groups) {
@@ -379,7 +404,10 @@ export default {
         // Send selected toolbar and perspectives to first student in selected group/ groups.
         async sendToFirstInGroup(groups) {
             if (!groups.length) {
-                this.showToast('Please select group to send toolbar for first student', 'warning');
+                this.showToast(
+                    'Please select group to send toolbar for first student',
+                    'warning',
+                );
             } else {
                 const {
                     perspectives,
@@ -402,15 +430,21 @@ export default {
                     },
                 });
 
-                const properties = { perspectives, toolbar };
+                const properties = {
+                    perspectives,
+                    toolbar,
+                };
 
                 groupsObjects.forEach(async (obj, i) => {
                     const { _id } = groupsObjects[i];
 
                     try {
-                        await this.patchWorkshop([_id, {
-                            propertiesFirst: properties,
-                        }]);
+                        await this.patchWorkshop([
+                            _id,
+                            {
+                                propertiesFirst: properties,
+                            },
+                        ]);
                         this.showToast('Successfully send toolbar to first', 'success');
                     } catch (error) {
                         this.showToast('Error while sending toolbar', 'danger');
@@ -453,7 +487,10 @@ export default {
             const perspectives = this.extractPerspectives(metaInformation);
             let toolbar = null;
 
-            this.$log.debug('this.perspectivesThatHaveToolbar(perspectives)', this.perspectivesThatHaveToolbar(perspectives));
+            this.$log.debug(
+                'this.perspectivesThatHaveToolbar(perspectives)',
+                this.perspectivesThatHaveToolbar(perspectives),
+            );
 
             if (this.sendToolbar && this.perspectivesThatHaveToolbar(perspectives)) {
                 if (this.toolbar !== emptyToolbarString()) {
@@ -467,7 +504,11 @@ export default {
             this.$log.debug('perspectives', perspectives);
             this.$log.debug('toolbar', toolbar);
 
-            return { metaInformation, perspectives, toolbar };
+            return {
+                metaInformation,
+                perspectives,
+                toolbar,
+            };
         },
 
         async sendConstructionToGroups(groupsObjects, metaInformation, properties) {
@@ -488,9 +529,11 @@ export default {
 
             successes = results.reduce((x, y) => x + y);
 
-
-            this.showToast(`Successfully send construction to ${successes}
-            groups out of ${groupsObjects.length} selected`, ((successes === groupsObjects.length) ? 'success' : 'warning'));
+            this.showToast(
+                `Successfully send construction to ${successes}
+            groups out of ${groupsObjects.length} selected`,
+                successes === groupsObjects.length ? 'success' : 'warning',
+            );
         },
 
         async createOrUpdateWorkshopWithElementsXMLAndProperties(
@@ -500,7 +543,11 @@ export default {
         ) {
             this.$log.debug(groupId);
             try {
-                await this.createWorkshop({ id: groupId, xml: metaInformation, properties });
+                await this.createWorkshop({
+                    id: groupId,
+                    xml: metaInformation,
+                    properties,
+                });
 
                 await this.addElements(groupId);
 
@@ -515,11 +562,14 @@ export default {
 
                     await this.removeThenAddElements(groupId);
 
-                    await this.updateWorkshop([groupId, {
-                        updating: false,
-                        xml: metaInformation,
-                        properties,
-                    }]);
+                    await this.updateWorkshop([
+                        groupId,
+                        {
+                            updating: false,
+                            xml: metaInformation,
+                            properties,
+                        },
+                    ]);
 
                     correct = 1;
                 } else {
@@ -553,21 +603,24 @@ export default {
         async removeThenAddElements(groupId) {
             this.$log.debug('groupId', groupId);
 
-            await this.removeElement([null, {
-                query: {
-                    workshop: groupId,
+            await this.removeElement([
+                null,
+                {
+                    query: {
+                        workshop: groupId,
+                    },
                 },
-            }]);
+            ]);
             this.$log.debug('groupId', groupId);
 
             await this.addElements(groupId);
         },
 
         /*
-            This function takes xml with construction and removes construction
-            inside so that there are no elements present in the XML.
-            Elements are loaded to workshops through service('elements').
-        */
+                This function takes xml with construction and removes construction
+                inside so that there are no elements present in the XML.
+                Elements are loaded to workshops through service('elements').
+            */
         produceXMLWithoutConstructionInside(xml) {
             const parser = new DOMParser();
 
@@ -584,8 +637,9 @@ export default {
             const parser = new DOMParser();
             const xmlDoc = parser.parseFromString(xml, 'text/xml');
 
-            const visibleViews = Array.from(xmlDoc.getElementsByTagName('view'))
-                .filter(el => el.getAttribute('visible') === 'true');
+            const visibleViews = Array.from(
+                xmlDoc.getElementsByTagName('view'),
+            ).filter(el => el.getAttribute('visible') === 'true');
 
             // We sort the views so that we can later send the ordered
             // arrangement of the different view tabs present
@@ -611,10 +665,9 @@ export default {
             for (let i = 0; i < visibleViewsSorted.length; i += 1) {
                 const id = visibleViewsSorted[i].getAttribute('id');
 
-
                 /* This mapping between integers and letters is taken from
-                 * old Mathnet project. Integers are coded inside XML in <view> elements
-                 */
+         * old Mathnet project. Integers are coded inside XML in <view> elements
+         */
                 if (id === '1') {
                     perspectivesMapped += 'G';
                 } else if (id === '2') {
@@ -633,25 +686,29 @@ export default {
                     perspectivesMapped += 'T';
                 }
                 /*
-                else if (id == '128') {
-                }
-                else if (id == '512') {
-                }
-                else if (id == '4097') {
-                }
-                else if (id == '43') {
-                }
-                else if (id == '70') {
-                }
-                */
+                    else if (id == '128') {
+                    }
+                    else if (id == '512') {
+                    }
+                    else if (id == '4097') {
+                    }
+                    else if (id == '43') {
+                    }
+                    else if (id == '70') {
+                    }
+                    */
             }
             return perspectivesMapped;
         },
 
         perspectivesThatHaveToolbar(perspectives) {
-            return !(perspectives.includes('S') || perspectives.includes('C')
-            || perspectives.includes('L') || perspectives.includes('B')
-            || perspectives.includes('T'));
+            return !(
+                perspectives.includes('S')
+        || perspectives.includes('C')
+        || perspectives.includes('L')
+        || perspectives.includes('B')
+        || perspectives.includes('T')
+            );
         },
 
         getXMLItemName(username) {
@@ -682,7 +739,12 @@ export default {
         // simple example code to show how to initialize GeoGebra
         this.GI = new GeogebraInterface(params, this.teacher.username); // constructor
 
-        this.GI.inject(() => { // passing callback
+        if (window.localStorage.getItem('code')) {
+            this.selectGroupsInClass(window.localStorage.getItem('code'));
+        }
+
+        this.GI.inject(() => {
+            // passing callback
             // const xml = this.GI.getXML(); // getting Geogebra state
             // this.GI.setXML(xml); // setting Geogebra state from xml
 
@@ -697,6 +759,8 @@ export default {
                 this.GI.setXML(xml);
 
                 perspectives = this.extractPerspectives(xml);
+            } else {
+                this.resetView();
             }
             if (toolbar) {
                 this.$log.debug('Loading toolbar from localStorage');
@@ -705,6 +769,8 @@ export default {
             if (perspectives) {
                 this.$log.debug('Loading perspectives from localStorage');
                 this.GI.setPerspective(perspectives);
+            } else {
+                this.GI.setPerspective('G');
             }
         });
     },
