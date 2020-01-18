@@ -291,8 +291,16 @@ export default {
                     this.GI.setXML(construction.xml);
                     this.$log.debug('Got construction', construction);
 
+                    // parse the things that GGB seems to ignore
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(construction.xml, 'text/xml');
+                    const evSettings = xmlDoc.getElementsByTagName('evSettings')[0];
+                    this.GI.setGridVisible(evSettings.getAttribute('grid') === 'true');
+
                     if (construction.properties && construction.properties.perspectives) {
                         this.GI.setPerspective(construction.properties.perspectives);
+                    } else {
+                        this.GI.setPerspective('G');
                     }
                 });
             } catch (error) {

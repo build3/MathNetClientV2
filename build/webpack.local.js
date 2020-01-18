@@ -1,5 +1,6 @@
 
 const path = require('path');
+const webpack = require('webpack');
 const webpackMerge = require('webpack-merge');
 const BundleTracker = require('webpack-bundle-tracker');
 const WebpackAssetsManifest = require('webpack-assets-manifest');
@@ -26,6 +27,7 @@ module.exports = webpackMerge(baseConfig, {
         new WebpackAssetsManifest({
             output: `${path.resolve()}/webpack-stats.local.json`,
         }),
+        new webpack.SourceMapDevToolPlugin({}),
         new HtmlWebpackPlugin({
             filename: 'index.html',
             template: 'index.html',

@@ -304,6 +304,10 @@ class StudentClient {
         this.ignoreUpdates = false;
     }
 
+    setGridVisible(visible) {
+        this.applet.setGridVisible(visible);
+    }
+
     /**
      * @param {Object} element
      */
