@@ -46,7 +46,9 @@ function throttle(func, limit) {
         if (!inThrottle) {
             func.apply(context, args);
             inThrottle = true;
-            setTimeout(() => { inThrottle = false; }, limit);
+            setTimeout(() => {
+                inThrottle = false;
+            }, limit);
         }
     };
 }
@@ -268,9 +270,10 @@ class StudentClient {
      * [onRemoveElement] is called for each object).
      */
     clear() {
-        this.applet.getAllObjectNames().forEach((obj) => {
-            this.applet.deleteObject(obj);
-        });
+        this.applet.getAllObjectNames()
+            .forEach((obj) => {
+                this.applet.deleteObject(obj);
+            });
     }
 
     /**
@@ -300,12 +303,80 @@ class StudentClient {
         this.ignoreUpdates = true;
         this.evalXML(xml);
         this.evalCommand('UpdateConstruction()');
+        // parse the things that GGB seems to ignore
+        // start with grid
+        setTimeout(() => this.processAdditionalXmlAttributes(xml));
         this.checkLocks();
         this.ignoreUpdates = false;
     }
 
+    processAdditionalXmlAttributes(xml, properties = {}) {
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xml, 'text/xml');
+        if (properties.perspective) {
+            this.setPerspective(properties.perspective);
+        } else {
+            this.setPerspective('G');
+        }
+        const evSettings = xmlDoc.getElementsByTagName('evSettings')[0];
+        this.setGridVisible(evSettings.getAttribute('grid') === 'true');
+        // then force the same aspect ratio as the teacher
+        const coordSystemTag = xmlDoc.getElementsByTagName('coordSystem')[0];
+        const windowTag = xmlDoc.getElementsByTagName('window')[0];
+        // calc ratio of current width to teacher width
+        if (properties.view) {
+            const viewProps = JSON.parse(properties.view);
+            const constructionXZero = viewProps.xMin;
+            const constructionYZero = viewProps.yMin;
+            const constructionScale = parseFloat(coordSystemTag.getAttribute('scale'));
+            const constructionYScale = parseFloat(coordSystemTag.getAttribute('yscale'));
+            const width = parseInt(windowTag.getAttribute('width'), 10);
+            const height = parseInt(windowTag.getAttribute('height'), 10);
+            const targetAspectRatio = width / height;
+            const existingAspectRatio = this.getWidth() / this.getHeight();
+            this.setWidth(this.getWidth() * (targetAspectRatio / existingAspectRatio));
+            // no need to adjust height
+            // now set the coordinate system
+            console.log(`${constructionXZero}, ${constructionYZero} -- ${constructionScale}, ${constructionYScale}`);
+            this.setCoordSystem(constructionXZero,
+                (viewProps.width / constructionScale) + constructionXZero,
+                constructionYZero,
+                (viewProps.height / constructionYScale) + constructionYZero);
+        }
+    }
+
+    setCoordSystem(xmin, xmax, ymin, ymax) {
+        this.applet.setCoordSystem(xmin, xmax, ymin, ymax);
+    }
+
     setGridVisible(visible) {
         this.applet.setGridVisible(visible);
+    }
+
+    setWidth(width) {
+        this.applet.setWidth(width);
+    }
+
+    setHeight(height) {
+        this.applet.setHeight(height);
+    }
+
+    getHeight() {
+        const xml = this.applet.getXML();
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xml, 'text/xml');
+        const windowTag = xmlDoc.getElementsByTagName('window')[0];
+        // eslint-disable-next-line radix
+        return parseInt(windowTag.getAttribute('height'));
+    }
+
+    getWidth() {
+        const xml = this.applet.getXML();
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xml, 'text/xml');
+        const windowTag = xmlDoc.getElementsByTagName('window')[0];
+        // eslint-disable-next-line radix
+        return parseInt(windowTag.getAttribute('width'));
     }
 
     /**
@@ -381,7 +452,7 @@ class StudentClient {
             } else {
                 this.setFixed(label, false);
             }
-        // Someone else is the owner of the object.
+            // Someone else is the owner of the object.
         } else if (!this.listener.isOwner(label, caption)) {
             if (objType === Consts.NUMERIC || objType === Consts.TEXTFIELD) {
                 this.setFixed(label, true, /* is selection allowed */ false);

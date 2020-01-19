@@ -351,6 +351,7 @@ export default {
                     xml,
                     properties: {
                         perspectives: this.extractPerspectives(xml),
+                        view: this.GI.getViewProperties(),
                     },
                 });
 
@@ -400,6 +401,7 @@ export default {
                 const properties = {
                     perspectives: information.perspectives,
                     toolbar: information.toolbar,
+                    view: this.GI.getViewProperties(),
                 };
                 await this.sendConstructionToGroups(
                     groupsObjects,
@@ -480,6 +482,7 @@ export default {
                 const properties = {
                     perspectives: information.perspectives,
                     toolbar: information.toolbar,
+                    view: this.GI.getViewProperties(),
                 };
                 await this.sendConstructionToGroups(
                     groupsObjects,

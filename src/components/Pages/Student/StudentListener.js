@@ -202,11 +202,7 @@ export default class StudentListener {
                     }
 
                     if (workshop.xml) {
-                        // parse the things that GGB seems to ignore
-                        const parser = new DOMParser();
-                        const xmlDoc = parser.parseFromString(workshop.xml, 'text/xml');
-                        const evSettings = xmlDoc.getElementsByTagName('evSettings')[0];
-                        this.client.setGridVisible(evSettings.getAttribute('grid') === 'true');
+                        this.client.processAdditionalXmlAttributes(workshop.xml, workshop.properties);
                     }
                 });
 

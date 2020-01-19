@@ -52,6 +52,10 @@ export default class {
         this.appletContainer.inject(this.params.container, 'auto');
     }
 
+    getViewProperties() {
+        return this.applet.getViewProperties();
+    }
+
     ggbOnInit() {
         this.applet = this.appletContainer.getAppletObject();
 
