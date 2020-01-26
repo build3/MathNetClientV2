@@ -318,6 +318,9 @@ class StudentClient {
         } else {
             this.setPerspective('G');
         }
+
+        this.enableShiftDragZoom(false);
+
         const evSettings = xmlDoc.getElementsByTagName('evSettings')[0];
         this.setGridVisible(evSettings.getAttribute('grid') === 'true');
         // then force the same aspect ratio as the teacher
@@ -334,7 +337,7 @@ class StudentClient {
             const height = parseInt(windowTag.getAttribute('height'), 10);
             const targetAspectRatio = width / height;
             const existingAspectRatio = this.getWidth() / this.getHeight();
-            this.setWidth(this.getWidth() * (targetAspectRatio / existingAspectRatio));
+            this.setHeight(this.getWidth() * (existingAspectRatio / targetAspectRatio));
             // no need to adjust height
             // now set the coordinate system
             console.log(`${constructionXZero}, ${constructionYZero} -- ${constructionScale}, ${constructionYScale}`);
@@ -568,6 +571,10 @@ class StudentClient {
     setPerspective(perspective) {
         this.log.debug('Setting perspective', perspective);
         this.applet.setPerspective(perspective);
+    }
+
+    enableShiftDragZoom(enable){
+        this.applet.enableShiftDragZoom(enable);
     }
 
     setCustomToolBar(toolbar) {

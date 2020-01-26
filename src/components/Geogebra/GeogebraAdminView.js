@@ -130,6 +130,69 @@ class GeogebraAdminView {
         this.evalCommand('CenterView[(0,0)]');
     }
 
+    // noinspection DuplicatedCode
+    static processAdditionalXmlAttributes(xml, properties = {}, applet) {
+
+        const getHeight = () => {
+            const xml = applet.getXML();
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xml, 'text/xml');
+            const windowTag = xmlDoc.getElementsByTagName('window')[0];
+            // eslint-disable-next-line radix
+            return parseInt(windowTag.getAttribute('height'));
+        };
+
+        const getWidth = () => {
+            const xml = applet.getXML();
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xml, 'text/xml');
+            const windowTag = xmlDoc.getElementsByTagName('window')[0];
+            // eslint-disable-next-line radix
+            return parseInt(windowTag.getAttribute('width'));
+        };
+
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xml, 'text/xml');
+        if (properties.perspective) {
+            applet.setPerspective(properties.perspective);
+        } else {
+            applet.setPerspective('G');
+        }
+
+        applet.enableShiftDragZoom(false);
+
+        const evSettings = xmlDoc.getElementsByTagName('evSettings')[0];
+        applet.setGridVisible(evSettings.getAttribute('grid') === 'true');
+        // then force the same aspect ratio as the teacher
+        const coordSystemTag = xmlDoc.getElementsByTagName('coordSystem')[0];
+        const windowTag = xmlDoc.getElementsByTagName('window')[0];
+        // calc ratio of current width to teacher width
+        if (properties.view) {
+            // noinspection DuplicatedCode
+            const viewProps = JSON.parse(properties.view);
+            const constructionXZero = viewProps.xMin;
+            const constructionYZero = viewProps.yMin;
+            // eslint-disable-next-line max-len
+            const constructionScale = parseFloat(coordSystemTag.getAttribute('scale'));
+            // eslint-disable-next-line max-len
+            const constructionYScale = parseFloat(coordSystemTag.getAttribute('yscale'));
+            const width = parseInt(windowTag.getAttribute('width'), 10);
+            const height = parseInt(windowTag.getAttribute('height'), 10);
+            const targetAspectRatio = width / height;
+            const existingAspectRatio = getWidth() / getHeight();
+
+            //maybe leave width alone?
+            //this.applet.setWidth(this.getWidth() * (targetAspectRatio / existingAspectRatio));
+            applet.setHeight(getHeight() * (existingAspectRatio / targetAspectRatio));
+            // now set the coordinate system
+            console.log(`${constructionXZero}, ${constructionYZero} -- ${constructionScale}, ${constructionYScale}`);
+            applet.setCoordSystem(constructionXZero,
+                (viewProps.width / constructionScale) + constructionXZero,
+                constructionYZero,
+                (viewProps.height / constructionYScale) + constructionYZero);
+        }
+    }
+
     async onAppletReady() {
         this.log.debug();
         // Load current state of the workshops.
@@ -144,6 +207,7 @@ class GeogebraAdminView {
         if (workshop) {
             // Set initial construction based on the `xml` field.
             this.setConstruction(workshop.xml);
+            GeogebraAdminView.processAdditionalXmlAttributes(workshop.xml, workshop.properties, this.applet);
 
             // Load any existing elements in the workshop.
             const elements = await api.service('elements').find({

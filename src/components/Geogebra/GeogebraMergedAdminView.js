@@ -218,6 +218,68 @@ class GeogebraMergedAdminView {
         };
     }
 
+    getHeight() {
+        const xml = this.applet.getXML();
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xml, 'text/xml');
+        const windowTag = xmlDoc.getElementsByTagName('window')[0];
+        // eslint-disable-next-line radix
+        return parseInt(windowTag.getAttribute('height'));
+    }
+
+    getWidth() {
+        const xml = this.applet.getXML();
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xml, 'text/xml');
+        const windowTag = xmlDoc.getElementsByTagName('window')[0];
+        // eslint-disable-next-line radix
+        return parseInt(windowTag.getAttribute('width'));
+    }
+
+    // noinspection DuplicatedCode
+    processAdditionalXmlAttributes(xml, properties = {}) {
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xml, 'text/xml');
+        if (properties.perspective) {
+            this.applet.setPerspective(properties.perspective);
+        } else {
+            this.applet.setPerspective('G');
+        }
+
+        this.applet.enableShiftDragZoom(false);
+
+        const evSettings = xmlDoc.getElementsByTagName('evSettings')[0];
+        this.applet.setGridVisible(evSettings.getAttribute('grid') === 'true');
+        // then force the same aspect ratio as the teacher
+        const coordSystemTag = xmlDoc.getElementsByTagName('coordSystem')[0];
+        const windowTag = xmlDoc.getElementsByTagName('window')[0];
+        // calc ratio of current width to teacher width
+        if (properties.view) {
+            // noinspection DuplicatedCode
+            const viewProps = JSON.parse(properties.view);
+            const constructionXZero = viewProps.xMin;
+            const constructionYZero = viewProps.yMin;
+            // eslint-disable-next-line max-len
+            const constructionScale = parseFloat(coordSystemTag.getAttribute('scale'));
+            // eslint-disable-next-line max-len
+            const constructionYScale = parseFloat(coordSystemTag.getAttribute('yscale'));
+            const width = parseInt(windowTag.getAttribute('width'), 10);
+            const height = parseInt(windowTag.getAttribute('height'), 10);
+            const targetAspectRatio = width / height;
+            const existingAspectRatio = this.getWidth() / this.getHeight();
+
+            //maybe leave width alone?
+            //this.applet.setWidth(this.getWidth() * (targetAspectRatio / existingAspectRatio));
+            this.applet.setHeight(this.getHeight() * (existingAspectRatio / targetAspectRatio));
+            // now set the coordinate system
+            console.log(`${constructionXZero}, ${constructionYZero} -- ${constructionScale}, ${constructionYScale}`);
+            this.applet.setCoordSystem(constructionXZero,
+                (viewProps.width / constructionScale) + constructionXZero,
+                constructionYZero,
+                (viewProps.height / constructionYScale) + constructionYZero);
+        }
+    }
+
     // Load current state of the workshops.
     async loadWorkshopState(workshopId, iter) {
         // eslint-disable-next-line prefer-const
@@ -229,6 +291,8 @@ class GeogebraMergedAdminView {
         this.log.debug('Loaded workshop: ', workshop);
         this.log.debug('Rest is: ', rest);
         // this.log.debug('API', api);
+
+        this.processAdditionalXmlAttributes(workshop.xml, workshop.properties);
 
         if (workshop) {
             // Set initial construction based on the `xml` field.
