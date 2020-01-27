@@ -84,7 +84,7 @@ class StudentClient {
             container: 'geogebra_designer',
             id: 'applet',
             width: 800,
-            height: 600,
+            height: 800 * 9 / 16,
             perspective: 'AG',
             showAlgebraInput: true,
             showToolBarHelp: false,
@@ -169,10 +169,10 @@ class StudentClient {
         // internal events (such as when element is added/modified/deleted).
         this.registerGlobalListeners();
 
-        // Resize applet on window resize.
-        window.onresize(() => {
-            this.applet.setHeight(window.innerHeight / this.params.resizeFactor);
-        });
+        // // Resize applet on window resize.
+        // window.onresize(() => {
+        //     this.applet.setHeight(window.innerHeight / this.params.resizeFactor);
+        // });
 
         // Notify listener.
         this.listener.onAppletReady();
@@ -333,11 +333,11 @@ class StudentClient {
             const constructionYZero = viewProps.yMin;
             const constructionScale = parseFloat(coordSystemTag.getAttribute('scale'));
             const constructionYScale = parseFloat(coordSystemTag.getAttribute('yscale'));
-            const width = parseInt(windowTag.getAttribute('width'), 10);
-            const height = parseInt(windowTag.getAttribute('height'), 10);
-            const targetAspectRatio = width / height;
-            const existingAspectRatio = this.getWidth() / this.getHeight();
-            this.setHeight(this.getWidth() * (existingAspectRatio / targetAspectRatio));
+            // const width = parseInt(windowTag.getAttribute('width'), 10);
+            // const height = parseInt(windowTag.getAttribute('height'), 10);
+            // const targetAspectRatio = width / height;
+            // const existingAspectRatio = this.getWidth() / this.getHeight();
+            // this.setHeight(this.getWidth() * (existingAspectRatio / targetAspectRatio));
             // no need to adjust height
             // now set the coordinate system
             console.log(`${constructionXZero}, ${constructionYZero} -- ${constructionScale}, ${constructionYScale}`);
