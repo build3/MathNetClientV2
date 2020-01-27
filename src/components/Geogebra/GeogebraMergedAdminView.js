@@ -265,7 +265,7 @@ class GeogebraMergedAdminView {
             const constructionYScale = parseFloat(coordSystemTag.getAttribute('yscale'));
             const width = parseInt(windowTag.getAttribute('width'), 10);
             const height = parseInt(windowTag.getAttribute('height'), 10);
-            const targetAspectRatio = width / height;
+            const targetAspectRatio = width / (height + 53); // add 53 to account for menu bar
             const existingAspectRatio = this.getWidth() / this.getHeight();
 
             //maybe leave width alone?
