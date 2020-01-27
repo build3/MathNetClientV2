@@ -10,7 +10,7 @@ export default class {
 
         this.params = {
             width: 600,
-            height: 600,
+            height: 600 * 9 / 16,
             perspective: 'G',
             // showAlgebraInput: false,
             showToolBarHelp: false,
