@@ -46,6 +46,8 @@ class PendingRenames {
 class GeogebraMergedAdminView {
     constructor(params, workshopIds) {
         this.params = {
+            width: 1366,
+            height: 768,
             showAlgebraInput: true,
             showToolBarHelp: false,
             showMenubar: true,
@@ -81,7 +83,7 @@ class GeogebraMergedAdminView {
             callback();
         };
 
-        this.appletContainer.inject(this.params.container, 'auto');
+        this.appletContainer.inject(this.params.container);// , 'auto');
     }
 
     ggbOnInit() {
@@ -265,12 +267,12 @@ class GeogebraMergedAdminView {
             const constructionYScale = parseFloat(coordSystemTag.getAttribute('yscale'));
             const width = parseInt(windowTag.getAttribute('width'), 10);
             const height = parseInt(windowTag.getAttribute('height'), 10);
-            const targetAspectRatio = width / (height + 53); // add 53 to account for menu bar
+            const targetAspectRatio = width / (height - 53); // subtract 53 to account for menu bar
             const existingAspectRatio = this.getWidth() / this.getHeight();
 
             //maybe leave width alone?
-            //this.applet.setWidth(this.getWidth() * (targetAspectRatio / existingAspectRatio));
-            this.applet.setHeight(this.getHeight() * (existingAspectRatio / targetAspectRatio));
+            // this.applet.setWidth(1366);
+            // this.applet.setHeight(768);
             // now set the coordinate system
             console.log(`${constructionXZero}, ${constructionYZero} -- ${constructionScale}, ${constructionYScale}`);
             this.applet.setCoordSystem(constructionXZero,

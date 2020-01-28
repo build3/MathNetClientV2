@@ -232,12 +232,13 @@ export default {
                     workshops: this.groupsInClass.map(g => g._id),
                 });
 
-                const tileSize = 400;
+                const tileWidth = 400;
+                const tileHeight = 225;
 
                 this.GeogebraViews = new GeogebraViews(this.groupsInClass, {
                     log: this.$log,
-                    width: tileSize, // this.$refs.ibox_content.clientWidth - 60,
-                    height: tileSize,
+                    width: tileWidth, // this.$refs.ibox_content.clientWidth - 60,
+                    height: tileHeight,
                 });
 
                 this.GeogebraViews.inject();
@@ -259,7 +260,7 @@ export default {
                 }); */
 
                 this.$log.debug('this.showMenuBar', this.showMenuBar);
-                const ggbWidth = this.$refs.ibox_content.clientWidth - 60;
+                const ggbWidth = 1366; //this.$refs.ibox_content.clientWidth - 60;
                 this.$log.debug('ggbWidth', ggbWidth);
 
                 this.GeogebraViews.mergeViews(
@@ -270,7 +271,7 @@ export default {
                         // The proper width, to fill the window
                         // was obtained with ratio height/width = 2/3
                         width: ggbWidth,
-                        height: ggbWidth * 2 / 3,
+                        height: ggbWidth * 9 / 16,
                     },
                 );
             } else {

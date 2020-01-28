@@ -742,8 +742,8 @@ export default {
         const params = {
             container: 'geogebra_designer',
             id: 'applet',
-            width: this.$refs.geogebra_container.clientWidth - 30,
-            height: (this.$refs.geogebra_container.clientWidth - 30) * 9 / 16,
+            width: 1366, //this.$refs.geogebra_container.clientWidth - 30,
+            height: 768, //(this.$refs.geogebra_container.clientWidth - 30) * 9 / 16,
             log: this.$log,
             ggbBase64: initialState,
         };

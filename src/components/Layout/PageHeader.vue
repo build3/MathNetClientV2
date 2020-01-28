@@ -5,6 +5,8 @@
                 <div class="ping-section">
                     <p>[Demo build]</p>
                     <p>Ping:</p><p v-if="!ping">waiting</p><p>{{ ping }}</p>
+                    <p>Username:</p><p v-if="user">{{user.username}}</p>
+                    <p>Group:</p><p v-if="studentGroup">{{ studentGroup.name }}</p>
                 </div>
             </div>
             <ul class="nav navbar-top-links navbar-right">
