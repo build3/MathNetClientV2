@@ -3,6 +3,7 @@ export default ('<?xml version="1.0" encoding="utf-8"?>' +
 '<geogebra format="5.0" version="5.0.398.0" app="classic" platform="w" id="2A7D6D28-D9B6-4D6F-9813-FBA1AF38D5D9"  xsi:noNamespaceSchemaLocation="http://www.geogebra.org/ggb.xsd" xmlns="" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" >' +
 '<gui>' +
 	'<window width="798" height="598" />' +
+	'<labelingStyle val="0"/>' +
 	'<perspectives>' +
 '<perspective id="tmp">' +
 	'<panes>' +
@@ -34,7 +35,7 @@ export default ('<?xml version="1.0" encoding="utf-8"?>' +
 	'<viewNumber viewNo="1"/>' +
 	'<size  width="524" height="545"/>' +
 	'<coordSystem xZero="215" yZero="314.99999999999994" scale="50" yscale="49.99999999999999"/>' +
-	'<evSettings axes="true" grid="false" gridIsBold="false" pointCapturing="3" rightAngleStyle="1" checkboxSize="26" gridType="3"/>' +
+	'<evSettings axes="true" grid="true" gridIsBold="false" pointCapturing="3" rightAngleStyle="1" checkboxSize="26" gridType="3"/>' +
 	'<bgColor r="255" g="255" b="255"/>' +
 	'<axesColor r="0" g="0" b="0"/>' +
 	'<gridColor r="192" g="192" b="192"/>' +

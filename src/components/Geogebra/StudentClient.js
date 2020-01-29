@@ -322,6 +322,9 @@ class StudentClient {
         this.enableShiftDragZoom(false);
 
         const evSettings = xmlDoc.getElementsByTagName('evSettings')[0];
+        if (!evSettings){
+            return;
+        }
         this.setGridVisible(evSettings.getAttribute('grid') === 'true');
         // then force the same aspect ratio as the teacher
         const coordSystemTag = xmlDoc.getElementsByTagName('coordSystem')[0];

@@ -373,7 +373,7 @@ export default {
 
         resetView() {
             this.GI.setXML(freshGeogebraState);
-            this.GI.setPerspective('G');
+            // this.GI.setPerspective('G');
         },
 
         async send(groups) {
