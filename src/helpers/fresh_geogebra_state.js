@@ -3,7 +3,7 @@ export default ('<?xml version="1.0" encoding="utf-8"?>' +
 '<geogebra format="5.0" version="5.0.398.0" app="classic" platform="w" id="2A7D6D28-D9B6-4D6F-9813-FBA1AF38D5D9"  xsi:noNamespaceSchemaLocation="http://www.geogebra.org/ggb.xsd" xmlns="" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" >' +
 '<gui>' +
 	'<window width="798" height="598" />' +
-	'<labelingStyle val="0"/>' +
+	'<labelingStyle val="3"/>' +
 	'<perspectives>' +
 '<perspective id="tmp">' +
 	'<panes>' +
