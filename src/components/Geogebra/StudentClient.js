@@ -303,6 +303,10 @@ class StudentClient {
         this.ignoreUpdates = true;
         this.evalXML(xml);
         this.evalCommand('UpdateConstruction()');
+        // const evaluatedXml = this.applet.getXML();
+        // const fixedXML = evaluatedXml.replace(/labelingStyle val="0"/, "labelingStyle val=\"3\"");
+        // this.evalXML(fixedXML);
+        // this.evalCommand('UpdateConstruction()');
         // parse the things that GGB seems to ignore
         // start with grid
         setTimeout(() => this.processAdditionalXmlAttributes(xml));
@@ -313,11 +317,11 @@ class StudentClient {
     processAdditionalXmlAttributes(xml, properties = {}) {
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(xml, 'text/xml');
-        if (properties.perspective) {
-            this.setPerspective(properties.perspective);
-        } else {
-            this.setPerspective('G');
-        }
+        // if (properties.perspective) {
+        //     this.setPerspective(properties.perspective);
+        // } else {
+        //     this.setPerspective('G');
+        // }
 
         this.enableShiftDragZoom(false);
 
@@ -326,6 +330,7 @@ class StudentClient {
             return;
         }
         this.setGridVisible(evSettings.getAttribute('grid') === 'true');
+
         // then force the same aspect ratio as the teacher
         const coordSystemTag = xmlDoc.getElementsByTagName('coordSystem')[0];
         const windowTag = xmlDoc.getElementsByTagName('window')[0];

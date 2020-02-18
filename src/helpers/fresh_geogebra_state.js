@@ -17,6 +17,7 @@ export default ('<?xml version="1.0" encoding="utf-8"?>' +
 '</gui>' +
 '<euclidianView>' +
 	'<viewNumber viewNo="1"/>' +
+	'<labelingStyle val="3"/>' +
 	'<coordSystem xZero="215" yZero="314.99999999999994" scale="50" yscale="49.99999999999999"/>' +
 	'<evSettings axes="true" grid="true" gridIsBold="false" pointCapturing="3" rightAngleStyle="1" checkboxSize="26" gridType="3"/>' +
 	'<bgColor r="255" g="255" b="255"/>' +
