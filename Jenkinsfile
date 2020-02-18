@@ -1,5 +1,8 @@
 pipeline() {
     agent any
+    environment {
+        AWS_PROFILE = "233analytics"
+    }
     stages{
         stage("Checkout"){
             steps {
