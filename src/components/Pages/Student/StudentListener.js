@@ -365,6 +365,8 @@ export default class StudentListener {
         if (!(this.initialElements.has(label) || this.claimed.has(label))) {
             this.log.debug(label);
             this.shouldUpdate[label] = false;
+            this.client.applet.setLabelStyle(label, 1);
+            setTimeout(() => this.client.setLabelVisible(label));
             this.adjustForDisplay(label);
             this.sendElement(label);
         }

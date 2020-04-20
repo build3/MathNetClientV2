@@ -288,6 +288,7 @@ class StudentClient {
 
         // Configure element to display caption as its display name.
         this.applet.setLabelStyle(label, Consts.CAPTION_STYLE);
+        this.applet.setLabelVisible(label);
         this.applet.setCaption(label, caption);
 
         this.ignoreUpdates = false;
@@ -317,11 +318,11 @@ class StudentClient {
     processAdditionalXmlAttributes(xml, properties = {}) {
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(xml, 'text/xml');
-        // if (properties.perspective) {
-        //     this.setPerspective(properties.perspective);
-        // } else {
-        //     this.setPerspective('G');
-        // }
+        if (properties.perspective) {
+            this.setPerspective(properties.perspective);
+        } else {
+            this.setPerspective('G');
+        }
 
         this.enableShiftDragZoom(false);
 
@@ -330,7 +331,6 @@ class StudentClient {
             return;
         }
         this.setGridVisible(evSettings.getAttribute('grid') === 'true');
-
         // then force the same aspect ratio as the teacher
         const coordSystemTag = xmlDoc.getElementsByTagName('coordSystem')[0];
         const windowTag = xmlDoc.getElementsByTagName('window')[0];
@@ -362,6 +362,10 @@ class StudentClient {
 
     setGridVisible(visible) {
         this.applet.setGridVisible(visible);
+    }
+
+    setLabelVisible(obj){
+        this.applet.setLabelVisible(obj, true);
     }
 
     setWidth(width) {
