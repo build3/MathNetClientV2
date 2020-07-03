@@ -354,6 +354,7 @@ export default class StudentListener {
         if (this.client.getObjectType(label) === 'point') {
             const caption = StudentListener.getElementCaption(label, this.studentUsername);
             this.client.setCaption(label, caption);
+            this.client.setLabelVisible(label);
             this.client.setColor(label, this.studentColor);
         }
     }
