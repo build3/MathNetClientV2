@@ -15,6 +15,19 @@
               >
                 Reset view
               </button>
+              <button
+                      class="btn btn-primary p-2 mr-1 mt-2"
+                      @click="exportConstruction()"
+              >
+                Export construction
+              </button>
+              <input type="file" id="file" style="display:none" @change="importConstructionInternal" />
+              <button
+                      class="btn btn-primary p-2 mr-1 mt-2"
+                      @click="importConstruction()"
+              >
+                Import construction
+              </button>
             </div>
           </div>
           <div class="row" v-if="!addMode">
@@ -33,19 +46,6 @@
                 </option>
               </select>
               <div class="mt-2">
-                <button
-                        class="btn btn-primary p-2 mr-1 mt-2"
-                        @click="exportConstruction()"
-                >
-                  Export construction
-                </button>
-                <input type="file" id="file" style="display:none" @change="importConstructionInternal" />
-                <button
-                        class="btn btn-primary p-2 mr-1 mt-2"
-                        @click="importConstruction()"
-                >
-                  Import construction
-                </button>
                 <button
                   class="btn btn-primary p-2 mr-1 mt-2"
                   @click="useConstruction()"
@@ -309,17 +309,28 @@ export default {
         }),
 
         importConstructionInternal(e) {
+            const replaceDefaults = true
             const file = e.target.files[0];
+            if (!file) return;
 
-            const reader = new FileReader();
-            reader.onload = () => {
-                const data = reader.result;
-                const base64String = base64ArrayBuffer(data);
-                this.GI.applet.setBase64(base64String);
+            if (!replaceDefaults){
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const data = reader.result;
+                    const base64String = base64ArrayBuffer(data);
+                    this.GI.applet.setBase64(base64String);
+                }
+                reader.readAsArrayBuffer(file);
+            }else{
+                jszip.loadAsync(file).then(zip => {
+                    zip.remove('geogebra_defaults2d.xml');
+                    zip.remove('geogebra_defaults3d.xml');
+                    zip.file('geogebra_defaults2d.xml', require('./geogebra_defaults2d.xml').default, 'binary');
+                    zip.file('geogebra_defaults3d.xml', require('./geogebra_defaults3d.xml').default, 'binary');
+                    zip.generateAsync({type: 'base64'}).then(data => this.GI.applet.setBase64(data))
+                })
             }
-            reader.readAsArrayBuffer(file);
-
-
+            document.getElementById("file").value = '';
         },
 
         importConstruction() {
