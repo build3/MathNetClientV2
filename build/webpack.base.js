@@ -22,6 +22,10 @@ module.exports = {
     module: {
         rules: [
             {
+                test: /\.xml$/i,
+                use: 'raw-loader'
+            },
+            {
                 enforce: 'pre',
                 test: /\.js$|\.vue$/,
                 exclude: /node_modules|scripts/,

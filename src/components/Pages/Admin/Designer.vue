@@ -34,6 +34,19 @@
               </select>
               <div class="mt-2">
                 <button
+                        class="btn btn-primary p-2 mr-1 mt-2"
+                        @click="exportConstruction()"
+                >
+                  Export construction
+                </button>
+                <input type="file" id="file" style="display:none" @change="importConstructionInternal" />
+                <button
+                        class="btn btn-primary p-2 mr-1 mt-2"
+                        @click="importConstruction()"
+                >
+                  Import construction
+                </button>
+                <button
                   class="btn btn-primary p-2 mr-1 mt-2"
                   @click="useConstruction()"
                 >
@@ -163,7 +176,9 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
-
+import jszip from 'jszip'
+import {saveAs} from 'file-saver'
+import {base64ArrayBuffer} from './BufferUtil';
 import ToastrMixin from '@/mixins/ToastrMixin.vue';
 import AlertMixin from '@/mixins/AlertMixin.vue';
 import GeogebraInterface from '../../Geogebra/GeogebraInterface';
@@ -172,6 +187,27 @@ import emptyToolbarString from '../../../helpers/emptyToolbarString';
 import ToolbarEditor from './ToolbarEditor.vue';
 // Initial state of the Geogebra applet encoded in Base64
 const initialState = require('../../../helpers/ggbbase64').default;
+
+const b64toBlob = (b64Data, contentType='', sliceSize=512) => {
+    const byteCharacters = atob(b64Data);
+    const byteArrays = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+        const byteNumbers = new Array(slice.length);
+        for (let i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+
+        const byteArray = new Uint8Array(byteNumbers);
+
+        byteArrays.push(byteArray);
+    }
+
+    const blob = new Blob(byteArrays, {type: contentType});
+    return blob;
+}
 
 export default {
     name: 'Designer',
@@ -272,6 +308,24 @@ export default {
             createElement: 'create',
         }),
 
+        importConstructionInternal(e) {
+            const file = e.target.files[0];
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                const data = reader.result;
+                const base64String = base64ArrayBuffer(data);
+                this.GI.applet.setBase64(base64String);
+            }
+            reader.readAsArrayBuffer(file);
+
+
+        },
+
+        importConstruction() {
+            document.getElementById("file").click()
+        },
+
         async selectGroupsInClass(code) {
             this.clearToast();
 
@@ -369,6 +423,24 @@ export default {
                     message: error.message,
                 };
             }
+        },
+
+
+
+        exportConstruction() {
+            // const zip = new jszip();
+            this.GI.applet.getBase64(data => {
+                const blob = b64toBlob(data, 'application/zip');
+                saveAs(blob, 'mathnet.ggb');
+            });
+            // zip.file('geogebra.xml', xml, 'binary');
+            // zip.file('geogebra_defaults2d.xml',
+            //     require('./geogebra_defaults2d.xml').default, 'binary');
+            // zip.file('geogebra_defaults3d.xml',
+            //     require('./geogebra_defaults3d.xml').default, 'binary');
+            // zip.generateAsync({type:'blob'})
+            //     .then(blob => saveAs(blob, 'mathnet.ggb'));
+
         },
 
         resetView() {
