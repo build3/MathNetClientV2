@@ -120,7 +120,7 @@ export default {
         },
     },
 
-    async reated() {
+    async created() {
         await this.getGroup(this.id);
         this.$store.commit('setStudentGroup', this.group);
         this.saveUserNumber();
@@ -159,8 +159,8 @@ export default {
     },
 
     async beforeDestroy() {
-        await this.leaveWorkshop();
         this.$store.commit('setStudentGroup', undefined);
+        await this.leaveWorkshop();
     },
 };
 </script>
