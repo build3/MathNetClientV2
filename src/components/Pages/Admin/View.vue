@@ -204,7 +204,10 @@ export default {
             this.clearToast();
 
             this.showMergedApplet = false;
+
             this.code = code;
+            window.localStorage.setItem('code', code);
+
             this.groupsInClass = await this.findGroups({
                 query: { class: code },
             });
@@ -282,6 +285,10 @@ export default {
     },
 
     async created() {
+        if (window.localStorage.code) {
+            this.selectAllGroupsinClass(window.localStorage.code);
+        }
+
         await this.findClasses();
     },
 

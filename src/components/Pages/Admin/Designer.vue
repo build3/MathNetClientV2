@@ -834,10 +834,6 @@ export default {
         // simple example code to show how to initialize GeoGebra
         this.GI = new GeogebraInterface(params, this.teacher.username); // constructor
 
-        if (window.localStorage.getItem('code')) {
-            this.selectGroupsInClass(window.localStorage.getItem('code'));
-        }
-
         this.GI.inject(() => {
             // passing callback
             // const xml = this.GI.getXML(); // getting Geogebra state
@@ -871,6 +867,10 @@ export default {
     },
 
     created() {
+        if (window.localStorage.code) {
+            this.selectGroupsInClass(window.localStorage.code);
+        }
+
         this.findConstructions();
         this.findClasses();
     },
