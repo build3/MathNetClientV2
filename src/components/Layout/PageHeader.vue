@@ -127,6 +127,9 @@ export default {
                 this.$router.push({ name: 'Login' });
                 this.clearCurrent();
             });
+
+            // Clear code id from local storage
+            window.localStorage.removeItem('code')
         },
 
         checkPing() {
