@@ -362,8 +362,11 @@ class GeogebraMergedAdminView {
             }
         }
 
+        const groupColor = this.getGroupColor(element.groupNum);
+
         this.evalXML(element.xml);
         this.evalCommand('UpdateConstruction()');
+        this.setDependentObjectsColor(element.name, groupColor);
         this.checkLock(element.name);
 
         this.ignoreUpdates = false;
@@ -386,6 +389,19 @@ class GeogebraMergedAdminView {
         });
 
         this.ignoreUpdates = false;
+    }
+
+    getGroupColor(groupNum) {
+        return this.params.groups[groupNum].color;
+    }
+
+    setDependentObjectsColor(label, color) {
+        const labelObject = this.applet.getObjectType(label);
+        const constructionTypes = ['segment', 'circle', 'ray', 'line', 'angle', 'triangle'];
+
+        if (constructionTypes.includes(labelObject)) {
+            this.setColor(label, color);
+        }
     }
 
     /**
@@ -506,6 +522,7 @@ class GeogebraMergedAdminView {
                     name: newLabel,
                     xml: newXML,
                     obj_cmd_str: newObjCmdStr,
+                    groupNum: groupNum,
                 }, additionalPoints,
             );
         } else {
