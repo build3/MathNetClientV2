@@ -146,9 +146,16 @@ export default {
         async leaveGroup() {
             await this.patch([this.user.username, { workshops: [], numberInGroup: null }]);
         },
+
+        logoutStudentAfterBrowserIsClosed(event) {
+            if (this.user.permissions.includes('student')) {
+                this.logoutUser()
+            }
+        },
     },
     created() {
         this.checkPing();
+        window.addEventListener('beforeunload', this.logoutStudentAfterBrowserIsClosed)
     },
 
 };
