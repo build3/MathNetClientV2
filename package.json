@@ -37,6 +37,7 @@
     "@feathersjs/socketio-client": "^1.2.1",
     "feathers-vuex": "^1.7.0",
     "file-saver": "^2.0.2",
+    "idle-vue": "^2.0.5",
     "jszip": "^3.5.0",
     "node-sass": "^4.12.0",
     "sass-loader": "^7.1.0",

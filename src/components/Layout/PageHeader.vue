@@ -147,15 +147,20 @@ export default {
             await this.patch([this.user.username, { workshops: [], numberInGroup: null }]);
         },
 
-        logoutStudentAfterBrowserIsClosed(event) {
-            if (this.user.permissions.includes('student')) {
-                this.logoutUser()
+        logoutStudentUser(event) {
+            if (this.isStudent) {
+                this.logoutUser();
             }
         },
     },
+
+    onIdle() {
+        this.logoutStudentUser();
+    },
+
     created() {
         this.checkPing();
-        window.addEventListener('beforeunload', this.logoutStudentAfterBrowserIsClosed)
+        window.addEventListener('beforeunload', this.logoutStudentUser);
     },
 
 };
