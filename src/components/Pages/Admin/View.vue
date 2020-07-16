@@ -29,6 +29,10 @@
                                             @click="mergeViews(checkedGroups)">
                                             Merge checked groups
                                         </button>
+                                        <button class="btn btn-warning p-2 mt-2"
+                                            @click="unmergeViews()">
+                                            Unmerge groups views
+                                        </button>
                                     </div>
                                     <div class="checkbox form-inline mt-4">
                                         <label class="checkbox-container">
@@ -280,6 +284,17 @@ export default {
             } else {
                 this.showToast('Select groups for merged view', 'warning');
                 this.showMergedApplet = false;
+            }
+        },
+
+        async unmergeViews() {
+            if (this.showMergedApplet) {
+                this.showMergedApplet = false;
+                this.liveMergeSwitch = false;
+
+                this.showToast('Merged groups views are <b>unmerged</b>', 'success');
+            } else {
+                this.showToast('No views to <b>unmerge</b>', 'warning');
             }
         },
     },
