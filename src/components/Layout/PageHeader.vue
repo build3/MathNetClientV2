@@ -146,9 +146,21 @@ export default {
         async leaveGroup() {
             await this.patch([this.user.username, { workshops: [], numberInGroup: null }]);
         },
+
+        logoutStudentUser(event) {
+            if (this.isStudent) {
+                this.logoutUser();
+            }
+        },
     },
+
+    onIdle() {
+        this.logoutStudentUser();
+    },
+
     created() {
         this.checkPing();
+        window.addEventListener('beforeunload', this.logoutStudentUser);
     },
 
 };
