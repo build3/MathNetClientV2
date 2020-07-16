@@ -121,6 +121,7 @@
                         <div v-for="g in groupsInClass" :key="g._id"
                             class="admin-view-applet-holder">
                             <h3>{{ g.name }}</h3>
+                            <div class="group-color" :style="groupColor(g.color)"></div>
                             <div :id="getAppletId(g._id)" class="geogebra-applet">
                                 <!-- Geogebra Teacher's view applets -->
                             </div>
@@ -188,6 +189,10 @@ export default {
     },
 
     methods: {
+        groupColor(color) {
+            return(`background:rgb(${color})`);
+        },
+
         ...mapActions('classes', {
             findClasses: 'find',
         }),
@@ -279,6 +284,7 @@ export default {
                         // was obtained with ratio height/width = 2/3
                         width: ggbWidth,
                         height: ggbWidth * 9 / 16,
+                        groups: this.selectedGroups
                     },
                 );
             } else {
