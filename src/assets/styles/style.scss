@@ -81,6 +81,18 @@ ol.breadcrumb {
         padding: 14px 4px 14px 4px;
         color: #999c9e;
     }
+
+    .ping-value {
+        min-width: 2.5em;
+    }
+
+    div {
+        display: inline-flex;
+
+        p:first-child {
+            padding: 14px 4px 14px 10px;
+        }
+    }
 }
 
 .navbar-top-links li:last-child {
