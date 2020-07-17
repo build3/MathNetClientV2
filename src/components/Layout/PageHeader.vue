@@ -4,9 +4,13 @@
             <div class="navbar-header">
                 <div class="ping-section">
                     <p>[Demo build]</p>
-                    <p>Ping:</p><p v-if="!ping">waiting</p><p>{{ ping }}</p>
-                    <p>Username:</p><p v-if="user">{{user.username}}</p>
-                    <p>Group:</p><p v-if="studentGroup">{{ studentGroup.name }}</p>
+                    <p>Ping:</p><p v-if="!ping">waiting</p><p class="ping-value">{{ ping }}</p>
+                    <div v-if="user">
+                        <p>Username:</p><p>{{ user.username }}</p>
+                        <div v-if="isStudent">
+                            <p>Group:</p><p v-if="studentGroup">{{ studentGroup.name }}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
             <ul class="nav navbar-top-links navbar-right">
