@@ -142,7 +142,7 @@ export default {
         const client = new StudentClient({
             container: 'geogebra-view',
             width: this.$refs.content.clientWidth,
-            height: this.$refs.content.clientWidth * 9 / 16,
+            height: this.$refs.content.clientWidth * 7 / 18,
             log: this.$log,
         });
 
