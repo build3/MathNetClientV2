@@ -24,7 +24,7 @@
                                     @click="useToolbar">
                                     Use Toolbar</button>
                                 <button class="btn btn-primary p-2 mr-1 mt-2"
-                                    @click="addMode = true">
+                                    @click="onAddToolbar">
                                     Add Toolbar</button>
                                 <button class="btn btn-danger p-2 mr-1 mt-2"
                                     @click="deleteToolbar"
@@ -49,7 +49,7 @@
                                 @click.prevent="saveToolbar">
                                 Save Toolbar</button>
                             <button class="btn btn-secondary"
-                                @click.prevent="closeToolbar">
+                                @click.prevent="onCloseToolbar">
                                 Cancel
                             </button>
                         </form>
@@ -113,28 +113,69 @@
 import { mapGetters, mapActions } from 'vuex';
 import draggable from 'vuedraggable';
 import AlertMixin from '@/mixins/AlertMixin.vue';
+
+/*
+ * Icons represent various GeoGebra tools, which have 'mode'
+ * that distinguishes them in GeoGebra. They also have names shown on hover,
+ * and 'src' that links appropriate svg icon image.
+ */
 import icons from '../../../helpers/icons';
 import emptyToolbarString from '../../../helpers/emptyToolbarString';
 
+/*
+ * General commentary:
+ * In this component there are methods for editing/saving/loading
+ * toolbars. Toolbars may be represented in dual forms: as a string
+ * e.g. "1 2 3 | 4 5 6 | ... " or 2-dimensional array of arrays.
+ * First representation uses '|' to divide toolbar into lists,
+ * and each list between '|' signs has numbers representing
+ * dropdown menu with many buttons. In array form each array represents
+ * one dropdown list, each of list elements represents different button
+ * with a mode number, icon image and name. Mode numbers represent
+ * different tools in Geogebra.
+ */
 
+/*
+ *  Empty toolbar produces standard,
+ *  12-element array full of empty arrays
+ *  Why 12 elements? It's standard taken from old MathNet
+ */
 function emptyToolbar() {
     return Array.from(new Array(12), () => []);
 }
 
+/*
+ * Parse tools takes part of original toolbar, a part splitted by '|' symbols,
+ * then splits it by spaces, filters if they are non-empty and maps into icons,
+ * finding icon that is matched by icon mode.
+ */
 function parseTools(list) {
     return list.split(' ').filter(s => s).map(s => icons.find(({ mode }) => s === mode));
 }
 
+/*
+ * Parse toolbar decomposes toolbar in string form
+ * into array of arrays (2-dimensional), through use of parseTools
+ */
 function parseToolbar(toolbarString) {
     if (toolbarString) return toolbarString.split('|').map(parseTools);
     else return emptyToolbar();
 }
 
+/*
+ * Transforms array into a string of tools
+ * (for one list, a part of the whole toolbar),
+ * joins with spaces
+ */
 function stringifyTools(list) {
     if (list) return list.filter(t => t).map(({ mode }) => mode).join(' ');
     else return '';
 }
 
+/*
+ * Transforms an array of arrays into a string form of toolbar,
+ * joins fragments of a whole toolbar string with '|' sign.
+ */
 function stringifyToolbar(toolbar) {
     return toolbar.map(stringifyTools).join('|');
 }
@@ -144,6 +185,9 @@ export default {
         draggable,
     },
 
+    /*
+     * Value prop used for a 2-way binding of v-model of ToolbarEditor
+     */
     props: {
         value: {
             type: String,
@@ -153,9 +197,13 @@ export default {
 
     data() {
         return {
+            // Toolbars selected in a multi-select (e.g. to be deleted or used)
             selectedToolbars: [],
+            // Current toolbar in an array of arrays representation
             currentToolbar: emptyToolbar(),
+            // Flag representing if addToolbar form is opened
             addMode: false,
+            // Name of a toolbar that is to be added
             addToolbarName: null,
         };
     },
@@ -189,6 +237,9 @@ export default {
             patchUser: 'patch',
         }),
 
+        /*
+         * Uses selectedToolbar by loading it into currentToolbar
+         */
         useToolbar() {
             if (this.selectedToolbars.length > 0) {
                 const selectedName = this.selectedToolbars[0];
@@ -205,6 +256,13 @@ export default {
             this.currentToolbar = emptyToolbar();
         },
 
+        /*
+         * Deletes one tool from a toolbar with coordinates given by
+         * listNumber, elementNumber.
+         * To sustain Vue's reactivity, you cannot just edit
+         * this.currentToolbar, you have to copy it and splice
+         * then update currentToolbar. Otherwise reactivity is lost.
+         */
         deleteTool(listNumber, elementNumber) {
             const toolbar = [...this.currentToolbar];
             const list = toolbar[listNumber];
@@ -213,10 +271,17 @@ export default {
             this.currentToolbar = toolbar;
         },
 
-        addToolbar() {
+        /*
+         * Used to open add-form
+         */
+        onAddToolbar() {
             this.addMode = true;
         },
 
+        /*
+         * Saves toolbar with given name this.addToolbarName
+         * if there is no overwrite conflict
+         */
         async saveToolbar() {
             this.alert = null;
 
@@ -239,9 +304,12 @@ export default {
                 this.showError(message);
             }
 
-            this.closeToolbar();
+            this.onCloseToolbar();
         },
 
+        /*
+         * Deletes selected toolbar(s)
+         */
         async deleteToolbar() {
             const list = this.toolbars.filter(
                 ({ name }) => !this.selectedToolbars.includes(name),
@@ -254,10 +322,16 @@ export default {
             }
         },
 
-        closeToolbar() {
+        /*
+         * Closes toolbar add form
+         */
+        onCloseToolbar() {
             this.addMode = false;
         },
 
+        /*
+         * Updates toolbar data by sending with patchUser method
+         */
         async sendToolbars(toolbars) {
             await this.patchUser([
                 this.teacher.username, {
@@ -289,12 +363,19 @@ export default {
             if (newValue) this.addToolbarName = null;
         },
 
+        /*
+         * Needed by v-model 2-way binding to update state
+         */
         toolbarString(newValue) {
             this.$emit('input', newValue);
 
             this.saveToolbarStateToLocalStorage();
         },
 
+        /*
+         * Reacts to updates of prop named 'value',
+         * parsing incoming toolbar string
+         */
         value(newValue, oldValue) {
             if (newValue !== oldValue && newValue !== emptyToolbarString()) {
                 this.currentToolbar = parseToolbar(newValue);
