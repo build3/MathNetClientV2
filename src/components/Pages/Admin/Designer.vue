@@ -294,6 +294,7 @@ export default {
 
         ...mapActions('users', {
             patch: 'patch',
+            findUser: 'find',
         }),
 
         ...mapActions('workshops', {
@@ -428,6 +429,8 @@ export default {
                     type: 'success',
                     message: 'Construction saved',
                 };
+
+                this.findUser()
             } catch (error) {
                 this.alert_add = {
                     type: 'danger',
