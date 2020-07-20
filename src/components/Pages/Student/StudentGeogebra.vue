@@ -139,10 +139,12 @@ export default {
 
         await this.joinWorkshop();
 
+        const maxWidth = (this.$refs.content.clientWidth ? 1600 : this.$refs.content.clientWidth)
+
         const client = new StudentClient({
             container: 'geogebra-view',
-            width: this.$refs.content.clientWidth,
-            height: this.$refs.content.clientWidth * 7 / 18,
+            width: maxWidth,
+            height: maxWidth * 9 / 16,
             log: this.$log,
         });
 
