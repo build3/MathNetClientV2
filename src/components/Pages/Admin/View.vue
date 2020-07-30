@@ -160,7 +160,7 @@ export default {
             checkedGroups: [],
             showMenuBar: false,
             showMergedApplet: false,
-            liveMergeSwitch: false,
+            liveMergeSwitch: true,
             classSelected: false,
         };
     },
@@ -259,7 +259,7 @@ export default {
 
         async mergeViews(checkedGroupIds) {
             this.showMergedApplet = true;
-            this.liveMergeSwitch = false;
+            this.liveMergeSwitch = true;
 
             this.selectedGroups = await this.findGroups({ query: { _id: checkedGroupIds } });
 
@@ -287,6 +287,8 @@ export default {
                         groups: this.selectedGroups
                     },
                 );
+
+                this.GeogebraViews.mergeGoLive();
             } else {
                 this.showToast('Select groups for merged view', 'warning');
                 this.showMergedApplet = false;
