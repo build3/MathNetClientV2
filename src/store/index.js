@@ -10,12 +10,22 @@ Vue.use(FeathersVuex);
 
 export default new Vuex.Store({
     state: {
+        studentClassCode: undefined,
         studentGroup: undefined,
+        className: undefined,
     },
 
     mutations: {
+        setStudentClassCode(state, code) {
+            state.studentClassCode = code;
+        },
+
         setStudentGroup(state, group) {
             state.studentGroup = group;
+        },
+
+        setClassName(state, name) {
+            state.className = name;
         },
     },
 
