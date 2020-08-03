@@ -31,7 +31,7 @@
             </div>
           </div>
           <div class="row" v-if="!addMode">
-            <div class="col-6">
+            <div class="col-4">
               <h2>Constructions</h2>
               <select
                 multiple="multiple"
@@ -110,42 +110,6 @@
                     <span class="checkmark"></span>
                   </label>
                 </div>
-              </div>
-            </div>
-            <div class="offset-1 col-5">
-              <div class="col-10 class-table">
-                <h2>Select class</h2>
-                <table class="table designer-class-table">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Code</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-if="!classes.total > 0">
-                      <td></td>
-                      <td>
-                        No class
-                      </td>
-                      <td></td>
-                    </tr>
-                    <tr v-for="cl in classes.data" :key="cl.id">
-                      <td>{{ cl.name }}</td>
-                      <td>{{ cl.code }}</td>
-                      <td class="text-center">
-                        <button
-                          v-if="code !== cl.code"
-                          @click="selectGroupsInClass(cl.code)"
-                          class="btn btn-sm btn-primary mr-2"
-                        >
-                          Select
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
               </div>
             </div>
           </div>

@@ -10,6 +10,7 @@
                         <div v-if="isStudent">
                             <p>Group:</p><p v-if="studentGroup">{{ studentGroup.name }}</p>
                         </div>
+                        <p>Selected class: <b>{{ className }}</b></p>
                     </div>
                 </div>
             </div>
@@ -109,6 +110,7 @@ export default {
 
         ...mapState([
             'studentGroup',
+            'className',
         ]),
     },
 
@@ -166,6 +168,5 @@ export default {
         this.checkPing();
         window.addEventListener('beforeunload', this.logoutStudentUser);
     },
-
 };
 </script>

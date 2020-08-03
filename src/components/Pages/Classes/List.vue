@@ -7,7 +7,6 @@
         <div class="ibox border-bottom offset-2 col-8">
             <div class="ibox-content">
                 <alert :alert="alert" />
-
                 <table class="table" v-if="!editMode">
                     <thead>
                         <tr>
@@ -36,6 +35,11 @@
                                     @click="editClass(cl)">
                                     Edit Class
                                 </button>
+                                <button class="btn btn-sm btn-primary mr-2"
+                                    :disabled="studentClassCode == cl.code"
+                                    @click="selectClass(cl.code, cl.name)">
+                                    Select class
+                                </button>
                                 <button class="btn btn-sm btn-danger"
                                     @click="deleteClass(cl.code)">
                                     Delete Class
@@ -44,7 +48,6 @@
                         </tr>
                     </tbody>
                 </table>
-
                 <form v-else
                     @submit.prevent="onSubmit(classname, code)">
                     <h3 v-if="!currentlyEdited">Add Class</h3>
@@ -84,14 +87,15 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
+import { mapState, mapGetters, mapActions } from 'vuex';
 
 import AlertMixin from '@/mixins/AlertMixin.vue';
+import ToastrMixin from '@/mixins/ToastrMixin.vue';
 
 export default {
     name: 'ClassList',
 
-    mixins: [AlertMixin],
+    mixins: [AlertMixin, ToastrMixin],
 
     data() {
         return {
@@ -99,10 +103,13 @@ export default {
             code: undefined,
             editMode: false,
             currentlyEdited: undefined,
+            selectedClassCode: undefined
         };
     },
 
     computed: {
+        ...mapState(['studentClassCode', 'className']),
+
         ...mapGetters('classes', {
             findClassesInStore: 'find',
         }),
@@ -127,6 +134,17 @@ export default {
             this.code = cl.code;
             this.currentlyEdited = cl.code;
             this.editMode = true;
+        },
+
+        selectClass(code, name) {
+            this.selectedClassCode = code;
+
+            this.$store.commit('setClassName', name);
+
+            window.localStorage.setItem('code', code);
+            window.localStorage.setItem('selectedClassName', name);
+
+            this.showToast(`Selected class <b>${name}</b>`, 'success');
         },
 
         async onSubmit(classname, code) {
@@ -177,9 +195,15 @@ export default {
 
     created() {
         this.findClasses();
+        this.$store.commit('setStudentClassCode', window.localStorage.code);
+        this.$store.commit('setClassName', window.localStorage.selectedClassName);
     },
 
     watch: {
+        selectedClassCode(newValue) {
+            this.$store.commit('setStudentClassCode', this.selectedClassCode);
+        },
+
         editMode(newValue) {
             if (!newValue) {
                 this.classname = undefined;
