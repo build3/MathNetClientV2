@@ -134,8 +134,9 @@ export default {
                 this.clearCurrent();
             });
 
-            // Clear code id from local storage
-            window.localStorage.removeItem('code')
+            // Clear code id and class name from local storage
+            window.localStorage.removeItem('code');
+            window.localStorage.removeItem('selectedClassName');
         },
 
         checkPing() {
