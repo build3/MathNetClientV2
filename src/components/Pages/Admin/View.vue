@@ -43,41 +43,6 @@
                                     </div> -->
                                 </div>
                             </div>
-                            <div class="offset-3 col-5">
-                                <div class="col-12">
-                                    <h2>Select class</h2>
-                                    <table class="table designer-class-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Name</th>
-                                                <th>Code</th>
-                                                <th></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr v-if="!classes.total > 0">
-                                                <td></td>
-                                                <td>
-                                                    No class
-                                                </td>
-                                                <td></td>
-                                            </tr>
-                                            <tr v-for="cl in classes.data" :key="cl.id">
-                                                <td>{{ cl.name }}</td>
-                                                <td>{{ cl.code }}</td>
-                                                <td class="text-center">
-                                                    <button
-                                                        v-if="code !== cl.code"
-                                                        @click="selectAllGroupsinClass(cl.code)"
-                                                        class="btn btn-sm btn-primary mr-2">
-                                                        Select
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
                         </div>
                         <div class="col-12">
                             <div v-if="showMergedApplet">
@@ -152,7 +117,7 @@ export default {
             GeogebraViews: undefined,
             checkedGroups: [],
             showMergedApplet: false,
-            liveMergeSwitch: false,
+            liveMergeSwitch: true,
             classSelected: false,
         };
     },
@@ -251,7 +216,7 @@ export default {
 
         async mergeViews(checkedGroupIds) {
             this.showMergedApplet = true;
-            this.liveMergeSwitch = false;
+            this.liveMergeSwitch = true;
 
             this.selectedGroups = await this.findGroups({ query: { _id: checkedGroupIds } });
 
@@ -278,6 +243,8 @@ export default {
                         groups: this.selectedGroups
                     },
                 );
+
+                this.GeogebraViews.mergeGoLive();
             } else {
                 this.showToast('Select groups for merged view', 'warning');
                 this.showMergedApplet = false;
