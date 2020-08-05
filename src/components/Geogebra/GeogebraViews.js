@@ -113,8 +113,13 @@ export default class {
         this.mergedView.inject();
     }
 
+    liveMergeViews() {
+        this.mergedView.initializeCallbacks();
+    }
+
     mergeGoLive() {
         this.log.debug('Going live');
+        this.mergedView.clear();
         this.mergedView.initializeCallbacks();
         this.mergedView.loadWorkshops();
     }
