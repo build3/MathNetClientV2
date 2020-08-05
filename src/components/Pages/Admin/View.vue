@@ -255,7 +255,7 @@ export default {
                     },
                 );
 
-                this.GeogebraViews.mergeGoLive();
+                this.GeogebraViews.liveMergeViews();
             } else {
                 this.showToast('Select groups for merged view', 'warning');
                 this.showMergedApplet = false;
