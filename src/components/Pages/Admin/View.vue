@@ -34,20 +34,13 @@
                                             Unmerge groups views
                                         </button>
                                     </div>
-                                    <div class="checkbox form-inline mt-4">
+                                    <!-- <div class="checkbox form-inline">
                                         <label class="checkbox-container">
-                                            Show menu bar
-                                            <input type="checkbox"
-                                                id="menu_bar_checkbox"
-                                                v-model="showMenuBar">
-                                            <span class="checkmark"></span>
-                                        </label>
-                                        <!-- <label class="checkbox-container">
                                             Send toolbar
                                             <input type="checkbox">
                                             <span class="checkmark"></span>
-                                        </label> -->
-                                    </div>
+                                        </label>
+                                    </div> -->
                                 </div>
                             </div>
                         </div>
@@ -124,7 +117,6 @@ export default {
             groupsInClass: undefined,
             GeogebraViews: undefined,
             checkedGroups: [],
-            showMenuBar: false,
             showMergedApplet: false,
             liveMergeSwitch: true,
             classSelected: false,
@@ -237,15 +229,13 @@ export default {
                     workshops: this.selectedGroups.map(g => g._id),
                 }); */
 
-                this.$log.debug('this.showMenuBar', this.showMenuBar);
                 const ggbWidth = 1366; //this.$refs.ibox_content.clientWidth - 60;
                 this.$log.debug('ggbWidth', ggbWidth);
 
                 this.GeogebraViews.mergeViews(
                     this.selectedGroups.map(g => g._id),
                     { // params for geogebra
-                        showMenubar: this.showMenuBar,
-
+                        showMenubar: true,
                         // Geogebra reprocesses this width/height.
                         // The proper width, to fill the window
                         // was obtained with ratio height/width = 2/3
