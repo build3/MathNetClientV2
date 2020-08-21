@@ -10,7 +10,7 @@
                         <div v-if="isStudent">
                             <p>Group:</p><p v-if="studentGroup">{{ studentGroup.name }}</p>
                         </div>
-                        <p>Selected class: <b>{{ isClassName() }}</b></p>
+                        <p>Selected class: <b>{{ selectedClassName() }}</b></p>
                     </div>
                 </div>
             </div>
@@ -150,7 +150,7 @@ export default {
             });
         },
 
-        isClassName() {
+        selectedClassName() {
             if (this.className) return this.className;
 
             return window.localStorage.selectedClassName;
