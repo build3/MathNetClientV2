@@ -270,9 +270,17 @@ export default {
         }
 
         await this.findClasses();
+
+        // Get all selected groups to merge.
+        const selectedGroups = window.localStorage.selectedGroups;
+        this.checkedGroups = JSON.parse(selectedGroups);
     },
 
     watch: {
+        checkedGroups(newVal) {
+            window.localStorage.setItem('selectedGroups', JSON.stringify(newVal))
+        },
+
         liveMergeSwitch(newVal) {
             if (newVal) {
                 this.GeogebraViews.mergeGoLive();

@@ -10,7 +10,7 @@
                         <div v-if="isStudent">
                             <p>Group:</p><p v-if="studentGroup">{{ studentGroup.name }}</p>
                         </div>
-                        <p>Selected class: <b>{{ className }}</b></p>
+                        <p>Selected class: <b>{{ selectedClassName() }}</b></p>
                     </div>
                 </div>
             </div>
@@ -148,6 +148,12 @@ export default {
             feathersClient.io.on('pong-rate', () => {
                 this.ping = Date.now() - this.pingTime;
             });
+        },
+
+        selectedClassName() {
+            if (this.className) return this.className;
+
+            return window.localStorage.selectedClassName;
         },
 
         async leaveGroup() {
